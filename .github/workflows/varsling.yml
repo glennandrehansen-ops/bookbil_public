@@ -1,0 +1,168 @@
+name: Varsle med Gmail
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # Kjører hvert 5. minutt
+  workflow_dispatch: # Test-knapp
+
+jobs:
+  sjekk_og_varsle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Deps
+        run: npm install @supabase/supabase-js nodemailer
+
+      - name: Kjor Script
+        env:
+          SUPA_URL: ${{ secrets.SUPABASE_URL }}
+          SUPA_KEY: ${{ secrets.SUPABASE_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+          APP_LINK: ${{ secrets.APP_URL }}
+        run: |
+          node -e '
+          const { createClient } = require("@supabase/supabase-js");
+          const nodemailer = require("nodemailer");
+          
+          const supabase = createClient(process.env.SUPA_URL, process.env.SUPA_KEY);
+
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: process.env.GMAIL_USER,
+              pass: process.env.GMAIL_PASS,
+            },
+          });
+
+          async function run() {
+            const now = new Date();
+            // Varsle hvis turen går ut mellom NÅ og om 35 min
+            const warningLimit = new Date(now.getTime() + 35 * 60000); 
+
+            console.log("Sjekker turer som utløper før:", warningLimit.toISOString());
+
+            // 1. Hent bookinger
+            const { data: bookings, error } = await supabase
+              .from("bookinger")
+              .select("*") 
+              .eq("varslet", false)
+              .gt("slutt_tid", now.toISOString())
+              .lt("slutt_tid", warningLimit.toISOString());
+
+            if (error) { console.error("DB Feil:", error); return; }
+            if (!bookings || bookings.length === 0) { console.log("Ingen turer å varsle akkurat nå."); return; }
+
+            console.log(`Fant ${bookings.length} turer. Sjekker brukere...`);
+
+            // 2. Sjekk hver booking
+            for (const b of bookings) {
+              
+              // Hent brukerinfo manuelt
+              const { data: user, error: uErr } = await supabase
+                .from("brukere")
+                .select("epost, varsel")
+                .eq("brukernavn", b.bid)
+                .single();
+
+              if (uErr || !user) {
+                console.log(`Fant ikke brukerinfo for ${b.bid}`);
+                continue;
+              }
+
+              if (!user.varsel || !user.epost) {
+                 console.log(`Bruker ${b.bid} skal ikke ha varsel.`);
+                 continue;
+              }
+
+              // Formater dato og tid
+              const timeOpts = { timeZone: "Europe/Oslo", hour: "2-digit", minute: "2-digit" };
+              const dateOpts = { timeZone: "Europe/Oslo", day: "2-digit", month: "2-digit", year: "numeric" };
+              
+              const startDate = new Date(b.start_tid).toLocaleDateString("no-NO", dateOpts);
+              const startTime = new Date(b.start_tid).toLocaleTimeString("no-NO", timeOpts);
+              const endTime = new Date(b.slutt_tid).toLocaleTimeString("no-NO", timeOpts);
+
+              const returnLink = `${process.env.APP_LINK}`;
+              
+              const mailOptions = {
+                from: `"Bilbooking Jæren" <${process.env.GMAIL_USER}>`,
+                to: user.epost,
+                subject: `Påminnelse: ${b.bil} må leveres snart`,
+                html: `
+                  <!DOCTYPE html>
+                  <html>
+                  <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #1f2937;">
+                    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                      
+                      <!-- Header -->
+                      <div style="background-color: #111827; padding: 30px; text-align: center;">
+                        <img src="https://img.icons8.com/fluency/96/police-badge.png" alt="Logo" style="width: 64px; height: 64px; display: block; margin: 0 auto 15px auto;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">Bilbooking Jæren</h1>
+                      </div>
+
+                      <!-- Content -->
+                      <div style="padding: 30px;">
+                        <h2 style="color: #1f2937; text-align: center; margin-bottom: 10px; margin-top: 0;">Snart leveringstid</h2>
+                        <p style="text-align: center; color: #4b5563; margin-bottom: 25px;">Din reservasjon utløper om ca. 30 minutter.</p>
+
+                        <!-- Info Card -->
+                        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Kjøretøy:</td>
+                                    <td style="padding: 5px 0; font-weight: bold; text-align: right;">${b.bil}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Dato:</td>
+                                    <td style="padding: 5px 0; font-weight: bold; text-align: right;">${startDate}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Tidsrom:</td>
+                                    <td style="padding: 5px 0; font-weight: bold; text-align: right;">${startTime} - ${endTime}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Formål:</td>
+                                    <td style="padding: 5px 0; font-weight: bold; text-align: right;">${b.formal}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <a href="${returnLink}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-right: 10px; display: inline-block;">ÅPNE APPEN</a>
+                        </div>
+
+                        <!-- Key reminder -->
+                        <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; font-size: 14px; color: #92400e;">
+                            <strong>Husk nøkler!</strong><br>
+                            Vennligst legg nøkkelen tilbake i nøkkelskapet når du har parkert.
+                        </div>
+                      </div>
+
+                      <!-- Footer -->
+                      <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af;">
+                        &copy; 2026 Bilbooking Jæren
+                      </div>
+                    </div>
+                  </body>
+                  </html>
+                `
+              };
+
+              try {
+                await transporter.sendMail(mailOptions);
+                console.log(`E-post sendt til ${user.epost}`);
+                // Oppdater at varsel er sendt
+                await supabase.from("bookinger").update({ varslet: true }).eq("id", b.id);
+              } catch (err) {
+                console.error("Kunne ikke sende e-post:", err);
+              }
+            }
+          }
+          run();
+          '
