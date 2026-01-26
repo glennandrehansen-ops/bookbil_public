@@ -1,0 +1,20 @@
+name: Keep Supabase Awake
+
+on:
+  schedule:
+    # Kjører hver natt kl 03:00 (UTC)
+    - cron: '0 3 * * *'
+  workflow_dispatch: # Gjør det mulig å starte manuelt for test
+
+jobs:
+  ping_supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send request to Supabase
+        env:
+          SUPA_URL: ${{ secrets.SUPABASE_URL }}
+          SUPA_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          curl -X GET "${SUPA_URL}/rest/v1/biler?select=count" \
+          -H "apikey: ${SUPA_KEY}" \
+          -H "Authorization: Bearer ${SUPA_KEY}"
