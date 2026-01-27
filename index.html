@@ -6,8 +6,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#121212">
-<title>Bilbooking Jæren</title>
+<meta name="theme-color" content="#0f172a">
+<title>BookBil Jæren</title>
 
 <!-- Manifest -->
 <link rel="manifest" href="manifest.json">
@@ -17,134 +17,204 @@
 <!-- Biblioteker -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 /* Base */
 .hidden{display:none!important}
-body{background:#121212;color:#E0E0E0;font-family:-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:contain}
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0f172a; /* Slate 900 */
+    color: #cbd5e1; /* Slate 300 */
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
+    height: 100vh;
+    overflow: hidden; 
+}
 
-/* Kort */
-.car-card{border-radius:12px;overflow:hidden;transition:transform .1s;border:1px solid rgba(255,255,255,.05);cursor:pointer;margin-bottom:8px; min-height: 74px; position: relative;}
-.car-card:active{transform:scale(.98)}
+/* Fleet Row (Liste-element) */
+.fleet-row {
+    background-color: #1e293b; /* Slate 800 */
+    border-bottom: 1px solid #334155; /* Slate 700 */
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.2s;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+}
+.fleet-row:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+.fleet-row:last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; border-bottom: none; }
+.fleet-row:active { background-color: #334155; }
 
-/* Farger */
-.bg-ledig{background:linear-gradient(135deg,#1b3320 0,#1a1a1a 100%);border-left:4px solid #4CAF50}
-.bg-res{background:linear-gradient(135deg,#332b15 0,#1a1a1a 100%);border-left:4px solid #FFC107}
-.bg-opp{background:linear-gradient(135deg,#331515 0,#1a1a1a 100%);border-left:4px solid #F44336}
-.bg-ute{background:#2c2c2c;border-left:4px solid #9E9E9E;opacity:.8}
-/* Ny farge for verksted/service (både status og booking) */
-.bg-ver{background:linear-gradient(135deg,#2e1065 0,#1a1a1a 100%);border-left:4px solid #8b5cf6}
+/* Status Indicators */
+.status-stripe {
+    width: 4px;
+    height: 40px;
+    border-radius: 2px;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+.c-green { background-color: #10b981; } /* Ledig */
+.c-red { background-color: #ef4444; }   /* Opptatt */
+.c-blue { background-color: #3b82f6; }  /* Min bil */
+.c-purple { background-color: #a855f7; } /* Verksted */
+.c-gray { background-color: #64748b; }   /* Ute av drift */
 
-/* Navigasjon */
-.nav-item{transition:color .2s;cursor:pointer; min-height: 48px; display: flex; justify-content: center;}
-.nav-item.active{color:#3b82f6}
-.safe-b{padding-bottom:env(safe-area-inset-bottom)}
+/* Knapper i liste */
+.btn-action {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 6px;
+    background-color: #334155; /* Slate 700 */
+    color: white;
+    border: 1px solid #475569;
+    transition: all 0.2s;
+    white-space: nowrap;
+    position: relative;
+    z-index: 5; /* Ensure clickable */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+.btn-primary {
+    background-color: #3b82f6; /* Blue 500 */
+    border-color: #2563eb;
+    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+}
+.btn-green {
+    background-color: #059669; /* Green 600 */
+    border-color: #047857;
+    box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
+}
+.btn-amber {
+    background-color: #d97706; /* Amber 600 */
+    border-color: #b45309;
+    box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);
+}
+
+/* Dashboard Stats (Pills) */
+.stat-pill {
+    background: #1e293b;
+    padding: 8px 0;
+    flex: 1;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    border: 1px solid #334155;
+    transition: all 0.2s;
+}
+.stat-active { border-color: #3b82f6; color: white; background: #1e293b; }
+
+/* Bottom Nav */
+.bottom-nav {
+    background: #0f172a; 
+    border-top: 1px solid #1e293b;
+    height: 80px;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.big-fab {
+    width: 64px; 
+    height: 64px; 
+    background: #2563eb; 
+    border-radius: 999px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); 
+    border: 4px solid #0f172a;
+    transition: transform 0.1s;
+}
+.big-fab:active { transform: scale(0.95); }
 
 /* Menyer */
-#more-menu{transition:transform .3s;transform:translateY(100%)}
-#more-menu.open{transform:translateY(0)}
-#menu-bg{transition:opacity .3s;pointer-events:none;opacity:0;background:rgba(0,0,0,.8)}
-#menu-bg.open{pointer-events:auto;opacity:1}
-.fab{position:fixed;bottom:90px;right:20px;z-index:45;box-shadow:0 4px 15px rgba(0,0,0,.5); width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; border-radius: 20px;}
+#more-menu { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+#more-menu.open { transform: translateY(0); }
 
-/* Skjema */
-input,select,textarea{color-scheme:dark;background:#1f2937;color:#fff;border:1px solid #374151;outline:0; min-height: 44px;}
+#menu-bg { transition: opacity 0.3s; pointer-events: none; opacity: 0; background: rgba(0,0,0,0.8); }
+#menu-bg.open { pointer-events: auto; opacity: 1; }
 
-/* Custom Date/Time Inputs */
-.split-input { background: transparent; border: none; outline: none; color: white; width: 100%; font-family: inherit; }
-.split-input[type="time"] { color: #60a5fa; font-weight: 900; font-size: 1.1rem; }
-
-/* TIDSLINJE */
-.timeline-scroll { 
-    overflow-x: auto; 
-    padding-bottom: 25px; 
-    padding-top: 10px; 
-    display: flex; 
-    margin-bottom: 5px; 
-    -webkit-overflow-scrolling: touch; 
-    scrollbar-width: none;
-    touch-action: pan-x; 
-    scroll-behavior: smooth; 
+/* Input Styles Override */
+input, select, textarea {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: white !important;
+    border-radius: 8px !important;
 }
+
+/* Modal overrides for Slate theme */
+.modal-bottom { display: flex; flex-direction: column; justify-content: flex-end; z-index: 100; pointer-events: auto;}
+.modal-content-bottom { 
+    background-color: #0f172a; 
+    border-top: 1px solid #1e293b; 
+    border-radius: 20px 20px 0 0; 
+    width: 100%; 
+    max-height: 90vh; 
+    animation: slideUp 0.25s ease-out; 
+    overflow-y: auto; /* FIX SCROLLING */
+    padding-bottom: 40px;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.bar{width:40px;height:5px;background:#4b5563;border-radius:99px}
+
+/* Tidslinje overrides */
+.timeline-scroll { overflow-x: auto; padding-bottom: 25px; padding-top: 10px; display: flex; margin-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .timeline-scroll::-webkit-scrollbar { display: none; }
-
 .time-grid { display: inline-flex; gap: 2px; height: 50px; padding: 0 4px; position: relative; }
-
-.time-block { 
-    width: 42px; height: 100%; 
-    background-color: #374151; 
-    border-radius: 6px; 
-    position: relative; flex-shrink: 0; cursor: pointer; 
-    border: 1px solid #4b5563; 
-    display: flex; justify-content: center; align-items: center; 
-    transition: all 0.1s; 
-}
-
-.time-label { 
-    position: absolute; bottom: -20px; left: 0; width: 100%; text-align: center; 
-    font-size: 10px; color: #9ca3af; font-weight: bold; pointer-events: none; 
-}
-
-/* Tilstander Tidslinje */
-.time-block.past { background-color: #1f2937; opacity: 0.3; pointer-events: none; border-color: transparent; }
-.time-block.busy { 
-    background-color: #451a1a; border-color: #7f1d1d; opacity: 0.9; pointer-events: none;
-    background-image: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.05) 3px, rgba(255,255,255,0.05) 6px); 
-}
-.time-block.start { background-color: #2563eb; border-color: #60a5fa; z-index: 10; transform: scale(1.1); box-shadow: 0 0 8px rgba(37,99,235,0.6); }
-.time-block.start::after { content: 'A'; color: white; font-weight: 900; font-size: 14px; }
-.time-block.end { background-color: #10b981; border-color: #34d399; z-index: 10; transform: scale(1.1); box-shadow: 0 0 8px rgba(16,185,129,0.6); }
-.time-block.end::after { content: 'B'; color: white; font-weight: 900; font-size: 14px; }
+.time-block { width: 42px; height: 100%; background-color: #1e293b; border-radius: 6px; position: relative; flex-shrink: 0; cursor: pointer; border: 1px solid #334155; display: flex; justify-content: center; align-items: center; }
+.time-label { position: absolute; bottom: -20px; left: 0; width: 100%; text-align: center; font-size: 10px; color: #64748b; font-weight: bold; pointer-events: none; }
+.time-block.past { opacity: 0.3; pointer-events: none; }
+.time-block.busy { background-color: #451a1a; border-color: #7f1d1d; opacity: 0.9; pointer-events: none; background-image: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.05) 3px, rgba(255,255,255,0.05) 6px); }
+.time-block.start { background-color: #2563eb; border-color: #60a5fa; z-index: 10; transform: scale(1.1); }
+.time-block.end { background-color: #10b981; border-color: #34d399; z-index: 10; transform: scale(1.1); }
 .time-block.range { background-color: #1e40af; border-color: #3b82f6; opacity: 0.8; }
 .time-now-line { position: absolute; width: 2px; height: 100%; background: #ef4444; z-index: 20; pointer-events: none; box-shadow: 0 0 5px red; }
 
 /* Legend & Tabs */
-.legend-box { display: flex; gap: 8px; background: #1f2937; border: 1px solid #374151; padding: 4px 10px; border-radius: 999px; font-size: 9px; color: #9ca3af; align-items: center; }
+.legend-box { display: flex; gap: 8px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 999px; font-size: 9px; color: #94a3b8; align-items: center; }
 .dot { width: 6px; height: 6px; border-radius: 50%; }
-.dot.free { background-color: #374151; border: 1px solid #4b5563; }
+.dot.free { background-color: #334155; border: 1px solid #475569; }
 .dot.busy { background-color: #7f1d1d; }
 .dot.selected { background-color: #2563eb; }
-.day-tab { flex: 1; padding: 10px; text-align: center; font-size: 12px; font-weight: bold; color: #9ca3af; transition: all 0.2s; border-radius: 6px; background: #1f2937; border: 1px solid #374151; }
+.day-tab { flex: 1; padding: 10px; text-align: center; font-size: 12px; font-weight: bold; color: #94a3b8; transition: all 0.2s; border-radius: 6px; background: #1e293b; border: 1px solid #334155; }
 .day-tab.active { background: #2563eb; color: white; border-color: #3b82f6; }
 
 /* Admin Pills */
 .car-pill { transition: all 0.2s; border: 2px solid transparent; color: white; opacity: 0.7; }
-.car-pill.selected { opacity: 1; border-color: white; transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+.car-pill.selected { opacity: 1; border-color: white; transform: scale(1.05); }
 .pill-green { background-color: #064e3b; border-color: #059669; }
 .pill-yellow { background-color: #78350f; border-color: #d97706; }
 .pill-gray { background-color: #1f2937; border-color: #4b5563; }
-.car-pill.selected.pill-green { background-color: #059669; border-color: #34d399; }
-.car-pill.selected.pill-yellow { background-color: #d97706; border-color: #fbbf24; }
-.car-pill.selected.pill-gray { background-color: #4b5563; border-color: #9ca3af; }
+.email-pill { background: #334155; border: 1px solid #475569; color: white; padding: 4px 10px; border-radius: 999px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
 
-/* Admin Email Pills */
-.email-pill { background: #374151; border: 1px solid #4b5563; color: white; padding: 4px 10px; border-radius: 999px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
-.email-pill button { color: #9ca3af; font-weight: bold; padding: 2px; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; }
-.email-pill button:hover { color: #ef4444; background: rgba(239, 68, 68, 0.2); }
-
-/* Modals */
-.modal-bottom { display: flex; flex-direction: column; justify-content: flex-end; z-index: 50; } 
-.modal-content-bottom { border-radius: 20px 20px 0 0; width: 100%; max-width: 100%; max-height: 90vh; border-bottom: none; animation: slideUp 0.25s ease-out; }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.bar{width:40px;height:5px;background:#4b5563;border-radius:99px}
+/* Scrollbars */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
 
 /* Toast */
 #toast-container { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 100; width: 90%; max-width: 400px; pointer-events: none; }
-.toast { background: #1f2937; color: white; padding: 12px 16px; border-radius: 12px; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; border: 1px solid #374151; font-size: 14px; font-weight: bold; pointer-events: auto; }
+.toast { background: #1e293b; color: white; padding: 12px 16px; border-radius: 12px; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; border: 1px solid #334155; font-size: 14px; font-weight: bold; pointer-events: auto; }
 .toast.show { opacity: 1; transform: translateY(0); }
 .toast-success { border-left: 4px solid #10b981; }
 .toast-error { border-left: 4px solid #ef4444; }
 .toast-info { border-left: 4px solid #3b82f6; }
 </style>
 </head>
-<body>
+<body class="flex flex-col h-screen overflow-hidden">
 
 <div id="offline-msg" class="hidden fixed top-0 w-full bg-red-600 text-white text-xs font-bold text-center py-1 z-[100]">INGEN INTERNETTFORBINDELSE</div>
 <div id="toast-container"></div>
 
 <!-- PWA TOAST -->
-<div id="pwa-toast" onclick="installPwa()" class="hidden fixed top-4 left-4 right-4 bg-blue-600 text-white p-4 rounded-xl shadow-2xl z-50 flex justify-between items-center cursor-pointer border border-blue-400 animate-[bounce_1s_infinite]">
+<div id="pwa-toast" onclick="installPwa()" class="hidden fixed top-4 left-4 right-4 bg-blue-600 text-white p-4 rounded-xl shadow-2xl z-[100] flex justify-between items-center cursor-pointer border border-blue-400 animate-[bounce_1s_infinite]">
     <div class="flex items-center gap-3">
         <span class="material-icons-round bg-white/20 p-2 rounded-full">download</span>
         <div>
@@ -156,231 +226,278 @@ input,select,textarea{color-scheme:dark;background:#1f2937;color:#fff;border:1px
 </div>
 
 <!-- AUTENTISERING -->
-<div id="auth" class="flex flex-col items-center justify-center h-screen p-6 text-center fixed inset-0 z-50 bg-[#121212]">
+<div id="auth" class="flex flex-col items-center justify-center h-screen p-6 text-center fixed inset-0 z-[60] bg-[#0f172a]">
  <span class="material-icons-round text-blue-500 text-7xl mb-4">local_police</span>
- <h1 class="text-3xl font-black mb-1 uppercase">Bilbooking Jæren</h1>
- <p class="text-gray-500 text-sm mb-6">Logg inn med din BID@politiet.no</p>
+ <h1 class="text-3xl font-black mb-1 uppercase text-white">BookBil Jæren</h1>
+ <p class="text-slate-500 text-sm mb-6">Logg inn med din BID@politiet.no</p>
  <div id="f-email" class="w-full max-w-xs space-y-4">
-   <input type="email" id="l-email" placeholder="bid@politiet.no" class="w-full p-4 rounded-xl text-center">
-   <button onclick="sendOtp()" id="btn-send" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-lg shadow-lg active:scale-95">SEND KODE</button>
+   <input type="email" id="l-email" placeholder="bid@politiet.no" class="w-full p-4 rounded-xl text-center text-lg font-bold">
+   <button onclick="sendOtp()" id="btn-send" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-lg text-white shadow-lg active:scale-95">SEND KODE</button>
  </div>
  <div id="f-otp" class="w-full max-w-xs space-y-4 hidden">
    <input type="text" id="l-otp" placeholder="12345678" maxlength="8" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-widest">
-   <button onclick="verifyOtp()" class="w-full bg-green-600 p-4 rounded-xl font-bold">LOGG INN</button>
-   <button onclick="resetAuth()" class="text-gray-500 text-sm underline mt-4">Angre</button>
+   <button onclick="verifyOtp()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold">LOGG INN</button>
+   <button onclick="resetAuth()" class="text-slate-500 text-sm underline mt-4">Angre</button>
  </div>
  <button onclick="window.open('https://bbmanual.pages.dev/')" class="text-blue-500 font-bold text-sm mt-6 flex items-center justify-center gap-2"><span class="material-icons-round">auto_stories</span> Brukermanual</button>
 </div>
 
 <!-- HOVEDAPP -->
-<div id="app" class="hidden h-screen flex flex-col relative overflow-hidden">
- <header class="p-4 bg-gray-900 border-b border-gray-800 sticky top-0 z-40 shadow-md">
-   <div class="flex justify-between items-center">
-     <div><h1 id="pg-t" class="text-base font-bold text-white">Biloversikt</h1><p id="u-disp" class="text-[10px] text-blue-400 font-bold uppercase"></p></div>
-     <div class="flex gap-2"><button onclick="load()" class="text-gray-500 active:text-white p-2 rounded-full"><span class="material-icons-round">refresh</span></button></div>
-   </div>
+<div id="app" class="hidden h-full flex flex-col relative w-full">
+ 
+ <!-- DASHBOARD HEADER -->
+ <header class="flex-none pt-6 pb-2 px-4 bg-[#0f172a] z-30 border-b border-slate-800 shadow-sm">
+    <div class="flex justify-between items-end mb-4">
+        <div>
+            <h1 id="pg-t" class="text-xl font-bold text-white">BookBil Jæren</h1>
+            <p id="u-disp" class="text-xs text-slate-500 font-medium">Laster bruker...</p>
+        </div>
+        <!-- Quick Stats Container (Hidden on subpages) -->
+        <div id="head-stats" class="flex gap-3">
+            <div class="text-right">
+                <span id="stat-free" class="block text-2xl font-bold text-emerald-400 leading-none">-</span>
+                <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider">Ledig</span>
+            </div>
+            <div class="w-px h-8 bg-slate-800"></div>
+            <div class="text-right">
+                <span id="stat-total" class="block text-2xl font-bold text-slate-200 leading-none">-</span>
+                <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider">Totalt</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs (Hidden on subpages) -->
+    <div id="head-tabs" class="flex gap-2 pb-1">
+        <button id="tab-ov" onclick="tab('cars')" class="stat-pill stat-active">OVERSIKT</button>
+        <button id="tab-res" onclick="tab('res')" class="stat-pill">RESERVASJONER</button>
+        <button id="tab-mine" onclick="tab('mine')" class="stat-pill">MINE</button>
+    </div>
  </header>
- <div id="ptr" class="w-full text-center py-2 -mt-10 transition-all duration-300"><span id="ptr-icon" class="material-icons-round text-gray-500">arrow_downward</span></div>
- <main id="main" class="p-3 pb-40 flex flex-col gap-2 flex-grow overflow-y-auto overscroll-y-contain"><div class="text-center mt-20 text-gray-500">Laster...</div></main>
- <div id="foot" class="fixed bottom-24 w-full text-center pb-2 pointer-events-none z-30"><p class="text-[10px] text-gray-600 bg-black/60 inline-block px-2 rounded">Sist oppdatert: <span id="l-upd">--:--</span></p></div>
- <nav class="fixed bottom-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around p-2 safe-b z-40 shadow-lg">
-  <div onclick="tab('cars')" id="t-cars" class="nav-item active flex flex-col items-center flex-1"><span class="material-icons-round text-2xl">directions_car</span><span class="text-[9px] font-bold uppercase">Biler</span></div>
-  <div onclick="tab('res')" id="t-res" class="nav-item text-gray-500 flex flex-col items-center flex-1"><span class="material-icons-round text-2xl">list_alt</span><span class="text-[9px] font-bold uppercase">Reservert</span></div>
-  <div onclick="togMenu()" id="t-more" class="nav-item text-gray-500 flex flex-col items-center flex-1"><span class="material-icons-round text-2xl">menu</span><span class="text-[9px] font-bold uppercase">Mer</span></div>
+
+ <!-- PULL TO REFRESH INDIKATOR -->
+ <div id="ptr" class="w-full text-center py-2 -mt-10 transition-all duration-300 absolute z-20 pointer-events-none"><span id="ptr-icon" class="material-icons-round text-slate-500">arrow_downward</span></div>
+ 
+ <!-- MAIN CONTENT LIST -->
+ <main id="main" class="flex-1 overflow-y-auto px-4 pb-32 pt-4 w-full">
+    <div class="text-center mt-20 text-slate-500">Laster...</div>
+ </main>
+ 
+ <div id="foot" class="fixed bottom-24 w-full text-center pb-2 pointer-events-none z-30"><p class="text-[10px] text-slate-400 bg-[#0f172a]/80 backdrop-blur inline-block px-2 rounded border border-slate-700">Oppdatert: <span id="l-upd">--:--</span></p></div>
+
+ <!-- BOTTOM NAVIGATION -->
+ <nav class="bottom-nav fixed bottom-0 w-full flex justify-between items-center px-8 z-40">
+    <!-- Biler -->
+    <button onclick="tab('cars')" class="flex flex-col items-center justify-center w-16 text-blue-500 transition-colors" id="nav-btn-cars">
+        <span class="material-icons-round text-2xl mb-1">directions_car</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider">Biler</span>
+    </button>
+
+    <!-- Main Action (Center) -->
+    <div class="relative -top-6 z-50">
+        <button onclick="openActionMenu()" class="big-fab text-white active:scale-95 transition-transform">
+            <span class="material-icons-round text-4xl">add</span>
+        </button>
+    </div>
+
+    <!-- Mer -->
+    <button onclick="togMenu()" class="flex flex-col items-center justify-center w-16 text-slate-500 hover:text-slate-300 transition-colors" id="nav-btn-more">
+        <span class="material-icons-round text-2xl mb-1">menu</span>
+        <span class="text-[9px] font-bold uppercase tracking-wider">Mer</span>
+    </button>
  </nav>
- <div id="menu-bg" class="fixed inset-0 z-45" onclick="togMenu()"></div>
- <div id="more-menu" class="fixed bottom-0 w-full bg-[#1e1e1e] z-50 rounded-t-3xl shadow-2xl flex flex-col pb-8 safe-b">
+</div> 
+<!-- END OF APP -->
+
+<!-- MENU & MODALS -->
+
+<!-- HAMBURGER MENU -->
+<div id="menu-bg" class="fixed inset-0 z-[45]" onclick="togMenu()"></div>
+<div id="more-menu" class="fixed bottom-0 w-full bg-[#1e1e1e] z-[50] rounded-t-3xl shadow-2xl flex flex-col pb-8 safe-b transform translate-y-full">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'more-menu')"><div class="bar"></div></div>
   <div class="p-4 space-y-2">
-   <button onclick="tab('logg');togMenu()" class="w-full bg-gray-800 p-4 rounded-xl text-left flex gap-4 items-center"><span class="material-icons-round text-blue-400">history</span> Logg</button>
-   <button onclick="tab('admin');togMenu()" class="w-full bg-gray-800 p-4 rounded-xl text-left flex gap-4 items-center"><span class="material-icons-round text-orange-400">warehouse</span> Billager</button>
-   <button onclick="tab('set');togMenu()" class="w-full bg-gray-800 p-4 rounded-xl text-left flex gap-4 items-center"><span class="material-icons-round text-gray-400">settings</span> Innstillinger</button>
-   <a href="https://bbmanual.pages.dev/" target="_blank" class="w-full bg-gray-800 p-4 rounded-xl text-left flex gap-4 items-center block no-underline text-white"><span class="material-icons-round text-purple-400">auto_stories</span> Brukermanual</a>
-   <button onclick="logout()" class="w-full bg-red-900/20 text-red-400 p-4 rounded-xl text-left flex gap-4 mt-6 items-center"><span class="material-icons-round">logout</span> Logg ut</button>
+   <button onclick="tab('logg');togMenu()" class="w-full bg-slate-800 p-4 rounded-xl text-left flex gap-4 items-center border border-slate-700"><span class="material-icons-round text-blue-400">history</span> Logg</button>
+   <button onclick="tab('admin');togMenu()" class="w-full bg-slate-800 p-4 rounded-xl text-left flex gap-4 items-center border border-slate-700"><span class="material-icons-round text-orange-400">warehouse</span> Billager</button>
+   <button onclick="tab('set');togMenu()" class="w-full bg-slate-800 p-4 rounded-xl text-left flex gap-4 items-center border border-slate-700"><span class="material-icons-round text-slate-400">settings</span> Innstillinger</button>
+   <a href="https://bbmanual.pages.dev/" target="_blank" class="w-full bg-slate-800 p-4 rounded-xl text-left flex gap-4 items-center block no-underline text-white border border-slate-700"><span class="material-icons-round text-purple-400">auto_stories</span> Brukermanual</a>
+   <button onclick="logout()" class="w-full bg-red-900/20 text-red-400 p-4 rounded-xl text-left flex gap-4 mt-6 items-center border border-red-900/30"><span class="material-icons-round">logout</span> Logg ut</button>
   </div>
- </div>
 </div>
 
-<!-- ACTIONS -->
-<div id="m-action" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-50" onclick="closeM('m-action')">
- <div class="bg-gray-900 modal-content-bottom p-5 border-t border-gray-700 shadow-2xl space-y-3" onclick="event.stopPropagation()">
+<!-- ACTIONS MODAL -->
+<div id="m-action" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-action')">
+ <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl space-y-3" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-action',1)"><div class="bar"></div></div>
-  <button onclick="expressBook()" class="w-full bg-yellow-600/20 border border-yellow-500 p-4 rounded-2xl flex items-center justify-between hover:bg-yellow-600/30"><div class="flex flex-col text-left"><span class="text-white font-black text-lg">⚡ EKSPRESS</span><span class="text-xs text-gray-400">Første ledige bil, nå!</span></div><span class="material-icons-round text-yellow-500 text-3xl">bolt</span></button>
-  <button onclick="sMode(); closeM('m-action', false)" class="w-full bg-green-900/20 border border-green-500 p-4 rounded-2xl flex items-center justify-between hover:bg-green-900/30"><div class="flex flex-col text-left"><span class="text-white font-black text-lg">🔍 FINN LEDIG</span><span class="text-xs text-gray-400">Søk med tidslinje</span></div><span class="material-icons-round text-green-500 text-3xl">search</span></button>
+  <h3 class="text-white font-bold text-center mb-2">Hva vil du gjøre?</h3>
+  <button onclick="expressBook()" class="w-full bg-yellow-600/20 border border-yellow-500 p-5 rounded-2xl flex items-center justify-between hover:bg-yellow-600/30 transition-colors"><div class="flex flex-col text-left"><span class="text-white font-black text-lg">⚡ EKSPRESS</span><span class="text-xs text-slate-400">Første ledige bil, nå!</span></div><span class="material-icons-round text-yellow-500 text-3xl">bolt</span></button>
+  <button onclick="sMode(); closeM('m-action', false)" class="w-full bg-green-900/20 border border-green-500 p-5 rounded-2xl flex items-center justify-between hover:bg-green-900/30 transition-colors"><div class="flex flex-col text-left"><span class="text-white font-black text-lg">🔍 FINN LEDIG</span><span class="text-xs text-slate-400">Søk med tidslinje</span></div><span class="material-icons-round text-green-500 text-3xl">search</span></button>
  </div>
 </div>
 
 <!-- EKSPRESS LISTE -->
-<div id="m-express-list" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-50" onclick="closeM('m-express-list')">
-    <div class="bg-gray-900 modal-content-bottom p-5 border-t border-gray-700 shadow-2xl" onclick="event.stopPropagation()">
+<div id="m-express-list" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-express-list')">
+    <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl" onclick="event.stopPropagation()">
         <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-express-list',1)"><div class="bar"></div></div>
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-white font-bold text-lg">Ekspress</h3>
-            <span class="text-xs text-gray-500 font-mono" id="exp-time-range"></span>
+            <span class="text-xs text-slate-500 font-mono" id="exp-time-range"></span>
         </div>
-        
-        <!-- Duration Buttons -->
         <div class="grid grid-cols-4 gap-2 mb-4">
             <button onclick="setExpDur(1)" id="btn-d-1" class="exp-dur-btn bg-blue-600 text-white p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all active:scale-95">1t</button>
-            <button onclick="setExpDur(2)" id="btn-d-2" class="exp-dur-btn bg-gray-800 text-gray-400 border border-gray-600 p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all active:scale-95">2t</button>
-            <button onclick="setExpDur(3)" id="btn-d-3" class="exp-dur-btn bg-gray-800 text-gray-400 border border-gray-600 p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all active:scale-95">3t</button>
-            <button onclick="setExpDur(0)" id="btn-d-0" class="exp-dur-btn bg-gray-800 text-gray-400 border border-gray-600 p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all active:scale-95">Ut dag</button>
+            <button onclick="setExpDur(2)" id="btn-d-2" class="exp-dur-btn bg-slate-800 text-slate-400 border border-slate-600 p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all active:scale-95">2t</button>
+            <button onclick="setExpDur(3)" id="btn-d-3" class="exp-dur-btn bg-slate-800 text-slate-400 border border-slate-600 p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all active:scale-95">3t</button>
+            <button onclick="setExpDur(0)" id="btn-d-0" class="exp-dur-btn bg-slate-800 text-slate-400 border border-slate-600 p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all active:scale-95">Ut dag</button>
         </div>
-
-        <div id="express-options" class="space-y-2 max-h-[50vh] overflow-y-auto pb-4"></div>
+        <div id="express-options" class="space-y-2 overflow-y-auto pb-4"></div>
     </div>
 </div>
 
 <!-- SØK -->
-<div id="m-search" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-50" onclick="closeM('m-search')">
- <div class="bg-gray-900 modal-content-bottom p-5 border-t border-gray-700 shadow-2xl relative" onclick="event.stopPropagation()">
+<div id="m-search" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-search')">
+ <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl relative" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-search',1)"><div class="bar"></div></div>
-  <button onclick="closeM('m-search')" class="absolute top-4 right-4 text-gray-500 p-2"><span class="material-icons-round">close</span></button>
+  <button onclick="closeM('m-search')" class="absolute top-4 right-4 text-slate-500 p-2"><span class="material-icons-round">close</span></button>
   <h2 class="text-xl font-black text-white mb-4">FINN LEDIG</h2>
   <div class="flex justify-between items-center mb-4"><div class="legend-box"><div class="legend-item"><div class="dot free"></div> Ledig</div><div class="legend-item"><div class="dot selected"></div> Valgt</div><div class="legend-item"><div class="dot busy"></div> Opptatt</div></div></div>
   <div class="mb-4">
-    <div class="flex bg-gray-800 p-1 rounded-lg mb-2 border border-gray-700"><button id="s-day-0" onclick="setTlDay('search', 0)" class="day-tab active">I DAG</button><button id="s-day-1" onclick="setTlDay('search', 1)" class="day-tab">I MORGEN</button></div>
+    <div class="flex bg-slate-800 p-1 rounded-lg mb-2 border border-slate-700"><button id="s-day-0" onclick="setTlDay('search', 0)" class="day-tab active">I DAG</button><button id="s-day-1" onclick="setTlDay('search', 1)" class="day-tab">I MORGEN</button></div>
     <div class="timeline-scroll" id="ts-search"><div class="time-grid" id="timeline-search"></div></div>
   </div>
-  
-  <p id="s-instr" class="text-center text-xs text-gray-500 font-bold mb-1 uppercase">Trykk starttid (A)</p>
-  
-  <div id="v-s-e" class="flex flex-col gap-2 mb-6 bg-gray-800 p-4 rounded-xl border border-gray-600">
+  <p id="s-instr" class="text-center text-xs text-slate-500 font-bold mb-1 uppercase">Trykk starttid (A)</p>
+  <div id="v-s-e" class="flex flex-col gap-2 mb-6 bg-slate-800 p-4 rounded-xl border border-slate-700">
     <div class="flex items-center justify-center gap-6">
         <input type="time" id="s-t-st" step="1800" class="bg-transparent text-2xl font-black text-white text-center w-28 outline-none p-0" onchange="synS()">
-        <span class="text-2xl font-black text-gray-600">-</span>
+        <span class="text-2xl font-black text-slate-600">-</span>
         <input type="time" id="s-t-en" step="1800" class="bg-transparent text-2xl font-black text-white text-center w-28 outline-none p-0" onchange="synS()">
     </div>
-    
-    <div class="w-full border-t border-gray-700 my-2"></div>
-    
+    <div class="w-full border-t border-slate-700 my-2"></div>
     <div class="flex items-center justify-center gap-4">
         <div class="flex flex-col items-center w-1/2">
-            <label class="text-[9px] font-bold text-gray-500 mb-1">FRA DATO</label>
-            <input type="date" id="s-d-st" class="bg-gray-700 text-white text-sm font-bold text-center w-full h-12 rounded outline-none p-1" onchange="synS('start')">
+            <label class="text-[9px] font-bold text-slate-500 mb-1">FRA DATO</label>
+            <input type="date" id="s-d-st" class="bg-slate-700 text-white text-sm font-bold text-center w-full h-12 rounded outline-none p-1" onchange="synS('start')">
         </div>
-        <div class="w-px h-8 bg-gray-700"></div>
+        <div class="w-px h-8 bg-slate-700"></div>
         <div class="flex flex-col items-center w-1/2">
-            <label class="text-[9px] font-bold text-gray-500 mb-1">TIL DATO</label>
-            <input type="date" id="s-d-en" class="bg-gray-700 text-white text-sm font-bold text-center w-full h-12 rounded outline-none p-1" onchange="synS()">
+            <label class="text-[9px] font-bold text-slate-500 mb-1">TIL DATO</label>
+            <input type="date" id="s-d-en" class="bg-slate-700 text-white text-sm font-bold text-center w-full h-12 rounded outline-none p-1" onchange="synS()">
         </div>
     </div>
   </div>
-  
   <button onclick="findC()" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm mb-4">SØK ETTER BIL</button>
-  
-  <div id="s-res" class="space-y-2 hidden border-t border-gray-800 pt-4 overflow-y-auto max-h-[30vh]"></div>
+  <div id="s-res" class="space-y-2 hidden border-t border-slate-800 pt-4 overflow-y-auto max-h-[30vh]"></div>
  </div>
 </div>
 
-<!-- BOOKING -->
-<div id="m-book" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-50" onclick="closeM('m-book')">
- <div class="bg-gray-900 modal-content-bottom p-5 border-t border-gray-700 shadow-2xl relative" id="m-book-content" onclick="event.stopPropagation()">
-  <button onclick="closeM('m-book')" class="absolute top-4 right-4 text-gray-500 p-2"><span class="material-icons-round">close</span></button>
-  
+<!-- BOOKING MODAL -->
+<div id="m-book" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-book')">
+ <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl relative" id="m-book-content" onclick="event.stopPropagation()">
+  <button onclick="closeM('m-book')" class="absolute top-4 right-4 text-slate-500 p-2"><span class="material-icons-round">close</span></button>
   <div class="flex justify-between items-center mb-1"><h2 id="b-title" class="text-xl font-black text-white uppercase truncate pr-2">RESERVER</h2><div class="legend-box"><div class="legend-item"><div class="dot free"></div> Ledig</div><div class="legend-item"><div class="dot selected"></div> Valgt</div><div class="legend-item"><div class="dot busy"></div> Opptatt</div></div></div>
-  <h3 id="b-sub" class="text-xs text-gray-400 mb-2 font-bold uppercase">Ny reservasjon</h3>
+  <h3 id="b-sub" class="text-xs text-slate-400 mb-2 font-bold uppercase">Ny reservasjon</h3>
   <p id="b-info" class="text-xs text-yellow-500 mb-3 bg-yellow-900/20 p-2 rounded border border-yellow-700/50 hidden"></p>
-  
   <div class="mb-4">
-    <div class="flex bg-gray-800 p-1 rounded-lg mb-2 border border-gray-700"><button id="b-day-0" onclick="setTlDay('book', 0)" class="day-tab active">I DAG</button><button id="b-day-1" onclick="setTlDay('book', 1)" class="day-tab">I MORGEN</button></div>
+    <div class="flex bg-slate-800 p-1 rounded-lg mb-2 border border-slate-700"><button id="b-day-0" onclick="setTlDay('book', 0)" class="day-tab active">I DAG</button><button id="b-day-1" onclick="setTlDay('book', 1)" class="day-tab">I MORGEN</button></div>
     <div class="timeline-scroll" id="ts-book"><div class="time-grid" id="timeline"></div></div>
   </div>
-
-  <p id="b-instr" class="text-center text-xs text-gray-500 font-bold mb-1 uppercase">Trykk starttid (A)</p>
-
-  <div class="flex flex-col gap-2 mb-4 bg-gray-800 p-4 rounded-xl border border-gray-600" id="b-date-inputs">
-    <div class="flex items-center justify-center gap-6">
-        <input type="time" id="b-t-st" step="1800" class="bg-transparent text-2xl font-black text-white text-center w-28 outline-none p-0" onchange="check()">
-        <span class="text-2xl font-black text-gray-600">-</span>
-        <input type="time" id="b-t-en" step="1800" class="bg-transparent text-2xl font-black text-white text-center w-28 outline-none p-0" onchange="check()">
+  <p id="b-instr" class="text-center text-xs text-slate-500 font-bold mb-1 uppercase">Trykk starttid (A)</p>
+  
+  <!-- REVISED DATE LAYOUT -->
+  <div class="flex flex-col gap-3 mb-4 bg-slate-800 p-4 rounded-xl border border-slate-700" id="b-date-inputs">
+    <div class="flex items-center gap-2">
+        <div class="w-12 text-[10px] font-bold text-slate-500 uppercase pt-2">Fra</div>
+        <input type="date" id="b-d-st" class="bg-slate-900 text-white text-sm font-bold h-10 px-2 rounded w-full border border-slate-600" onchange="check('start')">
+        <input type="time" id="b-t-st" class="bg-slate-900 text-blue-400 text-sm font-black h-10 px-2 rounded w-24 text-center border border-slate-600" onchange="check()">
     </div>
-    <div class="w-full border-t border-gray-700 my-2"></div>
-    <div class="flex items-center justify-center gap-4">
-        <div class="flex flex-col items-center w-1/2">
-            <label class="text-[9px] font-bold text-gray-500 mb-1">FRA DATO</label>
-            <input type="date" id="b-d-st" class="bg-gray-700 text-white text-sm font-bold text-center w-full h-12 rounded outline-none p-1" onchange="check('start')">
-        </div>
-        <div class="w-px h-8 bg-gray-700"></div>
-        <div class="flex flex-col items-center w-1/2">
-            <label class="text-[9px] font-bold text-gray-500 mb-1">TIL DATO</label>
-            <input type="date" id="b-d-en" class="bg-gray-700 text-white text-sm font-bold text-center w-full h-12 rounded outline-none p-1" onchange="check()">
-        </div>
+    <div class="flex items-center gap-2">
+        <div class="w-12 text-[10px] font-bold text-slate-500 uppercase pt-2">Til</div>
+        <input type="date" id="b-d-en" class="bg-slate-900 text-white text-sm font-bold h-10 px-2 rounded w-full border border-slate-600" onchange="check()">
+        <input type="time" id="b-t-en" class="bg-slate-900 text-blue-400 text-sm font-black h-10 px-2 rounded w-24 text-center border border-slate-600" onchange="check()">
     </div>
   </div>
 
-  <div class="mb-3"><details class="group"><summary class="text-blue-400 text-xs font-bold cursor-pointer list-none flex items-center gap-1 mb-2"><span class="material-icons-round text-sm">add_circle_outline</span> Legg til flere biler</summary><div id="b-multi" class="flex flex-wrap gap-2 p-2 bg-gray-800 rounded-lg border border-gray-700"></div></details></div>
-  <div id="b-alert" class="hidden mb-4 bg-gray-800 border border-gray-600 p-4 rounded-xl"><p id="al-t" class="text-red-400 font-bold text-sm flex gap-2"><span class="material-icons-round">error</span> UTILGJENGELIG</p><p id="b-reason" class="text-white text-sm mb-3"></p><button id="btn-react" onclick="react()" class="w-full py-2 bg-green-700 text-white rounded font-bold text-xs hidden">GJØR AKTIV</button></div>
+  <div class="mb-3"><details class="group"><summary class="text-blue-400 text-xs font-bold cursor-pointer list-none flex items-center gap-1 mb-2"><span class="material-icons-round text-sm">add_circle_outline</span> Legg til flere biler</summary><div id="b-multi" class="flex flex-wrap gap-2 p-2 bg-slate-800 rounded-lg border border-slate-700"></div></details></div>
+  <div id="b-alert" class="hidden mb-4 bg-slate-800 border border-slate-600 p-4 rounded-xl"><p id="al-t" class="text-red-400 font-bold text-sm flex gap-2"><span class="material-icons-round">error</span> UTILGJENGELIG</p><p id="b-reason" class="text-white text-sm mb-3"></p><button id="btn-react" onclick="react()" class="w-full py-2 bg-green-700 text-white rounded font-bold text-xs hidden">GJØR AKTIV</button></div>
   <div class="mb-4 space-y-3" id="b-form-container">
     <div class="flex gap-2" id="b-form-standard">
-       <div id="d-bid" class="flex-1"><label class="text-[10px] font-bold text-gray-500">BID</label><input id="b-bid" class="w-full bg-gray-800 p-3 rounded-xl border border-gray-600 font-bold text-white text-sm"></div>
-       <div class="flex-1"><label class="text-[10px] font-bold text-gray-500">FORMÅL</label><input id="b-form" list="opts" class="w-full bg-gray-800 p-3 rounded-xl border border-gray-600 text-white text-sm" placeholder="Velg..."><datalist id="opts"><option value="Møte"><option value="IP"><option value="Oppdrag"><option value="Verksted"><option value="Annet"></datalist></div></div>
-    
+       <div id="d-bid" class="flex-1"><label class="text-[10px] font-bold text-slate-500">BID</label><input id="b-bid" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-600 font-bold text-white text-sm"></div>
+       <div class="flex-1"><label class="text-[10px] font-bold text-slate-500">FORMÅL</label>
+         <select id="b-form" onchange="if(this.value==='Verksted') toggleVerkstedMode(true);" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-600 text-white text-sm h-12">
+           <option value="" disabled selected>Velg...</option>
+           <option value="Møte">Møte</option>
+           <option value="IP">IP</option>
+           <option value="Oppdrag">Oppdrag</option>
+           <option value="Verksted">Verksted</option>
+           <option value="Annet">Annet</option>
+         </select>
+       </div>
+    </div>
     <div class="hidden flex-col gap-2 bg-purple-900/20 p-3 rounded-xl border border-purple-500" id="b-form-verksted">
        <div class="flex justify-between items-center">
            <span class="text-purple-400 font-bold text-xs uppercase"><span class="material-icons-round text-sm align-text-bottom">build</span> Verksted / Service</span>
-           <button onclick="toggleVerkstedMode(false)" class="text-gray-400 hover:text-white"><span class="material-icons-round">close</span></button>
+           <button onclick="toggleVerkstedMode(false)" class="text-slate-400 hover:text-white"><span class="material-icons-round">close</span></button>
        </div>
-       <label class="text-[10px] font-bold text-gray-500">HVA SKAL GJØRES?</label>
-       <input id="b-verksted-desc" class="w-full bg-gray-900 p-3 rounded-xl border border-purple-500/50 text-white text-sm font-bold" placeholder="F.eks. Service, Dekk, EU-kontroll...">
+       <label class="text-[10px] font-bold text-slate-500">HVA SKAL GJØRES?</label>
+       <input id="b-verksted-desc" class="w-full bg-slate-900 p-3 rounded-xl border border-purple-500/50 text-white text-sm font-bold" placeholder="F.eks. Service, Dekk, EU-kontroll...">
     </div>
-
     <div class="mt-2 text-xs"><div id="warn" class="hidden mt-2 p-2 bg-red-900/40 border border-red-500 text-red-200 font-bold rounded text-center">⚠ OPPTATT I TIDSROMMET</div></div>
     <div class="flex gap-2 pt-2"><button id="btn-del" onclick="delB()" class="hidden py-4 px-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900 flex items-center justify-center"><span class="material-icons-round">delete</span></button><button id="btn-ok" onclick="confB()" class="flex-1 py-4 rounded-xl bg-blue-600 font-bold text-white text-lg shadow-lg disabled:opacity-50 disabled:bg-gray-600">BEKREFT</button></div>
   </div>
-  <div class="border-t border-gray-800 pt-4 mt-4 pb-10">
-      <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-3">Kommende turer på denne bilen</h4>
+  <div class="border-t border-slate-800 pt-4 mt-4 pb-10">
+      <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-3">Kommende turer (Trykk for å endre)</h4>
       <div id="fut-l" class="space-y-2"></div>
   </div>
  </div>
 </div>
 
-<!-- FILTER -->
-<div id="m-filter" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-50" onclick="togFilter()">
- <div class="bg-gray-900 modal-content-bottom p-5 border-t border-gray-700 shadow-2xl" onclick="event.stopPropagation()">
-  <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-filter',1)"><div class="bar"></div></div>
-  <h3 class="text-white font-bold text-lg mb-4">Filtrer</h3>
-  
-  <div class="space-y-4">
-      <div>
-          <label class="text-[10px] font-bold text-gray-500 block mb-1">BIL</label>
-          <select id="f-car" class="w-full bg-gray-800 border border-gray-600 text-white rounded-xl p-3 text-sm"></select>
-      </div>
-      
-      <div>
-          <label class="text-[10px] font-bold text-gray-500 block mb-1">DATO</label>
-          <input type="date" id="f-date" class="w-full bg-gray-800 border border-gray-600 text-white rounded-xl p-3 text-sm">
-      </div>
-      
-      <div class="flex items-center gap-3 bg-gray-800 p-4 rounded-xl border border-gray-600">
-          <input type="checkbox" id="f-my" class="w-5 h-5 accent-blue-600">
-          <span class="text-white text-sm font-bold">Vis kun mine bestillinger</span>
-      </div>
-      
-      <div class="grid grid-cols-2 gap-3 pt-2">
-          <button onclick="togFilter()" class="w-full bg-gray-800 text-gray-400 font-bold py-3 rounded-xl border border-gray-600">LUKK</button>
-          <button onclick="appF()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg">BRUK</button>
-      </div>
+<!-- LEVERING MODAL -->
+<div id="m-ret" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-ret')">
+ <div class="bg-[#0f172a] modal-content-bottom p-6 border-t border-slate-700 shadow-2xl" onclick="event.stopPropagation()">
+  <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-ret',1)"><div class="bar"></div></div>
+  <h2 class="text-white font-black text-2xl uppercase mb-1">Levering</h2><p id="r-name" class="text-blue-400 font-bold uppercase mb-6 text-sm"></p>
+  <div class="bg-blue-900/20 border border-blue-800 p-4 rounded-xl mb-6">
+      <h3 class="text-blue-400 font-bold text-sm mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">info</span> Informasjon</h3>
+      <p class="text-xs text-slate-300">Kommentar du skriver her blir synlig på bilkortet for neste bruker. I tillegg sendes det automatisk en e-post til bilansvarlig.</p>
   </div>
+  <div class="bg-yellow-900/30 border border-yellow-600/50 p-4 rounded-xl mb-6 flex items-center gap-4"><div class="bg-yellow-600/20 p-3 rounded-full"><span class="material-icons-round text-yellow-500 text-3xl">vpn_key</span></div><div><h3 class="text-yellow-500 font-black text-sm">HUSK NØKLER!</h3><p class="text-yellow-200/80 text-xs">Legg tilbake i skapet.</p></div></div>
+  <input id="r-comm" placeholder="Kommentar (Sendes til bilansvarlig + notat på bil)" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white mb-4 text-sm">
+  <button onclick="subRet()" class="w-full bg-green-600 py-4 rounded-xl font-black text-white text-lg shadow-lg">BEKREFT</button><button onclick="closeM('m-ret')" class="w-full text-slate-500 font-bold py-4 mt-2">AVBRYT</button>
  </div>
 </div>
 
-<!-- LEVERING -->
-<div id="m-ret" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-50" onclick="closeM('m-ret')">
- <div class="bg-gray-900 modal-content-bottom p-6 border-t border-gray-700 shadow-2xl" onclick="event.stopPropagation()">
-  <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-ret',1)"><div class="bar"></div></div>
-  <h2 class="text-white font-black text-2xl uppercase mb-1">Levering</h2><p id="r-name" class="text-blue-400 font-bold uppercase mb-6 text-sm"></p>
+<!-- ADMIN REDIGER MODAL -->
+<div id="m-admin-edit" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-admin-edit')">
+ <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl relative" onclick="event.stopPropagation()">
+  <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-admin-edit',1)"><div class="bar"></div></div>
+  <h2 class="text-xl font-black text-white mb-4">Rediger Bil</h2>
   
-  <div class="bg-blue-900/20 border border-blue-800 p-4 rounded-xl mb-6">
-      <h3 class="text-blue-400 font-bold text-sm mb-1 flex items-center gap-2">
-          <span class="material-icons-round text-sm">info</span> Informasjon
-      </h3>
-      <p class="text-xs text-gray-300">Kommentar du skriver her blir synlig på bilkortet for neste bruker. I tillegg sendes det automatisk en e-post til bilansvarlig.</p>
+  <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4">
+      <div>
+          <label class="text-[10px] font-bold text-slate-500">NAVN/REGNR</label>
+          <input type="text" id="adm-name" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm font-bold uppercase">
+      </div>
+      <div>
+          <label class="text-[10px] font-bold text-slate-500">STATUS</label>
+          <select id="adm-stat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm">
+            <option value="Aktiv">Aktiv</option>
+            <option value="Verksted">Verksted</option>
+            <option value="Skade">Skade</option>
+            <option value="EU-kontroll">EU-kontroll</option>
+            <option value="Annet">Annet</option>
+          </select>
+      </div>
+      <div>
+          <label class="text-[10px] font-bold text-slate-500">KOMMENTAR (SYNLIG)</label>
+          <input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Skriv beskjed...">
+      </div>
+      <div>
+          <label class="text-[10px] font-bold text-slate-500">INTERN INFO</label>
+          <textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater kun for admin..."></textarea>
+      </div>
   </div>
-
-  <div class="bg-yellow-900/30 border border-yellow-600/50 p-4 rounded-xl mb-6 flex items-center gap-4"><div class="bg-yellow-600/20 p-3 rounded-full"><span class="material-icons-round text-yellow-500 text-3xl">vpn_key</span></div><div><h3 class="text-yellow-500 font-black text-sm">HUSK NØKLER!</h3><p class="text-yellow-200/80 text-xs">Legg tilbake i skapet.</p></div></div>
-  <input id="r-comm" placeholder="Kommentar (Sendes til bilansvarlig + notat på bil)" class="w-full bg-gray-800 p-4 rounded-xl border border-gray-600 text-white mb-4 text-sm">
-  <button onclick="subRet()" class="w-full bg-green-600 py-4 rounded-xl font-black text-white text-lg shadow-lg">BEKREFT</button><button onclick="closeM('m-ret')" class="w-full text-gray-500 font-bold py-4 mt-2">AVBRYT</button>
+  
+  <div class="flex gap-2 mt-4">
+      <button onclick="delC(s.admId, $id('adm-name').value)" class="p-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900"><span class="material-icons-round">delete</span></button>
+      <button onclick="saveAdmCar()" class="flex-1 bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm">LAGRE ENDRINGER</button>
+  </div>
  </div>
 </div>
 
@@ -392,22 +509,18 @@ const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
-let s = { u:null, bid:null, c:[], r:[], sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false };
+let s = { u:null, bid:null, c:[], r:[], sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false };
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 window.addEventListener('beforeinstallprompt', (e) => { 
     e.preventDefault(); 
     s.deferredPrompt = e; 
-    
-    // Show settings button
     const setBtn = $id('pwa-settings-btn'); 
     if(setBtn) setBtn.classList.remove('hidden'); 
-    
-    // Show Toast
     const toast = $id('pwa-toast');
     if(toast) {
         toast.classList.remove('hidden');
-        setTimeout(() => toast.classList.add('hidden'), 60000); // Hide after 1 min
+        setTimeout(() => toast.classList.add('hidden'), 60000); 
     }
 });
 
@@ -423,9 +536,7 @@ async function installPwa() {
     } 
 }
 
-function closePwaToast() {
-    $id('pwa-toast').classList.add('hidden');
-}
+function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
 
 window.addEventListener('online', () => $id('offline-msg').classList.add('hidden'));
 window.addEventListener('offline', () => $id('offline-msg').classList.remove('hidden'));
@@ -442,17 +553,27 @@ function showToast(msg, type = 'info') {
     setTimeout(()=>t.classList.add('show'),10); setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000);
 }
 
-// NAVIGATION
 window.onpopstate = (event) => { if (s.activeModal) closeM(s.activeModal, false); };
 function openM(id) { if (s.activeModal === id) return; $id(id).classList.remove('hidden'); s.activeModal = id; history.pushState({modal: id}, null, ""); }
 function closeM(id, back=true) { $id(id).classList.add('hidden'); s.activeModal = null; if(back) history.back(); }
-function tab(v) { s.v=v; render(); updNav(v); }
-function updNav(v) { ['cars','res','more'].forEach(t => { $id('t-'+t).className = `nav-item flex flex-col items-center flex-1 py-1 ${v===t||(v==='cars'&&t==='cars')||(v==='res'&&t==='res')?'text-blue-500 active':'text-gray-500'}`; }); }
+function tab(v) { 
+    s.v=v; 
+    render(); 
+    updNav(v); 
+    if(v === 'cars') load(); 
+}
+function updNav(v) { 
+    const tc = $id('nav-btn-cars');
+    const tm = $id('nav-btn-more');
+    tc.className = "flex flex-col items-center justify-center w-16 text-slate-500 transition-colors";
+    tm.className = "flex flex-col items-center justify-center w-16 text-slate-500 transition-colors";
+    if(['cars','res','mine'].includes(v)) tc.className = "flex flex-col items-center justify-center w-16 text-blue-500 transition-colors";
+    else tm.className = "flex flex-col items-center justify-center w-16 text-blue-500 transition-colors";
+}
+
 function togMenu() { $id('more-menu').classList.toggle('open'); $id('menu-bg').classList.toggle('open'); }
 function openActionMenu() { openM('m-action'); }
-function addFab(i,fn) { const b=document.createElement('button'); b.className='fab bg-blue-600 text-white rounded-full shadow-xl active:scale-90 transition'; b.innerHTML=`<span class="material-icons-round text-2xl">${i}</span>`; b.setAttribute('onclick',fn); document.body.appendChild(b); }
 
-// AUTH
 async function sendOtp() {
     const e = $id('l-email').value.trim().toLowerCase(); if (!e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
     const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } });
@@ -466,12 +587,9 @@ async function verifyOtp() {
 function resetAuth() { $id('f-email').classList.remove('hidden'); $id('f-otp').classList.add('hidden'); $id('l-otp').value = ""; }
 async function logout() { if (confirm("Logg ut?")) { await _s.auth.signOut(); location.reload(); } }
 
-// UI
 function swipe(e,id,m=0) { e.preventDefault(); const start=e.clientY; const fn=()=>{ if(event.clientY-start>50) { if(m)closeM(id); else togMenu(); } document.removeEventListener('pointerup',fn); }; document.addEventListener('pointerup',fn); }
 
-// DATA
 async function load() {
-    // Fix: Sjekk også TEXTAREA og SELECT så man ikke mister fokus i Billager
     if(!s.u || (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName))) return;
     try {
         const [c,r,u, conf] = await Promise.all([
@@ -490,224 +608,183 @@ async function load() {
 
 function render() {
     if (document.activeElement.tagName === "INPUT" && s.v === 'set') return;
-    const c=$id('main'), t=$id('pg-t'); c.innerHTML=""; 
-    document.querySelectorAll('.fab').forEach(e=>e.remove());
-    $id('foot').className = ['cars','res','admin','logg', 'set'].includes(s.v) ? 'fixed bottom-24 w-full text-center pb-2 pointer-events-none z-30' : 'hidden';
+    const c=$id('main'); c.innerHTML=""; 
+    const stats = $id('head-stats');
+    const tabs = $id('head-tabs');
+    const title = $id('pg-t');
 
-    if(s.v==='cars') { t.innerText="Biloversikt"; rCars(c); addFab('add','openActionMenu()'); }
-    else if(s.v==='res') { t.innerText="Reservasjoner"; rRes(c); addFab('filter_list','togFilter()'); }
-    else if(s.v==='admin') { t.innerText="Billager"; rAdm(c); }
-    else if(s.v==='logg') { t.innerText="Logg"; rLog(c); }
-    else if(s.v==='set') { t.innerText="Innstillinger"; rSet(c); }
+    // Default: Show main dashboard items
+    if(stats) stats.classList.remove('hidden');
+    if(tabs) tabs.classList.remove('hidden');
+    if(title) title.innerText = "BookBil Jæren";
+
+    ['ov','res','mine'].forEach(x => { const el = $id('tab-'+x); if(el) el.className = "stat-pill"; });
+
+    if(s.v==='cars') { $id('tab-ov').className = "stat-pill stat-active"; rCars(c); }
+    else if(s.v==='res') { $id('tab-res').className = "stat-pill stat-active"; rRes(c, false); }
+    else if(s.v==='mine') { $id('tab-mine').className = "stat-pill stat-active"; rRes(c, true); }
+    else {
+        // Hide stats and tabs on subpages
+        if(stats) stats.classList.add('hidden');
+        if(tabs) tabs.classList.add('hidden');
+        
+        if(s.v==='admin') { if(title) title.innerText = "Billager"; rAdm(c); }
+        else if(s.v==='logg') { if(title) title.innerText = "Logg"; rLog(c); }
+        else if(s.v==='set') { if(title) title.innerText = "Innstillinger"; rSet(c); }
+    }
+    calcStats();
+}
+
+function calcStats() {
+    const now = new Date();
+    let total = 0; let free = 0;
+    s.c.forEach(b => {
+        if(s.h.includes(b.bil)) return;
+        total++;
+        if(b.status === 'Aktiv') {
+            const isBusy = s.r.some(r => r.bil===b.bil && new Date(r.start_tid)<=now && new Date(r.slutt_tid)>=now);
+            if(!isBusy) free++;
+        }
+    });
+    $id('stat-free').innerText = free; $id('stat-total').innerText = total;
 }
 
 function rCars(c) {
     const now = new Date();
+    const wrapper = document.createElement('div');
+    wrapper.className = "flex flex-col rounded-xl overflow-hidden shadow-lg border border-slate-700/50 mb-6";
+
     s.c.forEach(b => {
         if(s.h.includes(b.bil)) return;
         const act = s.r.find(r => r.bil===b.bil && new Date(r.start_tid)<=now && new Date(r.slutt_tid)>=now);
         const nxt = s.r.filter(r => r.bil===b.bil && new Date(r.start_tid)>now).sort((a,x)=>new Date(a.start_tid)-new Date(x.start_tid))[0];
         
-        let st="bg-ledig", ic="check_circle", col="text-green-500", txt="LEDIG", sub="Klar";
-        if (b.kommentar && b.status === 'Aktiv') sub = `<span class="text-yellow-400 font-bold">⚠ ${b.kommentar}</span>`;
+        let stripeClass="c-green", titleColor="text-white", subText="Ledig nå", subColor="text-emerald-500", rowBg="", rowOp="opacity-100";
+        let actionBtn = `<button onclick="event.stopPropagation();book('${b.bil}')" class="btn-action btn-green">RESERVER</button>`;
 
         if(b.status!=='Aktiv') { 
-            // STATUS: VERKSTED / SKADE / ANNET (fra Billager)
-            if(b.status === 'Verksted') {
-                st="bg-ver"; ic="build"; col="text-purple-400";
-            } else {
-                st="bg-ute"; ic="build"; col="text-gray-400"; 
-            }
-            sub="Årsak: "+(b.kommentar||b.status); 
+            if(b.status === 'Verksted') { stripeClass="c-purple"; titleColor="text-slate-400"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-60"; } 
+            else { stripeClass="c-gray"; titleColor="text-slate-500"; subText="Ute av drift"; subColor="text-slate-500"; rowOp="opacity-60"; }
+            if(b.status === 'Aktiv' && b.kommentar) { subText = `⚠ ${b.kommentar}`; subColor="text-yellow-500"; }
+            actionBtn = `<button onclick="event.stopPropagation();stat(${b.id},'Aktiv','${b.bil}')" class="btn-action btn-green">KLAR</button>`;
         }
         else if(act) { 
-            // BOOKING: VERKSTED / SERVICE (fra Reservasjon)
             if(act.formal && (act.formal.includes('Verksted') || act.formal.includes('Service'))) {
-                 st="bg-ver"; // Defined in CSS
-                 ic="build";
-                 col="text-purple-400";
-                 // Highlight the detail part in yellow if exists
-                 let detail = act.formal;
-                 if(detail.startsWith('Verksted: ')) {
-                     detail = `<span class="text-yellow-300 font-black">${detail.substring(10)}</span>`;
+                 stripeClass="c-purple"; titleColor="text-slate-400"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-70";
+                 actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
+            } else {
+                 if(act.bid === s.bid) {
+                     stripeClass="c-blue"; rowBg="bg-blue-900/10"; subText=`Frist: <span class="font-mono font-bold">${fmtT(act.slutt_tid)}</span>`; subColor="text-blue-300";
+                     actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}')" class="btn-action btn-primary">LEVER</button>`;
+                 } else {
+                     stripeClass="c-red"; titleColor="text-slate-400"; subText=`Opptatt (${act.bid})`; subColor="text-slate-500"; rowOp="opacity-75";
+                     actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Ledig</span><span class="block text-xs font-bold text-slate-300 font-mono">${fmtT(act.slutt_tid)}</span></div>`;
                  }
-                 sub=`${detail} (Tilbake: ${fmtD(act.slutt_tid)} ${fmtT(act.slutt_tid)})`;
-            } else {
-                 st="bg-opp"; ic="cancel"; col="text-red-500"; 
-                 sub=`Ledig ${fmtT(act.slutt_tid)} • ${act.bid}`;
             }
-            if (b.kommentar) sub += ` <span class="text-yellow-400">⚠</span>`;
         }
-        else if(nxt) { 
-            st="bg-res"; ic="schedule"; col="text-amber-500"; 
-            sub=`${fmtD(nxt.start_tid)} ${fmtT(nxt.start_tid)} - ${fmtT(nxt.slutt_tid)}`; 
-            if (b.kommentar) sub += ` <span class="text-yellow-400">⚠</span>`;
+        else if(nxt) { subText = `Ledig til ${fmtT(nxt.start_tid)}`; subColor="text-amber-500"; }
+
+        // OVERRIDE SUBTEXT IF COMMENT EXISTS AND CAR IS ACTIVE (Important for "Skitten" etc.)
+        if (b.status === 'Aktiv' && b.kommentar) {
+             subText = `⚠ ${b.kommentar}`; 
+             subColor = "text-yellow-500";
         }
 
-        // Determine Button content: HENTET/KLAR if status != Aktiv, else AVSLUTT/Chevron
-        let actionBtn = "";
-        
-        // Case 1: Acute Status != Aktiv (Billager)
-        if(b.status !== 'Aktiv') {
-             actionBtn = `<button onclick="event.stopPropagation();stat(${b.id},'Aktiv','${b.bil}')" class="bg-green-700 border border-green-500 text-white text-[10px] font-bold py-2 px-3 rounded shadow flex-shrink-0 animate-pulse">HENTET / KLAR</button>`;
-        } 
-        // Case 2: Active Reservation (Booking)
-        else if(act) {
-            // Special button for Workshop reservation
-            if(act.formal && (act.formal.includes('Verksted') || act.formal.includes('Service'))) {
-                actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="bg-green-700 border border-green-500 text-white text-[10px] font-bold py-2 px-3 rounded shadow flex-shrink-0">HENTET / KLAR</button>`;
-            } else {
-                actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}')" class="bg-red-900 border border-red-500 text-white text-[10px] font-bold py-2 px-3 rounded shadow flex-shrink-0">AVSLUTT</button>`;
+        const row = document.createElement('div');
+        row.className = `fleet-row ${rowBg} ${rowOp}`;
+        row.onclick = () => book(b.bil);
+
+        let minBilTag = (act && act.bid === s.bid) ? `<span class="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold uppercase ml-2">Min bil</span>` : '';
+
+        row.innerHTML = `<div class="flex items-center"><div class="status-stripe ${stripeClass}"></div><div><div class="flex items-center"><h2 class="text-base font-bold ${titleColor}">${b.bil}</h2>${minBilTag}</div><p class="text-xs ${subColor} mt-0.5 font-medium">${subText}</p></div></div>${actionBtn}`;
+        wrapper.appendChild(row);
+    });
+    c.appendChild(wrapper);
+}
+
+function rRes(c, mineOnly) {
+    const now=new Date(); 
+    let html = `<div class="space-y-3">`;
+    let list = s.r.filter(r => new Date(r.slutt_tid) > now).sort((a,b) => new Date(a.start_tid) - new Date(b.start_tid));
+    if(mineOnly) list = list.filter(r => r.bid === s.bid);
+    if(list.length === 0) { c.innerHTML = "<div class='text-center text-slate-500 mt-10'>Ingen reservasjoner funnet.</div>"; return; }
+    list.forEach(r => {
+        const active = new Date(r.start_tid) <= now;
+        const isVerksted = r.formal && (r.formal.includes("Verksted") || r.formal.includes("Service"));
+        let borderCol = active ? (isVerksted ? "border-purple-500" : "border-red-500") : "border-yellow-500";
+        let bgCol = active ? (isVerksted ? "bg-purple-900/10" : "bg-red-900/10") : "bg-yellow-900/10";
+        let statusTxt = active ? "PÅGÅENDE" : "KOMMENDE";
+        let icon = active ? "play_circle" : "schedule";
+        let actionBtns = "";
+
+        if(isVerksted) { borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; }
+
+        // Buttons logic
+        if (!isVerksted) {
+            if (active && (mineOnly || r.bid === s.bid)) {
+                // Active trip for user: Show Deliver button
+                actionBtns = `<button onclick="event.stopPropagation();ret(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
+            } else if (!active && (mineOnly || r.bid === s.bid)) {
+                // Future trip for user: Show Edit button
+                actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
             }
-        } 
-        // Case 3: Idle
-        else {
-            actionBtn = `<span class="material-icons-round text-white/20 text-3xl">chevron_right</span>`;
         }
 
-        c.innerHTML += `
-        <div class="car-card p-3 ${st} flex items-center justify-between shadow-lg mb-2" onclick="book('${b.bil}')">
-          <div class="flex items-center gap-3 min-w-0 flex-grow overflow-hidden">
-             <span class="material-icons-round ${col} text-2xl bg-black/20 p-2 rounded-full flex-shrink-0">${ic}</span>
-             <div class="flex-grow min-w-0 pr-2">
-               <h3 class="text-base font-black text-white truncate uppercase">${b.bil}</h3>
-               <p class="text-[11px] font-bold text-white/90 uppercase mt-0.5 truncate">${sub}</p>
-             </div>
-          </div>
-          ${actionBtn}
+        html += `<div onclick="book('${r.bil}',${r.id})" class="${bgCol} border-l-4 ${borderCol} p-4 rounded-r-xl border-y border-r border-slate-700/50 cursor-pointer relative flex justify-between items-center">
+            <div>
+                <div class="flex items-center gap-2 mb-1"><span class="text-xs font-black ${active ? 'text-white' : 'text-slate-300'}">${r.bil}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${statusTxt}</span></div>
+                <div class="text-sm font-bold text-white mb-0.5">${r.formal}</div>
+                <div class="text-xs text-slate-400 font-mono">${fmtD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtD(r.slutt_tid)} ${fmtT(r.slutt_tid)}</div>
+                ${!mineOnly ? `<div class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${r.bid}</div>` : ''}
+            </div>
+            <div class="flex flex-col items-end gap-2">
+                <span class="material-icons-round text-slate-600 mb-1">${icon}</span>
+                ${actionBtns}
+            </div>
         </div>`;
     });
+    html += `</div>`; c.innerHTML = html;
 }
 
-function rRes(c) {
-    const now=new Date(); 
-    s.c.forEach(b => {
-        if(s.f.c!=='all'&&s.f.c!==b.bil) return;
-        let allRes = s.r.filter(r => r.bil===b.bil && new Date(r.slutt_tid)>now).sort((a,x)=>new Date(a.start_tid)-new Date(x.start_tid));
-        if(s.f.d) { const d=new Date(s.f.d).toDateString(); allRes=allRes.filter(r=>new Date(r.start_tid).toDateString()===d); }
-        if(s.f.m) allRes=allRes.filter(r=>r.bid===s.bid);
-        if(!allRes.length) return;
-
-        const active = allRes.filter(r => new Date(r.start_tid) <= now);
-        const upcoming = allRes.filter(r => new Date(r.start_tid) > now);
-
-        let html = `<div class="mb-4"><h3 class="font-black text-lg text-white border-b border-gray-700 pb-1 mb-2 uppercase pl-1">${b.bil}</h3><div class="space-y-1">`;
-        active.forEach(r => {
-            const mine = r.bid===s.bid;
-            
-            // Check for Verksted/Service
-            let cardBg = "bg-red-900/20 border-red-500";
-            let titleCol = "text-red-400";
-            if(r.formal && (r.formal.includes("Verksted") || r.formal.includes("Service"))) {
-                cardBg = "bg-purple-900/20 border-purple-500";
-                titleCol = "text-purple-400";
-            }
-            
-            html += `<div onclick="book('${b.bil}',${r.id})" class="${cardBg} border-l-4 p-2 rounded-r-lg mb-1 flex items-center justify-between">
-                <div class="min-w-0">
-                    <div class="text-[10px] ${titleCol} font-bold uppercase flex gap-2">PÅGÅENDE <span class="text-white">${r.bid}</span> - ${r.formal}</div>
-                    <div class="text-xs text-gray-300 font-mono mt-0.5">${fmtD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtD(r.slutt_tid)} ${fmtT(r.slutt_tid)}</div>
-                </div>
-                <div class="flex items-center gap-4 pl-3 border-l border-white/10 ml-2">
-                    <button class="p-2 rounded-full hover:bg-blue-500/20 text-blue-400"><span class="material-icons-round text-base">edit</span></button>
-                    <button onclick="event.stopPropagation();delB(${r.id})" class="p-2 rounded-full hover:bg-red-500/20 text-red-400"><span class="material-icons-round text-base">delete</span></button>
-                </div>
-            </div>`;
-        });
-        upcoming.forEach(r => {
-            const mine = r.bid===s.bid;
-            
-            // Check for Verksted/Service
-            let cardBg = "bg-yellow-900/20 border-yellow-500";
-            let titleCol = "text-yellow-500";
-            if(r.formal && (r.formal.includes("Verksted") || r.formal.includes("Service"))) {
-                cardBg = "bg-purple-900/20 border-purple-500";
-                titleCol = "text-purple-400";
-            }
-
-            html += `<div onclick="book('${b.bil}',${r.id})" class="${cardBg} border-l-4 p-2 rounded-r-lg mb-1 flex items-center justify-between">
-                <div class="min-w-0">
-                    <div class="text-[10px] ${titleCol} font-bold uppercase flex gap-2">KOMMENDE <span class="text-gray-200">${r.bid}</span> - ${r.formal}</div>
-                    <div class="text-xs text-gray-400 font-mono mt-0.5">${fmtD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtD(r.slutt_tid)} ${fmtT(r.slutt_tid)}</div>
-                </div>
-                <div class="flex items-center gap-4 pl-3 border-l border-white/10 ml-2">
-                    <button class="p-2 rounded-full hover:bg-blue-500/20 text-blue-400"><span class="material-icons-round text-base">edit</span></button>
-                    <button onclick="event.stopPropagation();delB(${r.id})" class="p-2 rounded-full hover:bg-red-500/20 text-red-400"><span class="material-icons-round text-base">delete</span></button>
-                </div>
-            </div>`;
-        });
-        html += `</div></div>`; c.innerHTML += html;
-    });
-    if(!c.innerHTML) c.innerHTML = "<div class='text-center text-gray-500 mt-10'>Ingen treff.</div>";
-}
-
-function expressBook() {
-    closeM('m-action', false);
-    // Init state with 1 hour default
-    setExpDur(1);
-    openM('m-express-list');
-}
+function expressBook() { closeM('m-action', false); setExpDur(1); openM('m-express-list'); }
 
 function setExpDur(hours) {
     s.expDur = hours;
-    
-    // Update button styles
     [1,2,3,0].forEach(h => {
         const btn = $id('btn-d-' + h);
-        if(hours === h) {
-            btn.className = 'exp-dur-btn bg-blue-600 text-white p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all scale-105';
-        } else {
-            btn.className = 'exp-dur-btn bg-gray-800 text-gray-400 border border-gray-600 p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all active:scale-95';
-        }
+        if(hours === h) btn.className = 'exp-dur-btn bg-blue-600 text-white p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all scale-105';
+        else btn.className = 'exp-dur-btn bg-slate-800 text-slate-400 border border-slate-600 p-2 rounded-lg font-bold text-xs shadow-lg transform transition-all active:scale-95';
     });
-
     renderExpressList();
 }
 
 function renderExpressList() {
-    const list = $id('express-options');
-    list.innerHTML = "<div class='text-center text-gray-500 mt-4'>Laster...</div>";
+    const list = $id('express-options'); list.innerHTML = "<div class='text-center text-slate-500 mt-4'>Laster...</div>";
     
+    // UPDATED: No rounding, use current time (zero seconds)
     const now = new Date(); 
-    // Round to next 15 min for tidier start times
-    now.setMinutes(Math.ceil(now.getMinutes()/15)*15, 0, 0); 
+    now.setSeconds(0, 0); 
     
     let endTime;
-    if(s.expDur === 0) {
-        endTime = new Date(now);
-        endTime.setHours(16, 0, 0, 0); // End of work day (16:00)
-        // If it's already past 16:00, set to midnight to avoid error
-        if (endTime <= now) {
-            endTime.setHours(23, 59, 0, 0);
-        }
-    } else {
-        endTime = new Date(now.getTime() + s.expDur * 3600000);
-    }
+    if(s.expDur === 0) { endTime = new Date(now); endTime.setHours(16, 0, 0, 0); if (endTime <= now) endTime.setHours(23, 59, 0, 0); } 
+    else endTime = new Date(now.getTime() + s.expDur * 3600000);
 
     $id('exp-time-range').innerText = `NÅ - ${fmtT(endTime)}`;
-
     const availableCars = s.c.filter(b => {
         if(b.status !== 'Aktiv' || s.h.includes(b.bil)) return false;
-        // Check collision
         return !s.r.some(r => {
-            const rStart = new Date(r.start_tid);
-            const rEnd = new Date(r.slutt_tid);
+            const rStart = new Date(r.start_tid); const rEnd = new Date(r.slutt_tid);
             return r.bil === b.bil && now < rEnd && endTime > rStart;
         });
     }).sort((a,b) => a.bil.localeCompare(b.bil));
 
     list.innerHTML = "";
-    
-    if(availableCars.length === 0) {
-        list.innerHTML = "<div class='text-center text-red-400 py-4 font-bold'>Ingen ledige biler.</div>";
-        return;
-    }
-
+    if(availableCars.length === 0) { list.innerHTML = "<div class='text-center text-red-400 py-4 font-bold'>Ingen ledige biler.</div>"; return; }
     availableCars.forEach(b => {
-        // Safe onclick with parameters
         const btn = document.createElement('button');
-        btn.className = "w-full bg-gray-800 p-4 rounded-xl border border-gray-600 text-left font-bold text-white hover:bg-gray-700 flex justify-between items-center mb-2 shadow-lg";
-        btn.innerHTML = `<span class="text-lg">${b.bil}</span><span class="text-green-400 text-xs bg-green-900/30 px-2 py-1 rounded">LEDIG</span>`;
+        btn.className = "w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-left font-bold text-white hover:bg-slate-700 flex justify-between items-center mb-2 shadow-lg";
+        btn.innerHTML = `<span class="text-lg">${b.bil}</span><span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded">LEDIG</span>`;
+        // Pass current 'now' object to ensure immediate booking
         btn.onclick = () => doExpressBook(b.bil, now, endTime);
         list.appendChild(btn);
     });
@@ -715,514 +792,199 @@ function renderExpressList() {
 
 async function doExpressBook(car, start, end) {
     if(!confirm(`Bekreft ekspressbestilling på ${car} fra nå til ${fmtT(end)}?`)) return;
-    
     s.bid = s.u.split('@')[0].toUpperCase();
     const formal = localStorage.getItem('lastFormal') || "Møte";
-    
-    const d = { 
-        bid: s.bid, 
-        formal: formal, 
-        start_tid: start.toISOString(), 
-        slutt_tid: end.toISOString(),
-        bil: car
-    };
-    
+    const d = { bid: s.bid, formal: formal, start_tid: start.toISOString(), slutt_tid: end.toISOString(), bil: car };
     const { error } = await _s.from('bookinger').insert([d]);
-
-    if(error) {
-        showToast("Feil: " + error.message, "error");
-    } else {
-        showToast("Bestilt!", "success");
-        closeM('m-express-list');
-        load();
-    }
+    if(error) showToast("Feil: " + error.message, "error");
+    else { showToast("Bestilt!", "success"); closeM('m-express-list'); load(); }
 }
 
 function book(car, id=null, st=null, en=null) { 
-    s.sel=[car]; s.editId=id; s.co=s.c.find(x=>x.bil===car); 
-    // Default s.tlDay to 0, but calculate properly below
-    s.tlDay=0;
-    // Reset workshop mode
-    s.workshopMode = false;
-    toggleVerkstedMode(false);
-
-    const now = new Date(); 
-    now.setHours(0,0,0,0);
-
+    s.sel=[car]; s.editId=id; s.co=s.c.find(x=>x.bil===car); s.tlDay=0; s.workshopMode = false; toggleVerkstedMode(false);
+    const now = new Date(); now.setHours(0,0,0,0);
     if(id) {
-        const r = s.r.find(x=>x.id===id);
-        $id('b-bid').value=r.bid; 
-        
-        // Check if workshop format
-        if(r.formal && r.formal.startsWith('Verksted: ')) {
-            toggleVerkstedMode(true);
-            $id('b-verksted-desc').value = r.formal.substring(10);
-        } else {
-            $id('b-form').value=r.formal;
-        }
-
+        const r = s.r.find(x=>x.id===id); $id('b-bid').value=r.bid; 
+        if(r.formal && r.formal.startsWith('Verksted: ')) { toggleVerkstedMode(true); $id('b-verksted-desc').value = r.formal.substring(10); } 
+        else $id('b-form').value=r.formal;
         const stD = new Date(r.start_tid); const enD = new Date(r.slutt_tid);
-        setVal('b', 'st', stD);
-        setVal('b', 'en', enD);
-        
-        // Calculate diff
+        setVal('b', 'st', stD); setVal('b', 'en', enD);
         const stDateOnly = new Date(stD); stDateOnly.setHours(0,0,0,0);
-        s.tlDay = Math.round((stDateOnly - now) / 86400000);
-        
-        s.tlClick = 2; 
-        setupModal(car, 'Rediger');
+        s.tlDay = Math.round((stDateOnly - now) / 86400000); s.tlClick = 2; setupModal(car, 'Rediger');
     } else {
-        $id('b-bid').value=s.bid; 
-        $id('b-form').value = localStorage.getItem('lastFormal') || ""; 
-        
+        $id('b-bid').value=s.bid; $id('b-form').value = ""; 
         if(st && en) {
-            const stD = new Date(st);
-            setVal('b', 'st', stD);
-            setVal('b', 'en', new Date(en));
-            s.tlClick = 2;
-            
-            // Calculate diff
+            const stD = new Date(st); setVal('b', 'st', stD); setVal('b', 'en', new Date(en)); s.tlClick = 2;
             const stDateOnly = new Date(stD); stDateOnly.setHours(0,0,0,0);
             s.tlDay = Math.round((stDateOnly - now) / 86400000);
-        } else {
-            setVal('b', 'st', null);
-            setVal('b', 'en', null);
-            s.tlClick = 0; 
-            // Default s.tlDay is 0
-        }
+        } else { setVal('b', 'st', null); setVal('b', 'en', null); s.tlClick = 0; }
         setupModal(car, 'Ny reservasjon');
     }
 }
 
 function toggleVerkstedMode(on) {
     s.workshopMode = on;
-    const std = $id('b-form-standard');
-    const verk = $id('b-form-verksted');
-    
-    if(on) {
-        std.classList.add('hidden');
-        verk.classList.remove('hidden');
-        verk.classList.add('flex');
-        // Clear standard input to avoid confusion
-        $id('b-form').value = "Verksted"; 
-    } else {
-        std.classList.remove('hidden');
-        verk.classList.add('hidden');
-        verk.classList.remove('flex');
-        $id('b-verksted-desc').value = "";
+    const std = $id('b-form-standard'); const verk = $id('b-form-verksted');
+    if(on) { 
+        $id('b-form').value = "Verksted";
+        verk.classList.remove('hidden'); verk.classList.add('flex');
+    } 
+    else { 
+        if($id('b-form').value === "Verksted") $id('b-form').value = "";
+        verk.classList.add('hidden'); verk.classList.remove('flex'); $id('b-verksted-desc').value = ""; 
     }
 }
 
 function setupModal(title, sub="Ny reservasjon") {
     $id('b-title').innerText=title; 
     const subEl = $id('b-sub'); if(subEl) subEl.innerText=sub;
-    
-    // Auto switch day if late and we are on today (day 0)
-    const now = new Date();
-    if(now.getHours() >= 22 && !s.editId && s.tlDay === 0) s.tlDay = 1;
-
-    // Set initial tabs styling based on CURRENT tlDay
-    const t0 = $id('b-day-0');
-    const t1 = $id('b-day-1');
+    const now = new Date(); if(now.getHours() >= 22 && !s.editId && s.tlDay === 0) s.tlDay = 1;
+    const t0 = $id('b-day-0'); const t1 = $id('b-day-1');
     if(t0) {
-        if(s.tlDay === 0) {
-             t0.className = 'day-tab active';
-             t1.className = 'day-tab';
-        } else if(s.tlDay === 1) {
-             t0.className = 'day-tab';
-             t1.className = 'day-tab active';
-        } else {
-             t0.className = 'day-tab opacity-50'; // Gray out both if further ahead
-             t1.className = 'day-tab opacity-50';
-        }
+        if(s.tlDay === 0) { t0.className = 'day-tab active'; t1.className = 'day-tab'; } 
+        else if(s.tlDay === 1) { t0.className = 'day-tab'; t1.className = 'day-tab active'; } 
+        else { t0.className = 'day-tab opacity-50'; t1.className = 'day-tab opacity-50'; }
     }
-    
     const act=s.r.find(r=>r.bil===title && new Date(r.start_tid)<=new Date() && new Date(r.slutt_tid)>=new Date());
     $id('b-alert').classList.add('hidden'); $id('b-info').classList.add('hidden'); $id('btn-react').classList.add('hidden');
-    
-    // Reset buttons state
-    const btnOk = $id('btn-ok');
-    btnOk.disabled = false;
-    btnOk.classList.remove('opacity-50', 'cursor-not-allowed');
-    btnOk.innerText = "BEKREFT";
-
-    // Show date inputs by default
-    const dateInputs = document.querySelector('#m-book .flex-col.gap-2.mb-4.bg-gray-800');
+    const btnOk = $id('btn-ok'); btnOk.disabled = false; btnOk.classList.remove('opacity-50', 'cursor-not-allowed'); btnOk.innerText = "BEKREFT";
+    const dateInputs = document.querySelector('#m-book .flex-col.gap-3.mb-4.bg-slate-800');
     if(dateInputs) dateInputs.classList.remove('hidden');
 
     if(s.co && s.co.kommentar && s.co.status==='Aktiv') { $id('b-info').innerText="INFO: "+s.co.kommentar; $id('b-info').classList.remove('hidden'); }
-    
-    // BLOCKING LOGIC FOR NON-ACTIVE CARS
     if(s.co && s.co.status!=='Aktiv') { 
-        $id('b-alert').classList.remove('hidden'); 
-        $id('b-reason').innerText="Årsak: "+(s.co.kommentar||s.co.status); 
-        $id('btn-react').classList.remove('hidden'); 
-        
-        // Disable confirm button
-        btnOk.disabled = true;
-        btnOk.classList.add('opacity-50', 'cursor-not-allowed');
-        btnOk.innerText = "IKKE TILGJENGELIG";
-        
-        // Hide date inputs to avoid confusion
+        $id('b-alert').classList.remove('hidden'); $id('b-reason').innerText="Årsak: "+(s.co.kommentar||s.co.status); $id('btn-react').classList.remove('hidden'); 
+        btnOk.disabled = true; btnOk.classList.add('opacity-50', 'cursor-not-allowed'); btnOk.innerText = "IKKE TILGJENGELIG";
         if(dateInputs) dateInputs.classList.add('hidden');
     }
     else if(act && !s.editId) { $id('b-alert').classList.remove('hidden'); $id('b-reason').innerText = `Opptatt av ${act.bid} til ${fmtT(act.slutt_tid)}`; }
 
     if(!s.editId) { 
-        $id('btn-del').classList.add('hidden'); 
-        const mc = $id('b-multi'); mc.innerHTML = "";
-        s.c.forEach(b => {
-            if(b.bil === title || b.status !== 'Aktiv' || s.h.includes(b.bil)) return;
-            mc.innerHTML += `<button onclick="togMulti(this,'${b.bil}')" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-gray-900">${b.bil}</button>`;
-        });
+        $id('btn-del').classList.add('hidden'); const mc = $id('b-multi'); mc.innerHTML = "";
+        s.c.forEach(b => { if(b.bil === title || b.status !== 'Aktiv' || s.h.includes(b.bil)) return; mc.innerHTML += `<button onclick="togMulti(this,'${b.bil}')" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-900">${b.bil}</button>`; });
     } else { $id('btn-del').classList.remove('hidden'); $id('b-multi').innerHTML=""; }
 
-    openM('m-book');
-    renderTimeline(title, 'book');
-    setTimeout(() => scrollToView('book'), 50); // SCROLL TO START
-    check(); 
-    rFut(title); 
+    openM('m-book'); renderTimeline(title, 'book'); setTimeout(() => scrollToView('book'), 50); check(); rFut(title); 
+    const instr = $id('b-instr'); if(instr) { if(s.tlClick === 0) instr.innerText = "Trykk starttid (A)"; else if(s.tlClick === 1) instr.innerText = "Velg SLUTTID (B)"; else instr.innerText = ""; }
     
-    const instr = $id('b-instr');
-    if(instr) {
-        if(s.tlClick === 0) instr.innerText = "Trykk starttid (A)";
-        else if(s.tlClick === 1) instr.innerText = "Velg SLUTTID (B)";
-        else instr.innerText = "";
-    }
-    
-    // Auto-update placeholder based on previous form selection (if exists)
+    // Auto toggle workshop if needed
     const formInput = $id('b-form');
-    if(formInput.value === 'Verksted') {
-        formInput.placeholder = "Skriv detaljer, f.eks. 'EU-kontroll kl. 10:00'";
-    } else {
-        formInput.placeholder = "Velg...";
-    }
-    
-    // Add listener to form input
-    formInput.onchange = function() {
-        if(this.value === 'Verksted') {
-            toggleVerkstedMode(true);
-        }
-    };
+    if(formInput.value === 'Verksted') toggleVerkstedMode(true); else toggleVerkstedMode(false);
 }
 
 function scrollToView(mode) {
-    const el = $id(mode === 'search' ? 'ts-search' : 'ts-book');
-    if(!el) return;
-
-    let slotIndex = 0;
-    const now = new Date();
-
-    if (s.tlDay === 1) {
-        // I morgen: Vis fra 06:00
-        slotIndex = 12; // 6 timer * 2 slots
-    } else if (s.tlDay === 0) {
-        // I dag: Vis fra Nå
-        const currentSlot = now.getHours() * 2 + (now.getMinutes() >= 30 ? 1 : 0);
-        // Show max 1 past block (unavailable) on the left.
-        // So we scroll to (currentSlot - 1).
-        slotIndex = Math.max(0, currentSlot - 1);
-    } else {
-        // En annen dag: Start fra 06:00
-        slotIndex = 12; 
-    }
-    
-    // Beregn bredde (42px bredde + 2px gap = 44px ca)
-    const firstBlock = el.querySelector('.time-block');
-    if(firstBlock) {
-        const width = firstBlock.offsetWidth + 2; 
-        el.scrollLeft = slotIndex * width;
-    }
+    const el = $id(mode === 'search' ? 'ts-search' : 'ts-book'); if(!el) return;
+    let slotIndex = 0; const now = new Date();
+    if (s.tlDay === 1) slotIndex = 12; 
+    else if (s.tlDay === 0) { const currentSlot = now.getHours() * 2 + (now.getMinutes() >= 30 ? 1 : 0); slotIndex = Math.max(0, currentSlot - 1); } else slotIndex = 12; 
+    const firstBlock = el.querySelector('.time-block'); if(firstBlock) { const width = firstBlock.offsetWidth + 2; el.scrollLeft = slotIndex * width; }
 }
 
-function togMulti(el, c) {
-    el.classList.toggle('selected');
-    if(s.sel.includes(c)) s.sel = s.sel.filter(x => x !== c);
-    else s.sel.push(c);
-    check();
-}
+function togMulti(el, c) { el.classList.toggle('selected'); if(s.sel.includes(c)) s.sel = s.sel.filter(x => x !== c); else s.sel.push(c); check(); }
 
 function setTlDay(mode, day) {
-    s.tlDay = day;
-    const prefix = mode === 'search' ? 's' : 'b';
-    const t0 = $id(`${prefix}-day-0`);
-    const t1 = $id(`${prefix}-day-1`);
-    
-    // Reset classes first
-    if(t0) t0.className = 'day-tab';
-    if(t1) t1.className = 'day-tab';
-
-    if (day === 0) {
-        if(t0) t0.className = 'day-tab active';
-        // Set date inputs to today
-        const today = new Date();
-        setVal(prefix, 'st', today);
-        setVal(prefix, 'en', today);
-    } else if (day === 1) {
-        if(t1) t1.className = 'day-tab active';
-        // Set date inputs to tomorrow
-        const tom = new Date();
-        tom.setDate(tom.getDate() + 1);
-        setVal(prefix, 'st', tom);
-        setVal(prefix, 'en', tom);
-    }
-
-    renderTimeline(s.co ? s.co.bil : null, mode);
-    setTimeout(() => scrollToView(mode), 50);
+    s.tlDay = day; const prefix = mode === 'search' ? 's' : 'b';
+    const t0 = $id(`${prefix}-day-0`); const t1 = $id(`${prefix}-day-1`);
+    if(t0) t0.className = 'day-tab'; if(t1) t1.className = 'day-tab';
+    if (day === 0) { if(t0) t0.className = 'day-tab active'; const today = new Date(); setVal(prefix, 'st', today); setVal(prefix, 'en', today); } 
+    else if (day === 1) { if(t1) t1.className = 'day-tab active'; const tom = new Date(); tom.setDate(tom.getDate() + 1); setVal(prefix, 'st', tom); setVal(prefix, 'en', tom); }
+    renderTimeline(s.co ? s.co.bil : null, mode); setTimeout(() => scrollToView(mode), 50);
 }
 
 function renderTimeline(car, mode) {
-    const prefix = mode === 'search' ? 's' : 'b'; // Changed from 'in' to 'b' for booking
-    const el = $id(mode === 'search' ? 'timeline-search' : 'timeline'); el.innerHTML = "";
-    
-    const now = new Date();
-    const timelineDate = new Date(); timelineDate.setDate(now.getDate() + s.tlDay); timelineDate.setHours(0,0,0,0);
-    const startHour = 0; const endHour = 24; // Show full 24h as requested by 24/7 logic
-    const startOfDay = new Date(timelineDate); startOfDay.setHours(startHour,0,0,0);
+    const prefix = mode === 'search' ? 's' : 'b'; const el = $id(mode === 'search' ? 'timeline-search' : 'timeline'); el.innerHTML = "";
+    const now = new Date(); const timelineDate = new Date(); timelineDate.setDate(now.getDate() + s.tlDay); timelineDate.setHours(0,0,0,0);
+    const startHour = 0; const endHour = 24; const startOfDay = new Date(timelineDate); startOfDay.setHours(startHour,0,0,0);
     const endOfDay = new Date(timelineDate); endOfDay.setHours(endHour,0,0,0);
-    const totalSlots = (endHour - startHour) * 2; 
     const totalMins = (endHour - startHour) * 60; 
 
-    // Draw Now line
     if(s.tlDay === 0 && now >= startOfDay && now <= endOfDay) {
         const nowPct = ((now - startOfDay) / 60000 / totalMins) * 100;
         el.innerHTML += `<div class="time-now-line" style="left:${nowPct}%"></div>`;
     }
-
-    // Past gray
     if(s.tlDay === 0 && now > startOfDay) {
          const pastEnd = now > endOfDay ? endOfDay : now;
          const pastPct = ((pastEnd - startOfDay) / 60000 / totalMins) * 100;
          if(pastPct > 0) el.innerHTML += `<div class="time-past" style="width:${pastPct}%"></div>`;
     }
-
-    const selSt = getVal(prefix, 'st');
-    const selEn = getVal(prefix, 'en');
-    
-    for (let i = 0; i < 48; i++) { // Show 00:00 to 24:00 blocks
-        const slot = document.createElement('div');
-        slot.className = 'time-block';
-        const slotTime = new Date(startOfDay.getTime() + i * 1800000);
-        
-        const h = Math.floor(startHour + i/2);
-        
-        // VIS KUN HELTIMETIKETT PÅ PARTALL-INDEKS (0, 2, 4...)
-        if (i % 2 === 0) {
-             const lbl = document.createElement('div'); 
-             lbl.className = 'time-label';
-             lbl.innerText = h.toString().padStart(2,'0'); // Viser kun "12", "13" etc.
-             slot.appendChild(lbl);
-        }
-
+    const selSt = getVal(prefix, 'st'); const selEn = getVal(prefix, 'en');
+    for (let i = 0; i < 48; i++) { 
+        const slot = document.createElement('div'); slot.className = 'time-block';
+        const slotTime = new Date(startOfDay.getTime() + i * 1800000); const h = Math.floor(startHour + i/2);
+        if (i % 2 === 0) { const lbl = document.createElement('div'); lbl.className = 'time-label'; lbl.innerText = h.toString().padStart(2,'0'); slot.appendChild(lbl); }
         let busy = false;
         if(mode === 'book' && car) {
             s.r.forEach(r => {
-                if(r.bil === car && r.id !== s.editId) {
-                    const rSt = new Date(r.start_tid); const rEn = new Date(r.slutt_tid);
-                    const slotEnd = new Date(slotTime.getTime() + 1800000);
-                    // FIXED LOGIC: Strict overlap check
+                // FIXED: Looser comparison (!=) allows type coercion if IDs are string/number mix
+                if(r.bil === car && r.id != s.editId) {
+                    const rSt = new Date(r.start_tid); const rEn = new Date(r.slutt_tid); const slotEnd = new Date(slotTime.getTime() + 1800000);
                     if (rSt < slotEnd && rEn > slotTime) busy = true;
                 }
             });
         }
-        
-        if (s.tlDay === 0 && slotTime < now) slot.classList.add('past');
-        if (busy) slot.classList.add('busy');
-
+        if (s.tlDay === 0 && slotTime < now) slot.classList.add('past'); if (busy) slot.classList.add('busy');
         if (selSt && selEn && selSt < selEn) {
              const slotEnd = new Date(slotTime.getTime() + 1800000);
-             if (Math.abs(selSt - slotTime) < 1000) slot.classList.add('start'); 
-             else if (Math.abs(selEn - slotEnd) < 1000) slot.classList.add('end'); 
-             else if (slotTime > selSt && slotEnd < selEn) slot.classList.add('range');
-        } else if (selSt && Math.abs(selSt - slotTime) < 1000) {
-             slot.classList.add('start'); 
-        }
-
+             if (Math.abs(selSt - slotTime) < 1000) slot.classList.add('start'); else if (Math.abs(selEn - slotEnd) < 1000) slot.classList.add('end'); else if (slotTime > selSt && slotEnd < selEn) slot.classList.add('range');
+        } else if (selSt && Math.abs(selSt - slotTime) < 1000) slot.classList.add('start'); 
         slot.onclick = (e) => { e.stopPropagation(); handleBlockClick(slotTime, mode); };
         el.appendChild(slot);
     }
 }
 
 function handleBlockClick(time, mode) {
-    const prefix = mode === 'search' ? 's' : 'b';
-    const now = new Date();
-    const nextQ = new Date(now); nextQ.setMinutes(Math.ceil(nextQ.getMinutes()/30)*30, 0, 0);
-
-    if (s.tlDay === 0 && time < nextQ) time = nextQ;
-
-    if (s.tlClick === 2) s.tlClick = 0;
-
-    if (s.tlClick === 0) {
-        setVal(prefix, 'st', time);
-        setVal(prefix, 'en', time); 
-        s.tlClick = 1;
-    } else {
-        const stTime = getVal(prefix, 'st');
-        if (time <= stTime) {
-            setVal(prefix, 'st', time);
-            setVal(prefix, 'en', time);
-        } else {
-            const endTime = new Date(time.getTime() + 1800000);
-            setVal(prefix, 'en', endTime);
-            s.tlClick = 2;
-        }
-    }
-    
-    if (mode === 'search') synS(null); // Passing null to trigger normal check
-    renderTimeline(s.co ? s.co.bil : null, mode);
-    if (mode === 'book') check(null);
+    const prefix = mode === 'search' ? 's' : 'b'; const now = new Date(); const nextQ = new Date(now); nextQ.setMinutes(Math.ceil(nextQ.getMinutes()/30)*30, 0, 0);
+    if (s.tlDay === 0 && time < nextQ) time = nextQ; if (s.tlClick === 2) s.tlClick = 0;
+    if (s.tlClick === 0) { setVal(prefix, 'st', time); setVal(prefix, 'en', time); s.tlClick = 1; } 
+    else { const stTime = getVal(prefix, 'st'); if (time <= stTime) { setVal(prefix, 'st', time); setVal(prefix, 'en', time); } else { const endTime = new Date(time.getTime() + 1800000); setVal(prefix, 'en', endTime); s.tlClick = 2; } }
+    if (mode === 'search') synS(null); renderTimeline(s.co ? s.co.bil : null, mode); if (mode === 'book') check(null);
 }
 
-function synS(src) {
-    if (src === 'start') {
-        const st = $id('s-d-st').value;
-        const en = $id('s-d-en').value;
-        if (st) {
-            $id('s-d-en').value = st; // Sync end date to start date
-        }
-    }
-    check();
-}
+function synS(src) { if (src === 'start') { const st = $id('s-d-st').value; if (st) $id('s-d-en').value = st; } check(); }
 
 function check(src) {
-    // Determine active mode and prefix
-    let prefix = 'b';
-    let mode = 'book';
-    if(s.activeModal === 'm-search' || !$id('m-search').classList.contains('hidden')) { 
-        prefix = 's'; mode = 'search'; 
-    }
-    
-    // Sync Date Logic
-    if (src === 'start') {
-        const stVal = $id(`${prefix}-d-st`).value;
-        if (stVal) {
-             $id(`${prefix}-d-en`).value = stVal;
-        }
-    }
-    
-    // IMPORTANT: Read raw date input to update timeline even if time is empty
+    let prefix = 'b'; let mode = 'book';
+    if(s.activeModal === 'm-search' || !$id('m-search').classList.contains('hidden')) { prefix = 's'; mode = 'search'; }
+    if (src === 'start') { const stVal = $id(`${prefix}-d-st`).value; if (stVal) $id(`${prefix}-d-en`).value = stVal; }
     const stInput = $id(prefix+'-d-st').value;
     if(stInput) {
-        const parts = stInput.split('-');
-        const d = new Date(parts[0], parts[1]-1, parts[2]); 
-        
-        const n = new Date(); n.setHours(0,0,0,0);
-        const diff = Math.round((d - n) / 86400000);
-        
-        if(diff !== s.tlDay) {
-            s.tlDay = diff;
-            renderTimeline(s.co ? s.co.bil : null, mode);
-            setTimeout(() => scrollToView(mode), 50);
-        }
-        
-        // Update tabs styling - both gray if > 1 day away
-        const t0 = $id(prefix === 's' ? 's-day-0' : 'b-day-0');
-        const t1 = $id(prefix === 's' ? 's-day-1' : 'b-day-1');
-        if(t0) {
-            if(s.tlDay === 0) {
-                 t0.className = 'day-tab active';
-                 t1.className = 'day-tab';
-            } else if(s.tlDay === 1) {
-                 t0.className = 'day-tab';
-                 t1.className = 'day-tab active';
-            } else {
-                 t0.className = 'day-tab opacity-50';
-                 t1.className = 'day-tab opacity-50';
-            }
-        }
+        const parts = stInput.split('-'); const d = new Date(parts[0], parts[1]-1, parts[2]); 
+        const n = new Date(); n.setHours(0,0,0,0); const diff = Math.round((d - n) / 86400000);
+        if(diff !== s.tlDay) { s.tlDay = diff; renderTimeline(s.co ? s.co.bil : null, mode); setTimeout(() => scrollToView(mode), 50); }
+        const t0 = $id(prefix === 's' ? 's-day-0' : 'b-day-0'); const t1 = $id(prefix === 's' ? 's-day-1' : 'b-day-1');
+        if(t0) { if(s.tlDay === 0) { t0.className = 'day-tab active'; t1.className = 'day-tab'; } else if(s.tlDay === 1) { t0.className = 'day-tab'; t1.className = 'day-tab active'; } else { t0.className = 'day-tab opacity-50'; t1.className = 'day-tab opacity-50'; } }
     }
-
-    const stDate = getVal(prefix, 'st');
-    const enDate = getVal(prefix, 'en');
-
+    const stDate = getVal(prefix, 'st'); const enDate = getVal(prefix, 'en');
     if(mode === 'book' && s.co) renderTimeline(s.co.bil, 'book');
+    const instr = $id(mode === 'search' ? 's-instr' : 'b-instr'); if(instr) { if(s.tlClick === 0) instr.innerText = "Trykk starttid (A)"; else if(s.tlClick === 1) instr.innerText = "Velg SLUTTID (B)"; else instr.innerText = ""; }
     
-    const instr = $id(mode === 'search' ? 's-instr' : 'b-instr');
+    let conf = false; 
+    if(s.activeModal === 'm-book' && stDate && enDate) { 
+        // FIXED: Looser comparison (!=) allows type coercion to properly exclude edited booking
+        conf = s.sel.some(c => s.r.some(r => r.id != s.editId && r.bil===c && new Date(r.start_tid) < enDate && new Date(r.slutt_tid) > stDate)); 
+    }
     
-    if(instr) {
-        if(s.tlClick === 0) instr.innerText = "Trykk starttid (A)";
-        else if(s.tlClick === 1) instr.innerText = "Velg SLUTTID (B)";
-        else instr.innerText = "";
-    }
-
-    // Fix: Only warn if overlap is within SELECTED time, not just if car is busy now
-    let conf = false;
-    if(s.activeModal === 'm-book' && stDate && enDate) {
-        conf = s.sel.some(c => s.r.some(r => r.id!==s.editId && r.bil===c && new Date(r.start_tid) < enDate && new Date(r.slutt_tid) > stDate));
-    }
-
-    const btn = $id('btn-ok'); // Only exists in booking modal
+    const btn = $id('btn-ok'); 
     if(btn) {
-        if(conf || !stDate || !enDate) { 
-            if(conf) $id('warn').classList.remove('hidden'); 
-            else $id('warn').classList.add('hidden');
-            
-            btn.disabled = true; 
-            btn.classList.add('opacity-50'); 
-        } 
-        else { 
-            // Also need to check if car is active before enabling
-            if(s.co && s.co.status !== 'Aktiv') {
-                btn.disabled = true;
-                btn.classList.add('opacity-50');
-            } else {
-                $id('warn').classList.add('hidden'); 
-                btn.disabled = false; 
-                btn.classList.remove('opacity-50'); 
-            }
-        }
+        if(conf || !stDate || !enDate) { if(conf) $id('warn').classList.remove('hidden'); else $id('warn').classList.add('hidden'); btn.disabled = true; btn.classList.add('opacity-50'); } 
+        else { if(s.co && s.co.status !== 'Aktiv') { btn.disabled = true; btn.classList.add('opacity-50'); } else { $id('warn').classList.add('hidden'); btn.disabled = false; btn.classList.remove('opacity-50'); } }
     }
 }
 
-// Helpers for split inputs
-function getVal(p, type) { 
-  const d = $id(`${p}-d-${type}`).value;
-  const t = $id(`${p}-t-${type}`).value;
-  if(!d || !t) return null;
-  return new Date(d + 'T' + t);
-}
+function getVal(p, type) { const d = $id(`${p}-d-${type}`).value; const t = $id(`${p}-t-${type}`).value; if(!d || !t) return null; return new Date(d + 'T' + t); }
+function setVal(p, type, date) { if(!date) { $id(`${p}-d-${type}`).value = ""; $id(`${p}-t-${type}`).value = ""; return; } const iso = isoLocal(date); $id(`${p}-d-${type}`).value = iso.slice(0,10); $id(`${p}-t-${type}`).value = iso.slice(11,16); }
+function isoLocal(d) { const z = d.getTime() - (d.getTimezoneOffset() * 60000); return new Date(z).toISOString().slice(0,16); }
+async function logMsg(type, innhold, bil) { const { error } = await _s.from('meldinger').insert([{type: type, innhold: innhold, bil: bil, bruker: s.bid}]); if(error) console.error("Kunne ikke lagre melding", error); }
 
-function setVal(p, type, date) {
-  if(!date) {
-      $id(`${p}-d-${type}`).value = "";
-      $id(`${p}-t-${type}`).value = "";
-      return;
-  }
-  const iso = isoLocal(date); 
-  $id(`${p}-d-${type}`).value = iso.slice(0,10);
-  $id(`${p}-t-${type}`).value = iso.slice(11,16);
-}
-
-function isoLocal(d) {
-  const z = d.getTime() - (d.getTimezoneOffset() * 60000);
-  return new Date(z).toISOString().slice(0,16);
-}
-
-async function logMsg(type, innhold, bil) {
-    const { error } = await _s.from('meldinger').insert([{
-        type: type,
-        innhold: innhold,
-        bil: bil,
-        bruker: s.bid
-    }]);
-    if(error) console.error("Kunne ikke lagre melding", error);
-}
-
-// GLOBALE FUNKSJONER
 async function confB() {
-    // FINAL GUARD: Check car status
     if(s.co && s.co.status !== 'Aktiv') return showToast("Bilen er utilgjengelig", "error");
-
     const b=$id('b-bid').value.trim().toUpperCase();
     let f="";
-
     if(s.workshopMode) {
         const desc = $id('b-verksted-desc').value.trim();
         if(!desc) return showToast("Skriv hva som skal gjøres", "error");
         f = "Verksted: " + desc;
-    } else {
-        f = $id('b-form').value;
-    }
+    } else f = $id('b-form').value;
 
     const st = getVal('b', 'st');
     const en = getVal('b', 'en');
@@ -1233,15 +995,10 @@ async function confB() {
     if(!st || !en) return showToast("Velg tid", "error");
     if(en <= st) return showToast("Ugyldig tid", "error");
     
-    // If workshop, also log message
-    if(s.workshopMode) {
-        logMsg('Planlagt verksted', f, s.sel[0]);
-    } else {
-        localStorage.setItem('lastFormal', f);
-    }
+    if(s.workshopMode) logMsg('Planlagt verksted', f, s.sel[0]);
+    else localStorage.setItem('lastFormal', f);
 
     const d = { bid:b, formal:f, start_tid:st.toISOString(), slutt_tid:en.toISOString() };
-    
     let error;
     if(s.editId) { const { error: err } = await _s.from('bookinger').update(d).eq('id',s.editId); error = err; } 
     else { const { error: err } = await _s.from('bookinger').insert(s.sel.map(c=>({...d,bil:c}))); error = err; }
@@ -1254,33 +1011,28 @@ async function delB(id) {
     const delId = id || s.editId;
     const r = s.r.find(x => x.id === delId);
     if(!r) return;
-
     const txt = `Vil du slette reservasjon for ${r.bil}?\n\nTid: ${fmtD(r.start_tid)} kl. ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}\nFormål: ${r.formal}`;
-    
-    if(confirm(txt)) { 
-        await _s.from('bookinger').delete().eq('id', delId); 
-        if(s.editId && s.activeModal === 'm-book') closeM('m-book'); 
-        load(); 
-        showToast("Slettet", "info"); 
-    } 
+    if(confirm(txt)) { await _s.from('bookinger').delete().eq('id', delId); if(s.editId && s.activeModal === 'm-book') closeM('m-book'); load(); showToast("Slettet", "info"); } 
 }
 
 function rFut(c) {
-    const l=$id('fut-l');
-    l.innerHTML="";
+    const l=$id('fut-l'); l.innerHTML="";
     const now=new Date();
     const f=s.r.filter(r=>r.bil===c && new Date(r.start_tid)>now).sort((a,b)=>new Date(a.start_tid)-new Date(b.start_tid));
-    if(!f.length) l.innerHTML="<div class='text-gray-500 italic text-center'>Ingen kommende turer.</div>";
+    if(!f.length) l.innerHTML="<div class='text-slate-500 italic text-center'>Ingen kommende turer.</div>";
     f.forEach(r => {
         const div = document.createElement('div');
-        div.className = "bg-gray-800 p-2 rounded border border-gray-700 flex justify-between cursor-pointer text-xs mb-1";
-        div.innerHTML = `<span>${fmtD(r.start_tid)} ${fmtT(r.start_tid)}-${fmtT(r.slutt_tid)}</span><span>${r.bid}</span>`;
-        div.onclick = (e) => { 
-            e.stopPropagation(); 
-            // Correctly detect workshop mode when clicking future reservations
-            s.workshopMode = (r.formal || "").startsWith('Verksted: '); 
-            book(r.bil, r.id); 
-        };
+        div.className = "bg-slate-800 p-3 rounded-lg border border-slate-700 flex justify-between items-center cursor-pointer mb-2 hover:bg-slate-700 transition-colors";
+        div.innerHTML = `
+            <div class="flex flex-col">
+                <span class="text-xs text-white font-bold">${fmtD(r.start_tid)}</span>
+                <span class="text-[10px] text-slate-400 font-mono">${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</span>
+                <span class="text-[10px] text-slate-500 italic mt-1">${r.formal} (${r.bid})</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="material-icons-round text-blue-400 text-sm bg-blue-900/30 p-1 rounded-full">edit</span>
+            </div>`;
+        div.onclick = (e) => { e.stopPropagation(); s.workshopMode = (r.formal || "").startsWith('Verksted: '); book(r.bil, r.id); };
         l.appendChild(div);
     });
 }
@@ -1300,294 +1052,124 @@ function sMode() {
 function findC() {
     const st = getVal('s', 'st');
     const en = getVal('s', 'en');
-    
     if(!st || !en) return showToast("Velg tidsrom", "error");
     const l=$id('s-res'); l.innerHTML=""; l.classList.remove('hidden');
     if(st >= en) return showToast("Velg slutt-tid", "error");
-
     const av = s.c.filter(b => b.status==='Aktiv' && !s.h.includes(b.bil) && !s.r.some(r=>r.bil===b.bil && st<new Date(r.slutt_tid) && en>new Date(r.start_tid)));
     if(!av.length) l.innerHTML="<div class='text-center text-red-400'>Ingen ledige.</div>";
-    av.forEach(b => l.innerHTML += `<button onclick="found('${b.bil}')" class="w-full bg-gray-800 p-3 rounded flex justify-between border border-green-900 text-white font-bold mb-2"><span>${b.bil}</span><span>OK</span></button>`);
+    av.forEach(b => l.innerHTML += `<button onclick="found('${b.bil}')" class="w-full bg-slate-800 p-3 rounded flex justify-between border border-emerald-900 text-white font-bold mb-2"><span>${b.bil}</span><span>OK</span></button>`);
 }
 function found(c) { 
     const st = getVal('s', 'st');
     const en = getVal('s', 'en');
     closeM('m-search', false); 
-    book(c, null, st, en); // Pass date objects directly
+    book(c, null, st, en); 
 }
 
-function ret(id, c, type='standard') { 
-    s.rid=id; s.rc=c; s.rtype=type; 
-    $id('r-name').innerText=c; 
-    $id('r-comm').value=""; 
-    openM('m-ret'); 
-}
+function ret(id, c, type='standard') { s.rid=id; s.rc=c; s.rtype=type; $id('r-name').innerText=c; $id('r-comm').value=""; openM('m-ret'); }
 
 async function subRet() {
-    // Confirmation
     let txt = `Bekreft levering av ${s.rc}?`;
     if(s.rtype === 'verksted') {
-        // Need to find end time for better confirmation
         const booking = s.r.find(r => r.id === s.rid);
-        if(booking) {
-             txt = `Bekreft at ${s.rc} er hentet/klar?\nAvslutter: ${booking.formal} (Planlagt til: ${fmtT(booking.slutt_tid)})`;
-        }
+        if(booking) txt = `Bekreft at ${s.rc} er hentet/klar?\nAvslutter: ${booking.formal} (Planlagt til: ${fmtT(booking.slutt_tid)})`;
     }
-    
     if(!confirm(txt)) return;
-    
     const cm=$id('r-comm').value, d={slutt_tid:new Date().toISOString()}; if(cm) d.kommentar=cm;
     await _s.from('bookinger').update(d).eq('id',s.rid);
-    if(cm) {
-        await _s.from('biler').update({kommentar:cm}).eq('bil',s.rc);
-        // Logg melding til ansvarlig hvis kommentar legges inn
-        logMsg('Avvik ved levering', cm, s.rc);
-    }
+    if(cm) { await _s.from('biler').update({kommentar:cm}).eq('bil',s.rc); logMsg('Avvik ved levering', cm, s.rc); }
     closeM('m-ret'); load(); showToast("Levert!", "success");
 }
 
 async function react() { if(confirm(`Vil du gjøre ${s.co.bil} tilgjengelig igjen?\nNåværende status: ${s.co.status}`)) { await _s.from('biler').update({status:'Aktiv',kommentar:null}).eq('id',s.co.id); closeM('m-book'); load(); showToast("Bil aktivert", "success"); } }
 
-function togFilter() { $id('m-filter').classList.contains('hidden') ? openM('m-filter') : closeM('m-filter', false); 
-    if(!$id('m-filter').classList.contains('hidden')) { 
-        $id('f-car').innerHTML='<option value="all">Alle biler</option>'+s.c.map(b=>`<option value="${b.bil}">${b.bil}</option>`);
-        $id('f-date').value=s.f.d; $id('f-my').checked=s.f.m; 
-    }
-}
-function appF() { s.f={c:$id('f-car').value, d:$id('f-date').value, m:$id('f-my').checked}; closeM('m-filter', false); render(); }
-
 // ADMIN
 function rAdm(c) {
-    let html = `<div class="flex flex-wrap gap-2 mb-4 bg-gray-800 p-3 rounded-xl">`;
+    let html = `<div class="flex flex-wrap gap-2 mb-4 bg-slate-800 p-3 rounded-xl border border-slate-700">`;
     s.c.forEach(b => {
-       let colorClass = 'pill-gray'; 
-       if (b.status === 'Aktiv') { if (b.kommentar) colorClass = 'pill-yellow'; else colorClass = 'pill-green'; }
-       html += `<button onclick="selectAdmCar('${b.bil}')" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold ${s.admCar===b.bil?'selected':''}">${b.bil}</button>`;
+       let colorClass = 'pill-gray'; if (b.status === 'Aktiv') { if (b.kommentar) colorClass = 'pill-yellow'; else colorClass = 'pill-green'; }
+       // Escape quotes in JSON
+       const carJson = JSON.stringify(b).replace(/"/g, '&quot;');
+       html += `<button onclick="openAdmEdit(${carJson})" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold">${b.bil}</button>`;
     });
-    html += `<button onclick="addC()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-blue-900 text-blue-200 border-blue-700">+ NY</button>
-             <button onclick="showAdmHelp()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-gray-700 text-gray-300 border-gray-500">?</button></div>`;
-    
-    if(s.admCar) {
-        const b = s.c.find(x => x.bil === s.admCar);
-        if(b) {
-            html += `<div class="bg-gray-800 p-4 rounded-xl border border-gray-700 space-y-3">
-              <div class="flex justify-between"><h3 class="text-xl font-black text-white">${b.bil}</h3><button onclick="delC(${b.id},'${b.bil}')" class="text-red-500 text-xs font-bold border border-red-900 p-2 rounded">SLETT BIL</button></div>
-              
-              <div class="bg-blue-900/20 p-4 rounded-xl border border-blue-800 mb-4">
-                <h4 class="text-blue-400 font-bold text-xs uppercase mb-1">ℹ️ Veiledning</h4>
-                <p class="text-gray-300 text-xs mb-2"><strong>Status (her):</strong> Brukes ved akutte feil som gjør bilen ubrukelig NÅ (f.eks. kollisjon, motorstopp).</p>
-                <p class="text-gray-300 text-xs"><strong>Reservasjon:</strong> Skal bilen på verksted frem i tid? Gå til forsiden og lag en reservasjon med formål "Verksted".</p>
-              </div>
-
-              <div><label class="text-[10px] font-bold text-gray-500">NAVN/REGNR</label>
-              <input type="text" value="${b.bil}" onchange="renameC(${b.id},this.value)" class="w-full p-2 rounded bg-gray-900 border border-gray-600 text-white text-sm font-bold uppercase"></div>
-              
-              <div class="grid grid-cols-2 gap-4">
-                  <div>
-                      <label class="text-[10px] font-bold text-gray-500">STATUS (AKUTT)</label>
-                      <select onchange="stat(${b.id},this.value, '${b.bil}')" class="w-full p-2 rounded bg-gray-900 border border-gray-600 text-white text-sm">
-                        ${['Aktiv','Verksted','Skade','EU-kontroll','Annet'].map(o=>`<option ${b.status===o?'selected':''}>${o}</option>`).join('')}
-                      </select>
-                  </div>
-                  <div>
-                      <label class="text-[10px] font-bold text-gray-500">KOMMENTAR (SYNLIG)</label>
-                      <input type="text" value="${b.kommentar||''}" onchange="cmt(${b.id},this.value, '${b.bil}')" class="w-full p-2 rounded bg-gray-900 border border-gray-600 text-white text-sm" placeholder="Skriv beskjed...">
-                  </div>
-              </div>
-              
-              <div>
-                  <label class="text-[10px] font-bold text-gray-500">INTERN INFO (Vises ikke på kort)</label>
-                  <textarea onchange="updateInternalNote(${b.id}, this.value)" class="w-full p-2 rounded bg-gray-900 border border-gray-600 text-white text-sm h-20" placeholder="Notater kun for admin...">${b.intern_info || ''}</textarea>
-              </div>
-            </div>`;
-        }
-    } else { html += `<div class="text-center text-gray-500 italic mt-10">Trykk på en bil for å endre</div>`; }
+    html += `<button onclick="addC()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-blue-900 text-blue-200 border-blue-700">+ NY</button><button onclick="showAdmHelp()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300 border-slate-500">?</button></div>`;
+    html += `<div class="text-center text-slate-500 italic mt-10">Trykk på en bil for å endre</div>`;
     c.innerHTML = html;
 }
 
-async function updateInternalNote(id, val) {
-    const { error } = await _s.from('biler').update({ intern_info: val }).eq('id', id);
-    if(error) showToast("Feil ved lagring", "error");
-    else showToast("Intern info lagret", "success");
+function openAdmEdit(b) {
+    s.admCar = b.bil;
+    s.admId = b.id;
+    $id('adm-name').value = b.bil;
+    $id('adm-stat').value = b.status;
+    $id('adm-comm').value = b.kommentar || '';
+    $id('adm-info').value = b.intern_info || '';
+    openM('m-admin-edit');
 }
 
-function selectAdmCar(c) { s.admCar = c; render(); }
+async function saveAdmCar() {
+    const name = $id('adm-name').value.toUpperCase();
+    const stat = $id('adm-stat').value;
+    const comm = $id('adm-comm').value;
+    const info = $id('adm-info').value;
+    
+    if(!name) return showToast("Mangler navn", "error");
+
+    const updates = { bil: name, status: stat, kommentar: comm, intern_info: info };
+    const { error } = await _s.from('biler').update(updates).eq('id', s.admId);
+    
+    if(error) {
+        showToast("Feil: " + error.message, "error");
+    } else {
+        if(stat !== 'Aktiv') logMsg('Statusendring', `Ny status: ${stat}`, name);
+        if(comm) logMsg('Ny kommentar', comm, name);
+        
+        // Update local state immediately to reflect changes in UI
+        const idx = s.c.findIndex(c => c.id === s.admId);
+        if(idx !== -1) {
+            s.c[idx] = { ...s.c[idx], ...updates };
+        }
+        
+        showToast("Lagret!", "success");
+        closeM('m-admin-edit');
+        render(); // Re-render to update pills color
+    }
+}
+
+async function updateInternalNote(id, val) { const { error } = await _s.from('biler').update({ intern_info: val }).eq('id', id); if(error) showToast("Feil ved lagring", "error"); else showToast("Intern info lagret", "success"); }
 function showAdmHelp() { showToast("Grønn: OK. Gul: Har kommentar. Grå: Ute av drift.", "info"); }
-
 async function addC() { const v = prompt("Navn:"); if(v) { await _s.from('biler').insert({bil:v.toUpperCase()}); load(); showToast("Lagt til", "success"); } }
-async function delC(id,n) { if(confirm("Slette?")) { await _s.from('bookinger').delete().eq('bil',n); await _s.from('biler').delete().eq('id',id); s.admCar=null; load(); showToast("Slettet", "info"); } }
-async function stat(id,v, name) { 
-    await _s.from('biler').update({status:v}).eq('id',id); 
-    if(v !== 'Aktiv') logMsg('Statusendring', `Ny status: ${v}`, name);
-    load(); showToast("Oppdatert", "success"); 
-}
-async function cmt(id,v, name) { 
-    await _s.from('biler').update({kommentar:v}).eq('id',id); 
-    if(v) logMsg('Ny kommentar', v, name);
-    showToast("Lagret", "success"); 
-}
-async function renameC(id, v) { if(v) { await _s.from('biler').update({bil:v.toUpperCase()}).eq('id',id); s.admCar = v.toUpperCase(); load(); showToast("Endret", "success"); } }
+async function delC(id,n) { if(confirm("Slette?")) { await _s.from('bookinger').delete().eq('bil',n); await _s.from('biler').delete().eq('id',id); s.admCar=null; closeM('m-admin-edit'); load(); showToast("Slettet", "info"); } }
 
-// LOGG & SETTINGS
 function rLog(c) {
     const l = s.r.sort((a,b)=>new Date(b.start_tid)-new Date(a.start_tid));
-    c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV</button>
-    <div class="space-y-3">` + l.map(h => {
-        const dateOpt = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
-        const dateStr = new Date(h.start_tid).toLocaleDateString('no-NO', dateOpt);
-        return `<div class="bg-gray-800 p-4 rounded-xl border border-gray-700 text-sm"><div class="flex justify-between font-bold text-white mb-1"><span>${h.bil}</span><span class="text-gray-400">${h.bid}</span></div><div class="text-gray-400 text-xs mb-1 capitalize">${dateStr} | ${fmtT(h.start_tid)}-${fmtT(h.slutt_tid)}</div><div class="text-gray-300 italic">"${h.formal}"</div>${h.kommentar?`<div class="mt-1 text-amber-400 bg-amber-900/20 px-2 py-1 rounded inline-block text-xs">${h.kommentar}</div>`:''}</div>`;
+    c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV</button><div class="space-y-3">` + l.map(h => {
+        const dateOpt = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }; const dateStr = new Date(h.start_tid).toLocaleDateString('no-NO', dateOpt);
+        return `<div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-sm"><div class="flex justify-between font-bold text-white mb-1"><span>${h.bil}</span><span class="text-slate-400">${h.bid}</span></div><div class="text-slate-400 text-xs mb-1 capitalize">${dateStr} | ${fmtT(h.start_tid)}-${fmtT(h.slutt_tid)}</div><div class="text-slate-300 italic">"${h.formal}"</div>${h.kommentar?`<div class="mt-1 text-amber-400 bg-amber-900/20 px-2 py-1 rounded inline-block text-xs">${h.kommentar}</div>`:''}</div>`;
     }).join('') + `</div>`;
 }
 
-function csv() {
-    const t = "Bil,Bruker,Start,Slutt,Formål,Merknad\n" + s.r.map(x => `${x.bil},${x.bid},${fmtD(x.start_tid)} ${fmtT(x.start_tid)},${fmtD(x.slutt_tid)} ${fmtT(x.slutt_tid)},"${x.formal}",${x.kommentar||''}`).join('\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv;charset=utf-8;' })); a.download = "logg.csv"; a.click();
-}
+function csv() { const t = "Bil,Bruker,Start,Slutt,Formål,Merknad\n" + s.r.map(x => `${x.bil},${x.bid},${fmtD(x.start_tid)} ${fmtT(x.start_tid)},${fmtD(x.slutt_tid)} ${fmtT(x.slutt_tid)},"${x.formal}",${x.kommentar||''}`).join('\n'); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv;charset=utf-8;' })); a.download = "logg.csv"; a.click(); }
 
 function rSet(c) {
-    let p = s.c.map(b => `<button onclick="tVis('${b.bil}')" class="px-3 py-2 rounded-lg text-xs font-bold ${s.h.includes(b.bil)?'bg-gray-700 text-gray-400 border border-gray-600':'bg-blue-600 text-white border border-blue-500'}">${b.bil}</button>`).join('');
-    
-    c.innerHTML = `
-    <!-- Seksjon 1: Min Profil & Visning -->
-    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 mb-4">
-      <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-        <span class="material-icons-round text-blue-500">person</span> Min Profil & Visning
-      </h2>
-      
-      <div class="mb-4">
-        <label class="text-xs text-gray-500 font-bold uppercase">Innlogget som</label>
-        <p class="text-xl font-black text-white">${s.bid}</p>
-      </div>
-
-      <div class="border-t border-gray-700 pt-4 mb-4">
-        <p class="text-xs text-gray-400 mb-3 font-bold uppercase">Velg biler i oversikten</p>
-        <div class="flex flex-wrap gap-2">${p}</div>
-      </div>
-
-      <div class="border-t border-gray-700 pt-4">
-        <div class="flex items-center justify-between mb-2">
-            <label class="text-sm text-gray-300 font-bold">Aktiver e-postvarsling</label>
-            <input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-5 h-5 accent-blue-600">
-        </div>
-        <p class="text-xs text-gray-500 mb-3">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p>
-        <div class="flex gap-2">
-            <input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-lg text-sm bg-gray-900 border border-gray-600 text-white">
-            <button onclick="updEm()" class="bg-blue-600 px-4 rounded-lg text-white font-bold text-xs">LAGRE</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Seksjon 2: Hjelp & App -->
-    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 mb-4">
-       <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-        <span class="material-icons-round text-blue-500">help</span> Hjelp & App
-      </h2>
-      <div class="space-y-2">
-        <button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-gray-700 p-3 rounded-lg font-bold border border-gray-600 text-white flex items-center justify-center gap-2 hover:bg-gray-600">
-            <span class="material-icons-round">auto_stories</span> Åpne Brukermanual
-        </button>
-        
-        <button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-lg font-bold border border-blue-800 flex items-center justify-center gap-2">
-            <span class="material-icons-round">download</span> Installer som App
-        </button>
-        
-        <a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-gray-700 p-3 rounded-lg font-bold border border-gray-600 text-white flex items-center justify-center gap-2 hover:bg-gray-600 text-sm">
-            <span class="material-icons-round text-sm">mail</span> Melde feil
-        </a>
-      </div>
-    </div>
-
-    <!-- Seksjon 3: Administrasjon -->
-    <div class="bg-gray-900 p-5 rounded-xl border border-gray-800 mb-4">
-      <h2 class="text-lg font-bold text-gray-400 mb-4 flex items-center gap-2">
-        <span class="material-icons-round text-gray-500">admin_panel_settings</span> Administrasjon
-      </h2>
-      
-      <div class="mb-6">
-        <p class="text-xs text-gray-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p>
-        <div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div>
-        <div class="flex gap-2">
-            <input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-lg text-sm bg-gray-800 border border-gray-700 text-white">
-            <button onclick="addAdminEmail()" class="bg-gray-700 border border-gray-600 px-4 rounded-lg text-white font-bold text-xs">LEGG TIL</button>
-        </div>
-      </div>
-
-      <details>
-        <summary class="text-sm font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors">
-            Avansert: Slett data <span class="material-icons-round">expand_more</span>
-        </summary>
-        <div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30">
-            <p class="text-xs text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p>
-            <button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-lg font-bold hover:bg-red-800 border border-red-700 shadow-lg">SLETT ALLE DATA</button>
-        </div>
-      </details>
-    </div>
-    `;
-    
+    let p = s.c.map(b => `<button onclick="tVis('${b.bil}')" class="px-3 py-2 rounded-lg text-xs font-bold ${s.h.includes(b.bil)?'bg-slate-700 text-slate-400 border border-slate-600':'bg-blue-600 text-white border border-blue-500'}">${b.bil}</button>`).join('');
+    c.innerHTML = `<div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-4"><h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span class="material-icons-round text-blue-500">person</span> Min Profil & Visning</h2><div class="mb-4"><label class="text-xs text-slate-500 font-bold uppercase">Innlogget som</label><p class="text-xl font-black text-white">${s.bid}</p></div><div class="border-t border-slate-700 pt-4 mb-4"><p class="text-xs text-slate-400 mb-3 font-bold uppercase">Velg biler i oversikten</p><div class="flex flex-wrap gap-2">${p}</div></div><div class="border-t border-slate-700 pt-4"><div class="flex items-center justify-between mb-2"><label class="text-sm text-slate-300 font-bold">Aktiver e-postvarsling</label><input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-5 h-5 accent-blue-600"></div><p class="text-xs text-slate-500 mb-3">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p><div class="flex gap-2"><input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-lg text-sm bg-slate-900 border border-slate-600 text-white"><button onclick="updEm()" class="bg-blue-600 px-4 rounded-lg text-white font-bold text-xs">LAGRE</button></div></div></div><div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-4"><h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span class="material-icons-round text-blue-500">help</span> Hjelp & App</h2><div class="space-y-2"><button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-slate-700 p-3 rounded-lg font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600"><span class="material-icons-round">auto_stories</span> Åpne Brukermanual</button><button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-lg font-bold border border-blue-800 flex items-center justify-center gap-2"><span class="material-icons-round">download</span> Installer som App</button><a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-slate-700 p-3 rounded-lg font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 text-sm"><span class="material-icons-round text-sm">mail</span> Melde feil</a></div></div><div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mb-4"><h2 class="text-lg font-bold text-slate-400 mb-4 flex items-center gap-2"><span class="material-icons-round text-slate-500">admin_panel_settings</span> Administrasjon</h2><div class="mb-6"><p class="text-xs text-slate-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p><div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div><div class="flex gap-2"><input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-lg text-sm bg-slate-800 border border-slate-700 text-white"><button onclick="addAdminEmail()" class="bg-slate-700 border border-slate-600 px-4 rounded-lg text-white font-bold text-xs">LEGG TIL</button></div></div><details><summary class="text-sm font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors">Avansert: Slett data <span class="material-icons-round">expand_more</span></summary><div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30"><p class="text-xs text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p><button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-lg font-bold hover:bg-red-800 border border-red-700 shadow-lg">SLETT ALLE DATA</button></div></details></div>`;
     renderAdminEmails();
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); }
 }
-
 function renderAdminEmails() {
-    const list = $id('admin-email-list');
-    if(!list) return;
-    list.innerHTML = "";
-    
+    const list = $id('admin-email-list'); if(!list) return; list.innerHTML = "";
     const emails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : [];
-    
-    if(emails.length === 0) {
-        list.innerHTML = "<span class='text-xs text-gray-500 italic'>Ingen registrert.</span>";
-        return;
-    }
-
-    emails.forEach(email => {
-        const pill = document.createElement('div');
-        pill.className = 'email-pill';
-        pill.innerHTML = `<span>${email}</span><button onclick="removeAdminEmail('${email}')">×</button>`;
-        list.appendChild(pill);
-    });
+    if(emails.length === 0) { list.innerHTML = "<span class='text-xs text-slate-500 italic'>Ingen registrert.</span>"; return; }
+    emails.forEach(email => { const pill = document.createElement('div'); pill.className = 'email-pill'; pill.innerHTML = `<span>${email}</span><button onclick="removeAdminEmail('${email}')">×</button>`; list.appendChild(pill); });
 }
-
-async function addAdminEmail() {
-    const input = $id('s-admin-new-em');
-    const newEmail = input.value.trim();
-    if(!newEmail) return;
-    
-    const currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : [];
-    if(currentEmails.includes(newEmail)) {
-        showToast("Allerede lagt til", "info");
-        return;
-    }
-    
-    currentEmails.push(newEmail);
-    await saveAdminConfig(currentEmails.join(','));
-    input.value = "";
-}
-
-async function removeAdminEmail(email) {
-    if(!confirm(`Fjerne ${email} som bilansvarlig?`)) return;
-    
-    let currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : [];
-    currentEmails = currentEmails.filter(e => e !== email);
-    
-    await saveAdminConfig(currentEmails.join(','));
-}
-
-async function saveAdminConfig(val) {
-    const { error } = await _s.from('konfigurasjon').upsert({ nokkel: 'bilansvarlig_epost', verdi: val });
-    if(error) showToast("Feil ved lagring", "error");
-    else {
-        s.bilansvarlig = val;
-        renderAdminEmails();
-        showToast("Lagret!", "success");
-    }
-}
-
+async function addAdminEmail() { const input = $id('s-admin-new-em'); const newEmail = input.value.trim(); if(!newEmail) return; const currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : []; if(currentEmails.includes(newEmail)) { showToast("Allerede lagt til", "info"); return; } currentEmails.push(newEmail); await saveAdminConfig(currentEmails.join(',')); input.value = ""; }
+async function removeAdminEmail(email) { if(!confirm(`Fjerne ${email} som bilansvarlig?`)) return; let currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : []; currentEmails = currentEmails.filter(e => e !== email); await saveAdminConfig(currentEmails.join(',')); }
+async function saveAdminConfig(val) { const { error } = await _s.from('konfigurasjon').upsert({ nokkel: 'bilansvarlig_epost', verdi: val }); if(error) showToast("Feil ved lagring", "error"); else { s.bilansvarlig = val; renderAdminEmails(); showToast("Lagret!", "success"); } }
 function tVis(c) { s.h.includes(c) ? s.h=s.h.filter(x=>x!==c) : s.h.push(c); localStorage.setItem('h',JSON.stringify(s.h)); render(); }
 async function togVar(v) { s.varsel = v; const p = { brukernavn: s.bid, varsel: v }; if(s.savedEmail) p.epost = s.savedEmail; await _s.from('brukere').upsert(p, { onConflict: 'brukernavn' }); showToast("Innstilling lagret", "success"); }
 async function updEm() { const e = $id('s-em').value.trim(); if(!e) return showToast("Skriv e-post", "error"); const { error } = await _s.from('brukere').upsert({ brukernavn: s.bid, epost: e, varsel: s.varsel }, { onConflict: 'brukernavn' }); if(error) showToast("Feil.", "error"); else { s.savedEmail = e; showToast("Lagret.", "success"); } }
 async function nuke() { if(prompt("Skriv NULLSTILL for å slette alle data")==="NULLSTILL") { await _s.from('bookinger').delete().gt('id', 0); load(); showToast("Nullstilt.", "info"); } }
-
 function fmtT(d) { return new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function fmtD(d) { return new Date(d).toLocaleDateString([],{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 setInterval(load,10000);
