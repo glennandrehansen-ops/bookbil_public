@@ -49,33 +49,31 @@ body{background:#121212;color:#E0E0E0;font-family:-apple-system,sans-serif;-webk
 .fab{position:fixed;bottom:90px;right:20px;z-index:45;box-shadow:0 4px 15px rgba(0,0,0,.5); width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; border-radius: 20px;}
 
 /* Skjema */
-input,select{color-scheme:dark;background:#1f2937;color:#fff;border:1px solid #374151;outline:0; min-height: 44px;}
+input,select,textarea{color-scheme:dark;background:#1f2937;color:#fff;border:1px solid #374151;outline:0; min-height: 44px;}
 
 /* Custom Date/Time Inputs */
 .split-input { background: transparent; border: none; outline: none; color: white; width: 100%; font-family: inherit; }
 .split-input[type="time"] { color: #60a5fa; font-weight: 900; font-size: 1.1rem; }
 
-/* TIDSLINJE (Sjokoladeplate) */
+/* TIDSLINJE */
 .timeline-scroll { 
     overflow-x: auto; 
-    padding-bottom: 25px; /* Plass til etiketter */
+    padding-bottom: 25px; 
     padding-top: 10px; 
     display: flex; 
     margin-bottom: 5px; 
     -webkit-overflow-scrolling: touch; 
     scrollbar-width: none;
-    /* Viktig for scrolling */
     touch-action: pan-x; 
-    scroll-behavior: smooth; /* Myk scrolling ved auto-scroll */
+    scroll-behavior: smooth; 
 }
 .timeline-scroll::-webkit-scrollbar { display: none; }
 
-/* Lagt til position:relative her for å fange den røde linjen */
 .time-grid { display: inline-flex; gap: 2px; height: 50px; padding: 0 4px; position: relative; }
 
 .time-block { 
     width: 42px; height: 100%; 
-    background-color: #374151; /* Grå */
+    background-color: #374151; 
     border-radius: 6px; 
     position: relative; flex-shrink: 0; cursor: pointer; 
     border: 1px solid #4b5563; 
@@ -122,7 +120,7 @@ input,select{color-scheme:dark;background:#1f2937;color:#fff;border:1px solid #3
 
 /* Admin Email Pills */
 .email-pill { background: #374151; border: 1px solid #4b5563; color: white; padding: 4px 10px; border-radius: 999px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
-.email-pill button { color: #9ca3af; font-weight: bold; padding: 2px; border-radius: 50%; }
+.email-pill button { color: #9ca3af; font-weight: bold; padding: 2px; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; }
 .email-pill button:hover { color: #ef4444; background: rgba(239, 68, 68, 0.2); }
 
 /* Modals */
@@ -145,7 +143,7 @@ input,select{color-scheme:dark;background:#1f2937;color:#fff;border:1px solid #3
 <div id="offline-msg" class="hidden fixed top-0 w-full bg-red-600 text-white text-xs font-bold text-center py-1 z-[100]">INGEN INTERNETTFORBINDELSE</div>
 <div id="toast-container"></div>
 
-<!-- PWA TOAST (Henger i toppen) -->
+<!-- PWA TOAST -->
 <div id="pwa-toast" onclick="installPwa()" class="hidden fixed top-4 left-4 right-4 bg-blue-600 text-white p-4 rounded-xl shadow-2xl z-50 flex justify-between items-center cursor-pointer border border-blue-400 animate-[bounce_1s_infinite]">
     <div class="flex items-center gap-3">
         <span class="material-icons-round bg-white/20 p-2 rounded-full">download</span>
@@ -167,7 +165,7 @@ input,select{color-scheme:dark;background:#1f2937;color:#fff;border:1px solid #3
    <button onclick="sendOtp()" id="btn-send" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-lg shadow-lg active:scale-95">SEND KODE</button>
  </div>
  <div id="f-otp" class="w-full max-w-xs space-y-4 hidden">
-   <input type="text" id="l-otp" placeholder="123456" maxlength="8" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-widest" oninput="if(this.value.length>=6)verifyOtp()">
+   <input type="text" id="l-otp" placeholder="12345678" maxlength="8" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-widest">
    <button onclick="verifyOtp()" class="w-full bg-green-600 p-4 rounded-xl font-bold">LOGG INN</button>
    <button onclick="resetAuth()" class="text-gray-500 text-sm underline mt-4">Angre</button>
  </div>
@@ -278,7 +276,6 @@ input,select{color-scheme:dark;background:#1f2937;color:#fff;border:1px solid #3
 <!-- BOOKING -->
 <div id="m-book" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-50" onclick="closeM('m-book')">
  <div class="bg-gray-900 modal-content-bottom p-5 border-t border-gray-700 shadow-2xl relative" id="m-book-content" onclick="event.stopPropagation()">
-  <!-- INGEN SWIPE HANDLE -->
   <button onclick="closeM('m-book')" class="absolute top-4 right-4 text-gray-500 p-2"><span class="material-icons-round">close</span></button>
   
   <div class="flex justify-between items-center mb-1"><h2 id="b-title" class="text-xl font-black text-white uppercase truncate pr-2">RESERVER</h2><div class="legend-box"><div class="legend-item"><div class="dot free"></div> Ledig</div><div class="legend-item"><div class="dot selected"></div> Valgt</div><div class="legend-item"><div class="dot busy"></div> Opptatt</div></div></div>
@@ -292,15 +289,13 @@ input,select{color-scheme:dark;background:#1f2937;color:#fff;border:1px solid #3
 
   <p id="b-instr" class="text-center text-xs text-gray-500 font-bold mb-1 uppercase">Trykk starttid (A)</p>
 
-  <div class="flex flex-col gap-2 mb-4 bg-gray-800 p-4 rounded-xl border border-gray-600">
+  <div class="flex flex-col gap-2 mb-4 bg-gray-800 p-4 rounded-xl border border-gray-600" id="b-date-inputs">
     <div class="flex items-center justify-center gap-6">
         <input type="time" id="b-t-st" step="1800" class="bg-transparent text-2xl font-black text-white text-center w-28 outline-none p-0" onchange="check()">
         <span class="text-2xl font-black text-gray-600">-</span>
         <input type="time" id="b-t-en" step="1800" class="bg-transparent text-2xl font-black text-white text-center w-28 outline-none p-0" onchange="check()">
     </div>
-    
     <div class="w-full border-t border-gray-700 my-2"></div>
-    
     <div class="flex items-center justify-center gap-4">
         <div class="flex flex-col items-center w-1/2">
             <label class="text-[9px] font-bold text-gray-500 mb-1">FRA DATO</label>
@@ -316,11 +311,22 @@ input,select{color-scheme:dark;background:#1f2937;color:#fff;border:1px solid #3
 
   <div class="mb-3"><details class="group"><summary class="text-blue-400 text-xs font-bold cursor-pointer list-none flex items-center gap-1 mb-2"><span class="material-icons-round text-sm">add_circle_outline</span> Legg til flere biler</summary><div id="b-multi" class="flex flex-wrap gap-2 p-2 bg-gray-800 rounded-lg border border-gray-700"></div></details></div>
   <div id="b-alert" class="hidden mb-4 bg-gray-800 border border-gray-600 p-4 rounded-xl"><p id="al-t" class="text-red-400 font-bold text-sm flex gap-2"><span class="material-icons-round">error</span> UTILGJENGELIG</p><p id="b-reason" class="text-white text-sm mb-3"></p><button id="btn-react" onclick="react()" class="w-full py-2 bg-green-700 text-white rounded font-bold text-xs hidden">GJØR AKTIV</button></div>
-  <div class="mb-4 space-y-3">
-   <div class="flex gap-2"><div id="d-bid" class="flex-1"><label class="text-[10px] font-bold text-gray-500">BID</label><input id="b-bid" class="w-full bg-gray-800 p-3 rounded-xl border border-gray-600 font-bold text-white text-sm"></div><div class="flex-1"><label class="text-[10px] font-bold text-gray-500">FORMÅL</label><input id="b-form" list="opts" class="w-full bg-gray-800 p-3 rounded-xl border border-gray-600 text-white text-sm" placeholder="Velg..."><datalist id="opts"><option value="Møte"><option value="IP"><option value="Oppdrag"><option value="Verksted"><option value="Annet"></datalist></div></div>
-   
-   <div class="mt-2 text-xs"><div id="warn" class="hidden mt-2 p-2 bg-red-900/40 border border-red-500 text-red-200 font-bold rounded text-center">⚠ OPPTATT I TIDSROMMET</div></div>
-   <div class="flex gap-2 pt-2"><button id="btn-del" onclick="delB()" class="hidden py-4 px-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900 flex items-center justify-center"><span class="material-icons-round">delete</span></button><button id="btn-ok" onclick="confB()" class="flex-1 py-4 rounded-xl bg-blue-600 font-bold text-white text-lg shadow-lg disabled:opacity-50 disabled:bg-gray-600">BEKREFT</button></div>
+  <div class="mb-4 space-y-3" id="b-form-container">
+    <div class="flex gap-2" id="b-form-standard">
+       <div id="d-bid" class="flex-1"><label class="text-[10px] font-bold text-gray-500">BID</label><input id="b-bid" class="w-full bg-gray-800 p-3 rounded-xl border border-gray-600 font-bold text-white text-sm"></div>
+       <div class="flex-1"><label class="text-[10px] font-bold text-gray-500">FORMÅL</label><input id="b-form" list="opts" class="w-full bg-gray-800 p-3 rounded-xl border border-gray-600 text-white text-sm" placeholder="Velg..."><datalist id="opts"><option value="Møte"><option value="IP"><option value="Oppdrag"><option value="Verksted"><option value="Annet"></datalist></div></div>
+    
+    <div class="hidden flex-col gap-2 bg-purple-900/20 p-3 rounded-xl border border-purple-500" id="b-form-verksted">
+       <div class="flex justify-between items-center">
+           <span class="text-purple-400 font-bold text-xs uppercase"><span class="material-icons-round text-sm align-text-bottom">build</span> Verksted / Service</span>
+           <button onclick="toggleVerkstedMode(false)" class="text-gray-400 hover:text-white"><span class="material-icons-round">close</span></button>
+       </div>
+       <label class="text-[10px] font-bold text-gray-500">HVA SKAL GJØRES?</label>
+       <input id="b-verksted-desc" class="w-full bg-gray-900 p-3 rounded-xl border border-purple-500/50 text-white text-sm font-bold" placeholder="F.eks. Service, Dekk, EU-kontroll...">
+    </div>
+
+    <div class="mt-2 text-xs"><div id="warn" class="hidden mt-2 p-2 bg-red-900/40 border border-red-500 text-red-200 font-bold rounded text-center">⚠ OPPTATT I TIDSROMMET</div></div>
+    <div class="flex gap-2 pt-2"><button id="btn-del" onclick="delB()" class="hidden py-4 px-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900 flex items-center justify-center"><span class="material-icons-round">delete</span></button><button id="btn-ok" onclick="confB()" class="flex-1 py-4 rounded-xl bg-blue-600 font-bold text-white text-lg shadow-lg disabled:opacity-50 disabled:bg-gray-600">BEKREFT</button></div>
   </div>
   <div class="border-t border-gray-800 pt-4 mt-4 pb-10">
       <h4 class="text-[10px] font-bold text-gray-500 uppercase mb-3">Kommende turer på denne bilen</h4>
@@ -386,9 +392,7 @@ const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
-// window.onerror = function(msg, url, line) { showToast("FEIL: " + msg, "error"); return false; };
-
-let s = { u:null, bid:null, c:[], r:[], sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, tlDay: 0, expDur: 1, bilansvarlig: '' };
+let s = { u:null, bid:null, c:[], r:[], sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false };
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 window.addEventListener('beforeinstallprompt', (e) => { 
@@ -440,7 +444,7 @@ function showToast(msg, type = 'info') {
 
 // NAVIGATION
 window.onpopstate = (event) => { if (s.activeModal) closeM(s.activeModal, false); };
-function openM(id) { $id(id).classList.remove('hidden'); s.activeModal = id; history.pushState({modal: id}, null, ""); }
+function openM(id) { if (s.activeModal === id) return; $id(id).classList.remove('hidden'); s.activeModal = id; history.pushState({modal: id}, null, ""); }
 function closeM(id, back=true) { $id(id).classList.add('hidden'); s.activeModal = null; if(back) history.back(); }
 function tab(v) { s.v=v; render(); updNav(v); }
 function updNav(v) { ['cars','res','more'].forEach(t => { $id('t-'+t).className = `nav-item flex flex-col items-center flex-1 py-1 ${v===t||(v==='cars'&&t==='cars')||(v==='res'&&t==='res')?'text-blue-500 active':'text-gray-500'}`; }); }
@@ -459,7 +463,6 @@ async function verifyOtp() {
     const { error } = await _s.auth.verifyOtp({ email: e, token: t, type: 'email' });
     if (error) showToast("Feil kode.", 'error');
 }
-function checkOtp(val) { if(val.length >= 6) verifyOtp(); }
 function resetAuth() { $id('f-email').classList.remove('hidden'); $id('f-otp').classList.add('hidden'); $id('l-otp').value = ""; }
 async function logout() { if (confirm("Logg ut?")) { await _s.auth.signOut(); location.reload(); } }
 
@@ -468,7 +471,8 @@ function swipe(e,id,m=0) { e.preventDefault(); const start=e.clientY; const fn=(
 
 // DATA
 async function load() {
-    if(!s.u || document.activeElement.tagName === "INPUT") return;
+    // Fix: Sjekk også TEXTAREA og SELECT så man ikke mister fokus i Billager
+    if(!s.u || (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName))) return;
     try {
         const [c,r,u, conf] = await Promise.all([
             _s.from('biler').select('*').order('bil'), 
@@ -522,7 +526,12 @@ function rCars(c) {
                  st="bg-ver"; // Defined in CSS
                  ic="build";
                  col="text-purple-400";
-                 sub=`Verksted til ${fmtD(act.slutt_tid)} ${fmtT(act.slutt_tid)}`;
+                 // Highlight the detail part in yellow if exists
+                 let detail = act.formal;
+                 if(detail.startsWith('Verksted: ')) {
+                     detail = `<span class="text-yellow-300 font-black">${detail.substring(10)}</span>`;
+                 }
+                 sub=`${detail} (Tilbake: ${fmtD(act.slutt_tid)} ${fmtT(act.slutt_tid)})`;
             } else {
                  st="bg-opp"; ic="cancel"; col="text-red-500"; 
                  sub=`Ledig ${fmtT(act.slutt_tid)} • ${act.bid}`;
@@ -536,7 +545,6 @@ function rCars(c) {
         }
 
         // Determine Button content: HENTET/KLAR if status != Aktiv, else AVSLUTT/Chevron
-        // Also add logic for "Verksted" booking which should be finishable
         let actionBtn = "";
         
         // Case 1: Acute Status != Aktiv (Billager)
@@ -734,13 +742,25 @@ function book(car, id=null, st=null, en=null) {
     s.sel=[car]; s.editId=id; s.co=s.c.find(x=>x.bil===car); 
     // Default s.tlDay to 0, but calculate properly below
     s.tlDay=0;
+    // Reset workshop mode
+    s.workshopMode = false;
+    toggleVerkstedMode(false);
 
     const now = new Date(); 
     now.setHours(0,0,0,0);
 
     if(id) {
         const r = s.r.find(x=>x.id===id);
-        $id('b-bid').value=r.bid; $id('b-form').value=r.formal;
+        $id('b-bid').value=r.bid; 
+        
+        // Check if workshop format
+        if(r.formal && r.formal.startsWith('Verksted: ')) {
+            toggleVerkstedMode(true);
+            $id('b-verksted-desc').value = r.formal.substring(10);
+        } else {
+            $id('b-form').value=r.formal;
+        }
+
         const stD = new Date(r.start_tid); const enD = new Date(r.slutt_tid);
         setVal('b', 'st', stD);
         setVal('b', 'en', enD);
@@ -774,6 +794,25 @@ function book(car, id=null, st=null, en=null) {
     }
 }
 
+function toggleVerkstedMode(on) {
+    s.workshopMode = on;
+    const std = $id('b-form-standard');
+    const verk = $id('b-form-verksted');
+    
+    if(on) {
+        std.classList.add('hidden');
+        verk.classList.remove('hidden');
+        verk.classList.add('flex');
+        // Clear standard input to avoid confusion
+        $id('b-form').value = "Verksted"; 
+    } else {
+        std.classList.remove('hidden');
+        verk.classList.add('hidden');
+        verk.classList.remove('flex');
+        $id('b-verksted-desc').value = "";
+    }
+}
+
 function setupModal(title, sub="Ny reservasjon") {
     $id('b-title').innerText=title; 
     const subEl = $id('b-sub'); if(subEl) subEl.innerText=sub;
@@ -782,7 +821,7 @@ function setupModal(title, sub="Ny reservasjon") {
     const now = new Date();
     if(now.getHours() >= 22 && !s.editId && s.tlDay === 0) s.tlDay = 1;
 
-    // Set initial tabs styling
+    // Set initial tabs styling based on CURRENT tlDay
     const t0 = $id('b-day-0');
     const t1 = $id('b-day-1');
     if(t0) {
@@ -793,7 +832,7 @@ function setupModal(title, sub="Ny reservasjon") {
              t0.className = 'day-tab';
              t1.className = 'day-tab active';
         } else {
-             t0.className = 'day-tab opacity-50';
+             t0.className = 'day-tab opacity-50'; // Gray out both if further ahead
              t1.className = 'day-tab opacity-50';
         }
     }
@@ -862,9 +901,7 @@ function setupModal(title, sub="Ny reservasjon") {
     // Add listener to form input
     formInput.onchange = function() {
         if(this.value === 'Verksted') {
-            this.value = ''; // Clear to force typing
-            this.placeholder = "Skriv detaljer, f.eks. 'EU-kontroll kl. 10:00'";
-            this.focus();
+            toggleVerkstedMode(true);
         }
     };
 }
@@ -1176,7 +1213,17 @@ async function confB() {
     // FINAL GUARD: Check car status
     if(s.co && s.co.status !== 'Aktiv') return showToast("Bilen er utilgjengelig", "error");
 
-    const b=$id('b-bid').value.trim().toUpperCase(), f=$id('b-form').value;
+    const b=$id('b-bid').value.trim().toUpperCase();
+    let f="";
+
+    if(s.workshopMode) {
+        const desc = $id('b-verksted-desc').value.trim();
+        if(!desc) return showToast("Skriv hva som skal gjøres", "error");
+        f = "Verksted: " + desc;
+    } else {
+        f = $id('b-form').value;
+    }
+
     const st = getVal('b', 'st');
     const en = getVal('b', 'en');
 
@@ -1186,7 +1233,13 @@ async function confB() {
     if(!st || !en) return showToast("Velg tid", "error");
     if(en <= st) return showToast("Ugyldig tid", "error");
     
-    localStorage.setItem('lastFormal', f);
+    // If workshop, also log message
+    if(s.workshopMode) {
+        logMsg('Planlagt verksted', f, s.sel[0]);
+    } else {
+        localStorage.setItem('lastFormal', f);
+    }
+
     const d = { bid:b, formal:f, start_tid:st.toISOString(), slutt_tid:en.toISOString() };
     
     let error;
@@ -1213,10 +1266,23 @@ async function delB(id) {
 }
 
 function rFut(c) {
-    const l=$id('fut-l');l.innerHTML="";const now=new Date();
+    const l=$id('fut-l');
+    l.innerHTML="";
+    const now=new Date();
     const f=s.r.filter(r=>r.bil===c && new Date(r.start_tid)>now).sort((a,b)=>new Date(a.start_tid)-new Date(b.start_tid));
-    if(!f.length)l.innerHTML="<div class='text-gray-500 italic text-center'>Ingen kommende turer.</div>";
-    f.forEach(r => l.innerHTML += `<div onclick="book('${r.bil}',${r.id})" class="bg-gray-800 p-2 rounded border border-gray-700 flex justify-between cursor-pointer text-xs mb-1"><span>${fmtD(r.start_tid)} ${fmtT(r.start_tid)}-${fmtT(r.slutt_tid)}</span><span>${r.bid}</span></div>`);
+    if(!f.length) l.innerHTML="<div class='text-gray-500 italic text-center'>Ingen kommende turer.</div>";
+    f.forEach(r => {
+        const div = document.createElement('div');
+        div.className = "bg-gray-800 p-2 rounded border border-gray-700 flex justify-between cursor-pointer text-xs mb-1";
+        div.innerHTML = `<span>${fmtD(r.start_tid)} ${fmtT(r.start_tid)}-${fmtT(r.slutt_tid)}</span><span>${r.bid}</span>`;
+        div.onclick = (e) => { 
+            e.stopPropagation(); 
+            // Correctly detect workshop mode when clicking future reservations
+            s.workshopMode = (r.formal || "").startsWith('Verksted: '); 
+            book(r.bil, r.id); 
+        };
+        l.appendChild(div);
+    });
 }
 
 function sMode() { 
@@ -1380,39 +1446,85 @@ function csv() {
 
 function rSet(c) {
     let p = s.c.map(b => `<button onclick="tVis('${b.bil}')" class="px-3 py-2 rounded-lg text-xs font-bold ${s.h.includes(b.bil)?'bg-gray-700 text-gray-400 border border-gray-600':'bg-blue-600 text-white border border-blue-500'}">${b.bil}</button>`).join('');
+    
     c.innerHTML = `
+    <!-- Seksjon 1: Min Profil & Visning -->
     <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 mb-4">
-      <h2 class="text-xs font-bold text-gray-500 uppercase mb-2">Innlogget</h2><p class="text-xl font-black text-white mb-4">${s.bid}</p>
-      <h2 class="text-lg font-bold text-white mb-2">Filtrer Biler</h2><div class="flex flex-wrap gap-2 mb-6">${p}</div>
+      <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        <span class="material-icons-round text-blue-500">person</span> Min Profil & Visning
+      </h2>
       
-      <div class="flex flex-col mt-3 bg-gray-900 border border-gray-600 p-3 rounded-lg">
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-sm text-gray-300 font-bold">Aktiver varsling</label>
+      <div class="mb-4">
+        <label class="text-xs text-gray-500 font-bold uppercase">Innlogget som</label>
+        <p class="text-xl font-black text-white">${s.bid}</p>
+      </div>
+
+      <div class="border-t border-gray-700 pt-4 mb-4">
+        <p class="text-xs text-gray-400 mb-3 font-bold uppercase">Velg biler i oversikten</p>
+        <div class="flex flex-wrap gap-2">${p}</div>
+      </div>
+
+      <div class="border-t border-gray-700 pt-4">
+        <div class="flex items-center justify-between mb-2">
+            <label class="text-sm text-gray-300 font-bold">Aktiver e-postvarsling</label>
             <input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-5 h-5 accent-blue-600">
-          </div>
-          <p class="text-xs text-gray-500">Motta e-postvarsel ca. 30 min før leveringsfrist. Vi anbefaler å bruke privat e-post for å motta varsler på mobilen.</p>
+        </div>
+        <p class="text-xs text-gray-500 mb-3">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p>
+        <div class="flex gap-2">
+            <input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-lg text-sm bg-gray-900 border border-gray-600 text-white">
+            <button onclick="updEm()" class="bg-blue-600 px-4 rounded-lg text-white font-bold text-xs">LAGRE</button>
+        </div>
       </div>
-
-      <div class="flex gap-2 mt-3"><input id="s-em" placeholder="E-post" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-lg text-sm bg-gray-900 border border-gray-600 text-white"><button onclick="updEm()" class="bg-blue-600 px-4 rounded-lg text-white font-bold text-xs">LAGRE</button></div>
     </div>
 
-    <!-- Administrasjon (Bilansvarlig) -->
+    <!-- Seksjon 2: Hjelp & App -->
     <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 mb-4">
-      <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2"><span class="material-icons-round text-yellow-500">admin_panel_settings</span> Administrasjon</h2>
-      <p class="text-xs text-gray-400 mb-2">E-postadresser til bilansvarlige.</p>
-      <div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div>
-      <div class="flex gap-2">
-        <input id="s-admin-new-em" placeholder="ny.admin@politiet.no" class="flex-grow p-3 rounded-lg text-sm bg-gray-900 border border-gray-600 text-white">
-        <button onclick="addAdminEmail()" class="bg-yellow-600 px-4 rounded-lg text-white font-bold text-xs">LEGG TIL</button>
+       <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        <span class="material-icons-round text-blue-500">help</span> Hjelp & App
+      </h2>
+      <div class="space-y-2">
+        <button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-gray-700 p-3 rounded-lg font-bold border border-gray-600 text-white flex items-center justify-center gap-2 hover:bg-gray-600">
+            <span class="material-icons-round">auto_stories</span> Åpne Brukermanual
+        </button>
+        
+        <button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-lg font-bold border border-blue-800 flex items-center justify-center gap-2">
+            <span class="material-icons-round">download</span> Installer som App
+        </button>
+        
+        <a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-gray-700 p-3 rounded-lg font-bold border border-gray-600 text-white flex items-center justify-center gap-2 hover:bg-gray-600 text-sm">
+            <span class="material-icons-round text-sm">mail</span> Melde feil
+        </a>
       </div>
     </div>
-    
-    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 mb-4"><h2 class="text-lg font-bold text-white mb-2">App</h2><button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/50 text-blue-300 py-3 rounded-lg font-bold border border-blue-800 mb-2">INSTALLER APP</button><a href="mailto:glenn.andre.hansen@gmail.com" class="block w-full text-center bg-gray-700 p-3 rounded-lg font-bold border border-gray-600 text-white mt-2">MELDE FEIL</a></div>
-    <div class="bg-red-900 p-5 rounded-xl border border-red-800/50"><details><summary class="text-lg font-bold text-red-500 mb-2 cursor-pointer list-none flex justify-between items-center">Nullstill System <span class="material-icons-round">expand_more</span></summary><p class="text-xs text-red-300 mb-3 mt-2">Dette sletter ALLE reservasjoner. Kan ikke angres.</p><button onclick="nuke()" class="w-full bg-red-900 text-white p-4 rounded-xl font-bold mt-2 hover:bg-red-800 border border-red-700 shadow-lg">SLETT ALT</button></details></div>`;
-    
-    // Render Admin Emails
-    renderAdminEmails();
 
+    <!-- Seksjon 3: Administrasjon -->
+    <div class="bg-gray-900 p-5 rounded-xl border border-gray-800 mb-4">
+      <h2 class="text-lg font-bold text-gray-400 mb-4 flex items-center gap-2">
+        <span class="material-icons-round text-gray-500">admin_panel_settings</span> Administrasjon
+      </h2>
+      
+      <div class="mb-6">
+        <p class="text-xs text-gray-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p>
+        <div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div>
+        <div class="flex gap-2">
+            <input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-lg text-sm bg-gray-800 border border-gray-700 text-white">
+            <button onclick="addAdminEmail()" class="bg-gray-700 border border-gray-600 px-4 rounded-lg text-white font-bold text-xs">LEGG TIL</button>
+        </div>
+      </div>
+
+      <details>
+        <summary class="text-sm font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors">
+            Avansert: Slett data <span class="material-icons-round">expand_more</span>
+        </summary>
+        <div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30">
+            <p class="text-xs text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p>
+            <button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-lg font-bold hover:bg-red-800 border border-red-700 shadow-lg">SLETT ALLE DATA</button>
+        </div>
+      </details>
+    </div>
+    `;
+    
+    renderAdminEmails();
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); }
 }
 
@@ -1476,7 +1588,6 @@ async function togVar(v) { s.varsel = v; const p = { brukernavn: s.bid, varsel: 
 async function updEm() { const e = $id('s-em').value.trim(); if(!e) return showToast("Skriv e-post", "error"); const { error } = await _s.from('brukere').upsert({ brukernavn: s.bid, epost: e, varsel: s.varsel }, { onConflict: 'brukernavn' }); if(error) showToast("Feil.", "error"); else { s.savedEmail = e; showToast("Lagret.", "success"); } }
 async function nuke() { if(prompt("Skriv NULLSTILL for å slette alle data")==="NULLSTILL") { await _s.from('bookinger').delete().gt('id', 0); load(); showToast("Nullstilt.", "info"); } }
 
-function iso(d) { return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16); }
 function fmtT(d) { return new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function fmtD(d) { return new Date(d).toLocaleDateString([],{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 setInterval(load,10000);
