@@ -184,7 +184,7 @@ input, select, textarea {
 .time-block.end::after { content: 'B'; color: white; font-weight: 900; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 
 /* Legend & Tabs */
-.legend-box { display: flex; gap: 8px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 999px; font-size: 9px; color: #94a3b8; align-items: center; }
+.legend-box { display: flex; gap: 8px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 999px; font-size: 9px; color: #94a3b8; align-items: center; margin-right: auto; } /* Added margin-right: auto to push it left */
 .dot { width: 6px; height: 6px; border-radius: 50%; }
 .dot.free { background-color: #334155; border: 1px solid #475569; }
 .dot.busy { background-color: #7f1d1d; }
@@ -609,26 +609,21 @@ function rCars(c) {
     s.c.forEach(b => {
         if(s.h.includes(b.bil)) return;
         
-        // Strict "Busy NOW" check
         const act = s.r.find(r => r.bil===b.bil && new Date(r.start_tid)<=now && new Date(r.slutt_tid)>=now);
-        // Find next booking today to warn user, even if free now
         const nxt = s.r.filter(r => r.bil===b.bil && new Date(r.start_tid)>now).sort((a,x)=>new Date(a.start_tid)-new Date(x.start_tid))[0];
         
         let stripeClass="c-green", titleColor="text-white", subText="Ledig nå", subColor="text-emerald-500", rowBg="", rowOp="opacity-100";
         let actionBtn = `<button onclick="event.stopPropagation();book('${b.bil}')" class="btn-action btn-green">RESERVER</button>`;
 
         if(b.status!=='Aktiv') { 
-            // UTE AV DRIFT
             if(b.status === 'Verksted') { stripeClass="c-purple"; titleColor="text-slate-400"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-60"; } 
             else { stripeClass="c-gray"; titleColor="text-slate-500"; subText="Ute av drift"; subColor="text-slate-500"; rowOp="opacity-60"; }
             if(b.status === 'Aktiv' && b.kommentar) { subText = `⚠ ${b.kommentar}`; subColor="text-yellow-500"; }
             actionBtn = `<button onclick="event.stopPropagation();stat(${b.id},'Aktiv','${b.bil}')" class="btn-action btn-green">KLAR</button>`;
         }
         else if(act) { 
-            // OPPTATT NÅ -> RØD
             stripeClass="c-red"; titleColor="text-slate-400"; subColor="text-slate-500"; rowOp="opacity-75";
             subText = `Opptatt (Ferdig ${fmtT(act.slutt_tid)})`;
-            
             if(act.formal && (act.formal.includes('Verksted') || act.formal.includes('Service'))) {
                  stripeClass="c-purple"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-70";
                  actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
@@ -644,26 +639,15 @@ function rCars(c) {
         else if(nxt) { 
             const nxtStart = new Date(nxt.start_tid);
             if (nxtStart < tomorrow) {
-                // OPPTATT SENERE I DAG -> GUL
-                stripeClass="c-yellow"; 
-                subText = `Ledig til kl ${fmtT(nxt.start_tid)}`; 
-                subColor="text-amber-500";
+                stripeClass="c-yellow"; subText = `Ledig til kl ${fmtT(nxt.start_tid)}`; subColor="text-amber-500";
             } else {
-                // LEDIG I DAG, OPPTATT I MORGEN -> GRØNN
-                stripeClass="c-green"; 
-                subText = `Ledig til ${fmtDD(nxt.start_tid)} kl ${fmtT(nxt.start_tid)}`; 
-                subColor="text-emerald-400";
+                stripeClass="c-green"; subText = `Ledig til ${fmtDD(nxt.start_tid)} kl ${fmtT(nxt.start_tid)}`; subColor="text-emerald-400";
             }
         } else {
-            // HELT LEDIG -> GRØNN
             subText = "Ledig nå";
         }
 
-        // COMMENTS ALWAYS YELLOW IF NOT BUSY/OUT OF ORDER
-        if (b.status === 'Aktiv' && b.kommentar) { 
-             subText = `⚠ ${b.kommentar}`; 
-             subColor = "text-yellow-500";
-        }
+        if (b.status === 'Aktiv' && b.kommentar) { subText = `⚠ ${b.kommentar}`; subColor = "text-yellow-500"; }
 
         const row = document.createElement('div');
         row.className = `fleet-row ${rowBg} ${rowOp}`;
@@ -676,26 +660,73 @@ function rCars(c) {
 }
 
 function rRes(c, mineOnly) {
-    const now=new Date(); let html = `<div class="space-y-3">`;
+    const now=new Date(); 
     let list = s.r.filter(r => new Date(r.slutt_tid) > now).sort((a,b) => new Date(a.start_tid) - new Date(b.start_tid));
     if(mineOnly) list = list.filter(r => r.bid === s.bid);
     if(list.length === 0) { c.innerHTML = "<div class='text-center text-slate-500 mt-10'>Ingen reservasjoner funnet.</div>"; return; }
-    list.forEach(r => {
-        const active = new Date(r.start_tid) <= now;
-        const isVerksted = r.formal && (r.formal.includes("Verksted") || r.formal.includes("Service"));
-        let borderCol = active ? (isVerksted ? "border-purple-500" : "border-red-500") : "border-yellow-500";
-        let bgCol = active ? (isVerksted ? "bg-purple-900/10" : "bg-red-900/10") : "bg-yellow-900/10";
-        let statusTxt = active ? "PÅGÅENDE" : "KOMMENDE";
-        let icon = active ? "play_circle" : "schedule";
-        let actionBtns = "";
-        if(isVerksted) { borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; }
-        if (!isVerksted) {
-            if (active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();ret(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
-            else if (!active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
-        }
-        html += `<div onclick="book('${r.bil}',${r.id})" class="${bgCol} border-l-4 ${borderCol} p-4 rounded-r-xl border-y border-r border-slate-700/50 cursor-pointer relative flex justify-between items-center"><div><div class="flex items-center gap-2 mb-1"><span class="text-xs font-black ${active ? 'text-white' : 'text-slate-300'}">${r.bil}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${statusTxt}</span></div><div class="text-sm font-bold text-white mb-0.5">${r.formal}</div><div class="text-xs text-slate-400 font-mono">${fmtDD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</div>${!mineOnly ? `<div class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${r.bid}</div>` : ''}</div><div class="flex flex-col items-end gap-2"><span class="material-icons-round text-slate-600 mb-1">${icon}</span>${actionBtns}</div></div>`;
-    });
-    html += `</div>`; c.innerHTML = html;
+
+    let html = "";
+    
+    // 1. Ongoing
+    const ongoing = list.filter(r => new Date(r.start_tid) <= now);
+    if(ongoing.length > 0) {
+        html += `<h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-4 ml-1">Ute på tur nå</h3><div class="space-y-3">`;
+        ongoing.forEach(r => { html += createResCard(r, true, mineOnly); });
+        html += `</div>`;
+    }
+
+    // 2. Upcoming
+    const upcoming = list.filter(r => new Date(r.start_tid) > now);
+    if(upcoming.length > 0) {
+        let lastDate = "";
+        upcoming.forEach(r => {
+            const d = new Date(r.start_tid);
+            let dateHeader = fmtDateHeader(d);
+            if(dateHeader !== lastDate) {
+                html += `<h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-6 ml-1 sticky top-0 bg-[#0f172a] py-2 z-10 opacity-90">${dateHeader}</h3>`;
+                lastDate = dateHeader;
+                html += `<div class="space-y-3">`; 
+            }
+            html += createResCard(r, false, mineOnly);
+        });
+    }
+    c.innerHTML = html;
+}
+
+function createResCard(r, active, mineOnly) {
+    const isVerksted = r.formal && (r.formal.includes("Verksted") || r.formal.includes("Service"));
+    let borderCol = active ? (isVerksted ? "border-purple-500" : "border-red-500") : "border-yellow-500";
+    let bgCol = active ? (isVerksted ? "bg-purple-900/10" : "bg-red-900/10") : "bg-yellow-900/10";
+    let statusTxt = active ? "PÅGÅENDE" : "KOMMENDE";
+    let icon = active ? "play_circle" : "schedule";
+    let actionBtns = "";
+
+    if(isVerksted) { borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; }
+
+    if (!isVerksted) {
+        if (active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();subRet(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
+        else if (!active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
+    }
+
+    return `<div onclick="book('${r.bil}',${r.id})" class="${bgCol} border-l-4 ${borderCol} p-4 rounded-r-xl border-y border-r border-slate-700/50 cursor-pointer relative flex justify-between items-center mb-2">
+        <div>
+            <div class="flex items-center gap-2 mb-1"><span class="text-xs font-black ${active ? 'text-white' : 'text-slate-300'}">${r.bil}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${statusTxt}</span></div>
+            <div class="text-sm font-bold text-white mb-0.5">${r.formal}</div>
+            <div class="text-xs text-slate-400 font-mono">${fmtDD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</div>
+            ${!mineOnly ? `<div class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${r.bid}</div>` : ''}
+        </div>
+        <div class="flex flex-col items-end gap-2"><span class="material-icons-round text-slate-600 mb-1">${icon}</span>${actionBtns}</div>
+    </div>`;
+}
+
+function fmtDateHeader(d) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const tom = new Date(today); tom.setDate(tom.getDate() + 1);
+    const dZero = new Date(d); dZero.setHours(0,0,0,0);
+    if(dZero.getTime() === today.getTime()) return "I DAG";
+    if(dZero.getTime() === tom.getTime()) return "I MORGEN";
+    const days = ['SØNDAG','MANDAG','TIRSDAG','ONSDAG','TORSDAG','FREDAG','LØRDAG'];
+    return `${days[d.getDay()]} ${d.getDate()}.${d.getMonth()+1}`;
 }
 
 function expressBook() { closeM('m-action', false); setExpDur(1); $id('exp-conf-form').value = ""; openM('m-express-list'); }
@@ -725,17 +756,13 @@ function renderExpressList() {
 function initExpressConfirm(car, start, end) {
     s.expCar = car; s.expStart = start; s.expEnd = end;
     $id('exp-conf-txt').innerText = `Du velger ${car} for perioden NÅ - ${fmtT(end)}`;
-    
-    // Fix: Use separate closing logic to avoid history back conflict
     $id('m-express-list').classList.add('hidden');
-    // Ensure we push a new history state for the confirmation modal
     openM('m-express-conf');
 }
 
 async function confirmExpress() {
     const formal = $id('exp-conf-form').value;
     if(!formal) return showToast("Skriv formål", "error");
-    
     s.bid = s.u.split('@')[0].toUpperCase();
     const d = { bid: s.bid, formal: formal, start_tid: s.expStart.toISOString(), slutt_tid: s.expEnd.toISOString(), bil: s.expCar };
     const { error } = await _s.from('bookinger').insert([d]);
@@ -1010,12 +1037,20 @@ function found(c) {
 
 function ret(id, c, type='standard') { s.rid=id; s.rc=c; s.rtype=type; $id('r-name').innerText=c; $id('r-comm').value=""; openM('m-ret'); }
 
-async function subRet() {
-    // Removed duplicate confirm check. Just execute.
-    const cm=$id('r-comm').value, d={slutt_tid:new Date().toISOString()}; if(cm) d.kommentar=cm;
+async function subRet(id, c) {
+    // If called with arguments (direct action), update state first
+    if(id && c) { s.rid = id; s.rc = c; }
+    
+    const cm=$id('r-comm').value || ""; 
+    const d={slutt_tid:new Date().toISOString()}; 
+    if(cm) d.kommentar=cm;
+    
     await _s.from('bookinger').update(d).eq('id',s.rid);
     if(cm) { await _s.from('biler').update({kommentar:cm}).eq('bil',s.rc); logMsg('Avvik ved levering', cm, s.rc); }
-    closeM('m-ret'); load(); showToast("Levert!", "success");
+    
+    closeM('m-ret'); 
+    load(); 
+    showToast("Levert!", "success");
 }
 
 async function react() { if(confirm(`Vil du gjøre ${s.co.bil} tilgjengelig igjen?\nNåværende status: ${s.co.status}`)) { await _s.from('biler').update({status:'Aktiv',kommentar:null}).eq('id',s.co.id); closeM('m-book'); load(); showToast("Bil aktivert", "success"); } }
