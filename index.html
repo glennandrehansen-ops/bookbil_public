@@ -56,7 +56,7 @@ body {
     width: 4px;
     height: 40px;
     border-radius: 2px;
-    margin-right: 12px; /* Redusert litt for mobil */
+    margin-right: 12px;
     flex-shrink: 0;
 }
 .c-green { background-color: #10b981; } /* Ledig */
@@ -184,7 +184,7 @@ input, select, textarea {
 .time-block.end::after { content: 'B'; color: white; font-weight: 900; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 
 /* Legend & Tabs */
-.legend-box { display: flex; gap: 8px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 999px; font-size: 9px; color: #94a3b8; align-items: center; margin-right: auto; } /* Added margin-right: auto to push it left */
+.legend-box { display: flex; gap: 8px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 999px; font-size: 9px; color: #94a3b8; align-items: center; margin-right: auto; }
 .dot { width: 6px; height: 6px; border-radius: 50%; }
 .dot.free { background-color: #334155; border: 1px solid #475569; }
 .dot.busy { background-color: #7f1d1d; }
@@ -409,8 +409,8 @@ input, select, textarea {
     </div>
   </div>
   
+  <div id="s-res" class="space-y-2 mb-4 hidden border-t border-slate-800 pt-4 overflow-y-auto max-h-[30vh]"></div>
   <button onclick="findC()" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm mb-4">SØK ETTER BIL</button>
-  <div id="s-res" class="space-y-2 hidden border-t border-slate-800 pt-4 overflow-y-auto max-h-[30vh]"></div>
  </div>
 </div>
 
@@ -418,11 +418,16 @@ input, select, textarea {
 <div id="m-book" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-book')">
  <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl relative" id="m-book-content" onclick="event.stopPropagation()">
   <button onclick="closeM('m-book')" class="absolute top-4 right-4 text-slate-500 p-2"><span class="material-icons-round">close</span></button>
-  <div class="flex items-center gap-4 mb-2">
-      <h2 id="b-title" class="text-xl font-black text-white uppercase truncate">RESERVER</h2>
-      <div class="legend-box"><div class="legend-item"><div class="dot free"></div> Ledig</div><div class="legend-item"><div class="dot selected"></div> Valgt</div><div class="legend-item"><div class="dot busy"></div> Opptatt</div></div>
+  <div class="flex items-center gap-4 mb-2 overflow-hidden w-full pr-10">
+      <h2 id="b-title" class="text-xl font-black text-white uppercase flex items-center overflow-hidden w-full">RESERVER</h2>
+      <!-- Legend removed from header to make space for chips -->
   </div>
-  <h3 id="b-sub" class="text-xs text-slate-400 mb-2 font-bold uppercase">Ny reservasjon</h3>
+  
+  <!-- NEW SUBTITLE with Details (Moved here from JS injection) -->
+  <h3 id="b-sub" class="text-sm text-slate-300 mb-2 font-bold flex flex-col">
+      <span>Ny reservasjon</span>
+  </h3>
+
   <p id="b-info" class="text-xs text-yellow-500 mb-3 bg-yellow-900/20 p-2 rounded border border-yellow-700/50 hidden"></p>
   <div class="mb-4">
     <!-- Updated Dynamic Date Display -->
@@ -573,35 +578,17 @@ function handleTouchEnd(e) {
 
 function togMenu() { $id('more-menu').classList.toggle('open'); $id('menu-bg').classList.toggle('open'); }
 function openActionMenu() { openM('m-action'); }
-
-// NY VALIDERINGSLOGIKK HER
 async function sendOtp() {
     const e = $id('l-email').value.trim().toLowerCase();
-    
-    // Sjekk 1: Må slutte på riktig domene
-    if (!e.endsWith(JOB_DOMAIN)) {
-        return showToast(`Må slutte på ${JOB_DOMAIN}`, 'error');
-    }
-
-    // Sjekk 2: Regex for BID-format (3 bokstaver + 3 tall) før @
-    // ^ = start, [a-zæøå]{3} = 3 bokstaver, \d{3} = 3 tall, @... = resten
+    if (!e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
+    // Regex for 3 letters + 3 digits
     const bidPattern = /^[a-zæøå]{3}\d{3}@politiet\.no$/;
-    
-    if (!bidPattern.test(e)) {
-        return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
-    }
+    if (!bidPattern.test(e)) return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
 
     const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } });
-    
-    if (error) {
-        showToast(error.message, 'error');
-    } else {
-        $id('f-email').classList.add('hidden');
-        $id('f-otp').classList.remove('hidden');
-        $id('l-otp').focus();
-    }
+    if (error) showToast(error.message, 'error'); 
+    else { $id('f-email').classList.add('hidden'); $id('f-otp').classList.remove('hidden'); $id('l-otp').focus(); }
 }
-
 async function verifyOtp() { const e = $id('l-email').value.trim().toLowerCase(), t = $id('l-otp').value.trim(); const { error } = await _s.auth.verifyOtp({ email: e, token: t, type: 'email' }); if (error) showToast("Feil kode.", 'error'); }
 function resetAuth() { $id('f-email').classList.remove('hidden'); $id('f-otp').classList.add('hidden'); $id('l-otp').value = ""; }
 async function logout() { if (confirm("Logg ut?")) { await _s.auth.signOut(); location.reload(); } }
@@ -650,6 +637,27 @@ function calcStats() {
     $id('stat-free').innerText = free; $id('stat-total').innerText = total;
 }
 
+// HELPER FOR BADGES
+function getBadgesHtml(b, large=false, showResp=true) {
+    if(!b) return '';
+    let html = '';
+    const size = large ? "text-[10px] px-2 py-1" : "text-[9px] px-1.5 py-0.5";
+    const iconSize = large ? "text-xs" : "text-[10px]";
+    
+    // Type Badge (Uniformert/Sivil same color)
+    if(b.kategori === 'Uniformert' || b.kategori === 'Sivil') {
+        html += `<span class="${size} bg-blue-900/40 text-blue-300 rounded border border-blue-800 font-bold uppercase whitespace-nowrap">${b.kategori.toUpperCase()}</span>`;
+    } else if(b.kategori === 'Admin') {
+        html += `<span class="${size} bg-gray-800 text-gray-500 rounded border border-gray-700 font-bold uppercase whitespace-nowrap">ADMIN</span>`;
+    }
+
+    // Ansvarlig Badge - ONLY if showResp is true
+    if(showResp && b.ansvarlig) {
+        html += `<span class="${size} bg-slate-700 text-slate-300 rounded border border-slate-600 font-bold uppercase whitespace-nowrap flex items-center gap-1"><span class="material-icons-round ${iconSize}">person</span> ${b.ansvarlig}</span>`;
+    }
+    return html;
+}
+
 function rCars(c) {
     const now = new Date();
     const today = new Date(); today.setHours(0,0,0,0);
@@ -658,7 +666,15 @@ function rCars(c) {
     const wrapper = document.createElement('div');
     wrapper.className = "flex flex-col rounded-xl overflow-hidden shadow-lg border border-slate-700/50 mb-6";
 
-    s.c.forEach(b => {
+    const sortedCars = [...s.c].sort((a, b) => {
+        const actA = s.r.find(r => r.bil === a.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
+        const actB = s.r.find(r => r.bil === b.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
+        if (actA && !actB) return -1;
+        if (!actA && actB) return 1;
+        return a.bil.localeCompare(b.bil);
+    });
+
+    sortedCars.forEach(b => {
         if(s.h.includes(b.bil)) return;
         
         const act = s.r.find(r => r.bil===b.bil && new Date(r.start_tid)<=now && new Date(r.slutt_tid)>=now);
@@ -705,29 +721,22 @@ function rCars(c) {
         row.className = `fleet-row ${rowBg} ${rowOp}`;
         row.onclick = () => book(b.bil);
 
-        let minBilTag = (act && act.bid === s.bid) ? `<span class="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold uppercase ml-2">Min bil</span>` : '';
-        let respTag = b.ansvarlig ? `<span class="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded border border-slate-600 font-bold uppercase ml-2 flex items-center gap-1"><span class="material-icons-round text-[10px]">person</span> ${b.ansvarlig}</span>` : '';
-
-        // --- TEKST-TAGS ---
-        let typeTag = "";
-        if(b.kategori === 'Uniformert') typeTag = `<span class="text-[9px] bg-blue-900/40 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800 font-bold uppercase ml-2">UNIFORMERT</span>`;
-        else if(b.kategori === 'Sivil') typeTag = `<span class="text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded border border-slate-600 font-bold uppercase ml-2">SIVIL</span>`;
-        else if(b.kategori === 'Admin') typeTag = `<span class="text-[9px] bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-700 font-bold uppercase ml-2">ADMIN</span>`;
-
+        let minBilTag = (act && act.bid === s.bid) ? `<span class="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold uppercase ml-2 flex-shrink-0">Min bil</span>` : '';
+        
+        // Use helper with NO RESPONSIBLE PERSON for list view
         row.innerHTML = `
-        <div class="flex items-center flex-1 min-w-0 gap-3"> <!-- Left side container -->
-            <div class="status-stripe ${stripeClass}"></div> <!-- Stripe -->
-            <div class="flex-1 min-w-0 py-1 overflow-hidden"> <!-- Text content -->
-                <div class="flex items-center gap-1 overflow-x-auto no-scrollbar mask-right"> <!-- Title & Badges row -->
-                    <h2 class="text-base font-bold ${titleColor} leading-tight whitespace-nowrap mr-1">${b.bil}</h2>
+        <div class="flex items-center flex-1 min-w-0 gap-3">
+            <div class="status-stripe ${stripeClass}"></div>
+            <div class="flex-1 min-w-0 py-1 overflow-hidden">
+                <div class="flex items-center gap-1 overflow-x-auto no-scrollbar mask-right">
+                    <h2 class="text-base font-bold ${titleColor} leading-tight whitespace-nowrap mr-1 flex-shrink-0">${b.bil}</h2>
+                    ${getBadgesHtml(b, false, false)} 
                     ${minBilTag}
-                    ${respTag}
-                    ${typeTag}
                 </div>
                 <p class="text-xs ${subColor} mt-0.5 font-medium truncate">${subText}</p>
             </div>
         </div>
-        <div class="flex-shrink-0 ml-2"> <!-- Right side action -->
+        <div class="flex-shrink-0 ml-2">
             ${actionBtn}
         </div>`;
         wrapper.appendChild(row);
@@ -775,8 +784,14 @@ function renderExpressList() {
     if(availableCars.length === 0) { list.innerHTML = "<div class='text-center text-red-400 py-4 font-bold'>Ingen ledige biler.</div>"; return; }
     availableCars.forEach(b => {
         const btn = document.createElement('button');
-        btn.className = "w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-left font-bold text-white hover:bg-slate-700 flex justify-between items-center mb-2 shadow-lg";
-        btn.innerHTML = `<span class="text-lg">${b.bil}</span><span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded">LEDIG</span>`;
+        btn.className = "w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-left font-bold text-white hover:bg-slate-700 flex justify-between items-center mb-2 shadow-lg overflow-hidden";
+        // SINGLE LINE LAYOUT
+        btn.innerHTML = `
+        <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
+            <span class="text-lg flex-shrink-0">${b.bil}</span>
+            <div class="flex items-center gap-1 overflow-hidden">${getBadgesHtml(b, true, true)}</div>
+        </div>
+        <span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded flex-shrink-0 ml-2">LEDIG</span>`;
         btn.onclick = () => initExpressConfirm(b.bil, now, endTime);
         list.appendChild(btn);
     });
@@ -784,7 +799,12 @@ function renderExpressList() {
 
 function initExpressConfirm(car, start, end) {
     s.expCar = car; s.expStart = start; s.expEnd = end;
-    $id('exp-conf-txt').innerText = `Du velger ${car} for perioden NÅ - ${fmtT(end)}`;
+    // Add extra info here as well?
+    const b = s.c.find(x => x.bil === car);
+    let extra = "";
+    if(b) extra = `<br><span class="text-slate-500 font-normal text-[10px]">${b.kategori||''} ${b.ansvarlig ? '• '+b.ansvarlig : ''}</span>`;
+
+    $id('exp-conf-txt').innerHTML = `Du velger ${car} ${extra}<br>for perioden NÅ - ${fmtT(end)}`;
     $id('m-express-list').classList.add('hidden');
     openM('m-express-conf');
 }
@@ -831,7 +851,22 @@ function toggleVerkstedMode(on) {
 }
 
 function setupModal(title, sub="Ny reservasjon") {
-    $id('b-title').innerText=title; 
+    // 1. Find car data
+    const carObj = s.c.find(x => x.bil === title);
+    
+    // 2. Build HTML for Title + Badges inside b-title
+    let html = `<span class="truncate">${title}</span>`; 
+    
+    if (carObj) {
+        // Wrapper for badges
+        html += `<div class="flex items-center gap-1 ml-2 flex-shrink-0">`;
+        html += getBadgesHtml(carObj); // Use helper here too
+        html += `</div>`;
+    }
+    
+    // 3. Inject into b-title
+    $id('b-title').innerHTML = html;
+    
     const subEl = $id('b-sub'); if(subEl) subEl.innerText=sub;
     const act=s.r.find(r=>r.bil===title && new Date(r.start_tid)<=new Date() && new Date(r.slutt_tid)>=new Date());
     $id('b-alert').classList.add('hidden'); $id('b-info').classList.add('hidden'); $id('btn-react').classList.add('hidden');
@@ -1055,7 +1090,17 @@ function findC() {
     if(st >= en) return showToast("Velg slutt-tid", "error");
     const av = s.c.filter(b => b.status==='Aktiv' && !s.h.includes(b.bil) && !s.r.some(r=>r.bil===b.bil && st<new Date(r.slutt_tid) && en>new Date(r.start_tid)));
     if(!av.length) l.innerHTML="<div class='text-center text-red-400'>Ingen ledige.</div>";
-    av.forEach(b => l.innerHTML += `<button onclick="found('${b.bil}')" class="w-full bg-slate-800 p-3 rounded flex justify-between border border-emerald-900 text-white font-bold mb-2"><span>${b.bil}</span><span>OK</span></button>`);
+    av.forEach(b => {
+        // Enkel liste også her, nå med "one-line" layout
+        l.innerHTML += `
+        <button onclick="found('${b.bil}')" class="w-full bg-slate-800 p-3 rounded flex justify-between border border-emerald-900 text-white font-bold mb-2 items-center overflow-hidden">
+            <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
+                <span class="block flex-shrink-0">${b.bil}</span>
+                <div class="flex items-center gap-1 overflow-hidden">${getBadgesHtml(b, true, true)}</div>
+            </div>
+            <span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded flex-shrink-0 ml-2">OK</span>
+        </button>`;
+    });
 }
 function found(c) { 
     const st = getVal('s', 'st');
@@ -1104,7 +1149,6 @@ function openAdmEdit(b) {
     s.admId = b.id;
     $id('adm-name').value = b.bil;
     $id('adm-resp').value = b.ansvarlig || ''; 
-    // Last inn kategori
     $id('adm-cat').value = b.kategori || 'SivilAdm'; 
     $id('adm-stat').value = b.status;
     $id('adm-comm').value = b.kommentar || '';
@@ -1115,7 +1159,6 @@ function openAdmEdit(b) {
 async function saveAdmCar() {
     const name = $id('adm-name').value.toUpperCase();
     const resp = $id('adm-resp').value; 
-    // Hent kategori
     const cat = $id('adm-cat').value;
     const stat = $id('adm-stat').value;
     const comm = $id('adm-comm').value;
@@ -1123,7 +1166,6 @@ async function saveAdmCar() {
     
     if(!name) return showToast("Mangler navn", "error");
 
-    // Legg til kategori i update
     const updates = { bil: name, ansvarlig: resp, kategori: cat, status: stat, kommentar: comm, intern_info: info };
     const { error } = await _s.from('biler').update(updates).eq('id', s.admId);
     
@@ -1188,3 +1230,5 @@ function fmtDD(dStr) {
 }
 setInterval(load,10000);
 </script>
+</body>
+</html>
