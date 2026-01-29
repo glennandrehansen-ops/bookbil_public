@@ -56,7 +56,7 @@ body {
     width: 4px;
     height: 40px;
     border-radius: 2px;
-    margin-right: 16px;
+    margin-right: 12px; /* Redusert litt for mobil */
     flex-shrink: 0;
 }
 .c-green { background-color: #10b981; } /* Ledig */
@@ -199,6 +199,10 @@ input, select, textarea {
 .pill-yellow { background-color: #78350f; border-color: #d97706; }
 .pill-gray { background-color: #1f2937; border-color: #4b5563; }
 .email-pill { background: #334155; border: 1px solid #475569; color: white; padding: 4px 10px; border-radius: 999px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+
+/* Custom Scrollbar Hiding */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* Scrollbars */
 ::-webkit-scrollbar { width: 4px; }
@@ -495,7 +499,27 @@ input, select, textarea {
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-admin-edit',1)"><div class="bar"></div></div>
   <h2 class="text-xl font-black text-white mb-4">Rediger Bil</h2>
   <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4">
-      <div><label class="text-[10px] font-bold text-slate-500">NAVN/REGNR</label><input type="text" id="adm-name" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm font-bold uppercase"></div>
+      <div class="grid grid-cols-2 gap-4">
+          <div>
+              <label class="text-[10px] font-bold text-slate-500">NAVN/REGNR</label>
+              <input type="text" id="adm-name" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm font-bold uppercase">
+          </div>
+          <div>
+              <label class="text-[10px] font-bold text-slate-500">ANSVARLIG</label>
+              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Olsen">
+          </div>
+      </div>
+      
+      <!-- NYTT FELT: KATEGORI -->
+      <div>
+          <label class="text-[10px] font-bold text-slate-500">KATEGORI (Bilsymbol)</label>
+          <select id="adm-cat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm">
+            <option value="Uniformert">Uniformert</option>
+            <option value="Sivil">Sivil</option>
+            <option value="Admin">Admin</option>
+          </select>
+      </div>
+
       <div><label class="text-[10px] font-bold text-slate-500">STATUS</label><select id="adm-stat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm"><option value="Aktiv">Aktiv</option><option value="Verksted">Verksted</option><option value="Skade">Skade</option><option value="EU-kontroll">EU-kontroll</option><option value="Annet">Annet</option></select></div>
       <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR (SYNLIG)</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Skriv beskjed..."></div>
       <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater kun for admin..."></textarea></div>
@@ -652,81 +676,58 @@ function rCars(c) {
         const row = document.createElement('div');
         row.className = `fleet-row ${rowBg} ${rowOp}`;
         row.onclick = () => book(b.bil);
+
         let minBilTag = (act && act.bid === s.bid) ? `<span class="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold uppercase ml-2">Min bil</span>` : '';
-        row.innerHTML = `<div class="flex items-center"><div class="status-stripe ${stripeClass}"></div><div><div class="flex items-center"><h2 class="text-base font-bold ${titleColor}">${b.bil}</h2>${minBilTag}</div><p class="text-xs ${subColor} mt-0.5 font-medium">${subText}</p></div></div>${actionBtn}`;
+        let respTag = b.ansvarlig ? `<span class="text-[9px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded border border-slate-600 font-bold uppercase ml-2 flex items-center gap-1"><span class="material-icons-round text-[10px]">person</span> ${b.ansvarlig}</span>` : '';
+
+        // --- TEKST-TAGS ---
+        let typeTag = "";
+        if(b.kategori === 'Uniformert') typeTag = `<span class="text-[9px] bg-blue-900/40 text-blue-300 px-1.5 py-0.5 rounded border border-blue-800 font-bold uppercase ml-2">UNIFORMERT</span>`;
+        else if(b.kategori === 'Sivil') typeTag = `<span class="text-[9px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded border border-slate-600 font-bold uppercase ml-2">SIVIL</span>`;
+        else if(b.kategori === 'Admin') typeTag = `<span class="text-[9px] bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-700 font-bold uppercase ml-2">ADMIN</span>`;
+
+        row.innerHTML = `
+        <div class="flex items-center flex-1 min-w-0 gap-3"> <!-- Left side container -->
+            <div class="status-stripe ${stripeClass}"></div> <!-- Stripe -->
+            <div class="flex-1 min-w-0 py-1 overflow-hidden"> <!-- Text content -->
+                <div class="flex items-center gap-1 overflow-x-auto no-scrollbar mask-right"> <!-- Title & Badges row -->
+                    <h2 class="text-base font-bold ${titleColor} leading-tight whitespace-nowrap mr-1">${b.bil}</h2>
+                    ${minBilTag}
+                    ${respTag}
+                    ${typeTag}
+                </div>
+                <p class="text-xs ${subColor} mt-0.5 font-medium truncate">${subText}</p>
+            </div>
+        </div>
+        <div class="flex-shrink-0 ml-2"> <!-- Right side action -->
+            ${actionBtn}
+        </div>`;
         wrapper.appendChild(row);
     });
     c.appendChild(wrapper);
 }
 
 function rRes(c, mineOnly) {
-    const now=new Date(); 
+    const now=new Date(); let html = `<div class="space-y-3">`;
     let list = s.r.filter(r => new Date(r.slutt_tid) > now).sort((a,b) => new Date(a.start_tid) - new Date(b.start_tid));
     if(mineOnly) list = list.filter(r => r.bid === s.bid);
     if(list.length === 0) { c.innerHTML = "<div class='text-center text-slate-500 mt-10'>Ingen reservasjoner funnet.</div>"; return; }
-
-    let html = "";
-    
-    // 1. Ongoing
-    const ongoing = list.filter(r => new Date(r.start_tid) <= now);
-    if(ongoing.length > 0) {
-        html += `<h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-4 ml-1">Ute på tur nå</h3><div class="space-y-3">`;
-        ongoing.forEach(r => { html += createResCard(r, true, mineOnly); });
-        html += `</div>`;
-    }
-
-    // 2. Upcoming
-    const upcoming = list.filter(r => new Date(r.start_tid) > now);
-    if(upcoming.length > 0) {
-        let lastDate = "";
-        upcoming.forEach(r => {
-            const d = new Date(r.start_tid);
-            let dateHeader = fmtDateHeader(d);
-            if(dateHeader !== lastDate) {
-                html += `<h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 mt-6 ml-1 sticky top-0 bg-[#0f172a] py-2 z-10 opacity-90">${dateHeader}</h3>`;
-                lastDate = dateHeader;
-                html += `<div class="space-y-3">`; 
-            }
-            html += createResCard(r, false, mineOnly);
-        });
-    }
-    c.innerHTML = html;
-}
-
-function createResCard(r, active, mineOnly) {
-    const isVerksted = r.formal && (r.formal.includes("Verksted") || r.formal.includes("Service"));
-    let borderCol = active ? (isVerksted ? "border-purple-500" : "border-red-500") : "border-yellow-500";
-    let bgCol = active ? (isVerksted ? "bg-purple-900/10" : "bg-red-900/10") : "bg-yellow-900/10";
-    let statusTxt = active ? "PÅGÅENDE" : "KOMMENDE";
-    let icon = active ? "play_circle" : "schedule";
-    let actionBtns = "";
-
-    if(isVerksted) { borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; }
-
-    if (!isVerksted) {
-        if (active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();subRet(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
-        else if (!active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
-    }
-
-    return `<div onclick="book('${r.bil}',${r.id})" class="${bgCol} border-l-4 ${borderCol} p-4 rounded-r-xl border-y border-r border-slate-700/50 cursor-pointer relative flex justify-between items-center mb-2">
-        <div>
-            <div class="flex items-center gap-2 mb-1"><span class="text-xs font-black ${active ? 'text-white' : 'text-slate-300'}">${r.bil}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${statusTxt}</span></div>
-            <div class="text-sm font-bold text-white mb-0.5">${r.formal}</div>
-            <div class="text-xs text-slate-400 font-mono">${fmtDD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</div>
-            ${!mineOnly ? `<div class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${r.bid}</div>` : ''}
-        </div>
-        <div class="flex flex-col items-end gap-2"><span class="material-icons-round text-slate-600 mb-1">${icon}</span>${actionBtns}</div>
-    </div>`;
-}
-
-function fmtDateHeader(d) {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const tom = new Date(today); tom.setDate(tom.getDate() + 1);
-    const dZero = new Date(d); dZero.setHours(0,0,0,0);
-    if(dZero.getTime() === today.getTime()) return "I DAG";
-    if(dZero.getTime() === tom.getTime()) return "I MORGEN";
-    const days = ['SØNDAG','MANDAG','TIRSDAG','ONSDAG','TORSDAG','FREDAG','LØRDAG'];
-    return `${days[d.getDay()]} ${d.getDate()}.${d.getMonth()+1}`;
+    list.forEach(r => {
+        const active = new Date(r.start_tid) <= now;
+        const isVerksted = r.formal && (r.formal.includes("Verksted") || r.formal.includes("Service"));
+        let borderCol = active ? (isVerksted ? "border-purple-500" : "border-red-500") : "border-yellow-500";
+        let bgCol = active ? (isVerksted ? "bg-purple-900/10" : "bg-red-900/10") : "bg-yellow-900/10";
+        let statusTxt = active ? "PÅGÅENDE" : "KOMMENDE";
+        let icon = active ? "play_circle" : "schedule";
+        let actionBtns = "";
+        if(isVerksted) { borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; }
+        if (!isVerksted) {
+            if (active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();subRet(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
+            else if (!active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
+        }
+        html += `<div onclick="book('${r.bil}',${r.id})" class="${bgCol} border-l-4 ${borderCol} p-4 rounded-r-xl border-y border-r border-slate-700/50 cursor-pointer relative flex justify-between items-center"><div><div class="flex items-center gap-2 mb-1"><span class="text-xs font-black ${active ? 'text-white' : 'text-slate-300'}">${r.bil}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${statusTxt}</span></div><div class="text-sm font-bold text-white mb-0.5">${r.formal}</div><div class="text-xs text-slate-400 font-mono">${fmtDD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</div>${!mineOnly ? `<div class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${r.bid}</div>` : ''}</div><div class="flex flex-col items-end gap-2"><span class="material-icons-round text-slate-600 mb-1">${icon}</span>${actionBtns}</div></div>`;
+    });
+    html += `</div>`; c.innerHTML = html;
 }
 
 function expressBook() { closeM('m-action', false); setExpDur(1); $id('exp-conf-form').value = ""; openM('m-express-list'); }
@@ -1057,12 +1058,14 @@ async function react() { if(confirm(`Vil du gjøre ${s.co.bil} tilgjengelig igje
 
 // ADMIN
 function rAdm(c) {
+    // ... existing rAdm code ...
     let html = `<div class="flex flex-wrap gap-2 mb-4 bg-slate-800 p-3 rounded-xl border border-slate-700">`;
     s.c.forEach(b => {
        let colorClass = 'pill-gray'; if (b.status === 'Aktiv') { if (b.kommentar) colorClass = 'pill-yellow'; else colorClass = 'pill-green'; }
        const carJson = JSON.stringify(b).replace(/"/g, '&quot;');
        html += `<button onclick="openAdmEdit(${carJson})" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold">${b.bil}</button>`;
     });
+    // ... rest of rAdm code ...
     html += `<button onclick="addC()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-blue-900 text-blue-200 border-blue-700">+ NY</button><button onclick="showAdmHelp()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300 border-slate-500">?</button></div>`;
     html += `<div class="text-center text-slate-500 italic mt-10">Trykk på en bil for å endre</div>`;
     c.innerHTML = html;
@@ -1072,6 +1075,9 @@ function openAdmEdit(b) {
     s.admCar = b.bil;
     s.admId = b.id;
     $id('adm-name').value = b.bil;
+    $id('adm-resp').value = b.ansvarlig || ''; 
+    // Last inn kategori
+    $id('adm-cat').value = b.kategori || 'SivilAdm'; 
     $id('adm-stat').value = b.status;
     $id('adm-comm').value = b.kommentar || '';
     $id('adm-info').value = b.intern_info || '';
@@ -1080,18 +1086,30 @@ function openAdmEdit(b) {
 
 async function saveAdmCar() {
     const name = $id('adm-name').value.toUpperCase();
+    const resp = $id('adm-resp').value; 
+    // Hent kategori
+    const cat = $id('adm-cat').value;
     const stat = $id('adm-stat').value;
     const comm = $id('adm-comm').value;
     const info = $id('adm-info').value;
+    
     if(!name) return showToast("Mangler navn", "error");
-    const updates = { bil: name, status: stat, kommentar: comm, intern_info: info };
+
+    // Legg til kategori i update
+    const updates = { bil: name, ansvarlig: resp, kategori: cat, status: stat, kommentar: comm, intern_info: info };
     const { error } = await _s.from('biler').update(updates).eq('id', s.admId);
-    if(error) showToast("Feil: " + error.message, "error");
-    else {
+    
+    if(error) {
+        showToast("Feil: " + error.message, "error");
+    } else {
         if(stat !== 'Aktiv') logMsg('Statusendring', `Ny status: ${stat}`, name);
         if(comm) logMsg('Ny kommentar', comm, name);
+        
         const idx = s.c.findIndex(c => c.id === s.admId);
-        if(idx !== -1) s.c[idx] = { ...s.c[idx], ...updates };
+        if(idx !== -1) {
+            s.c[idx] = { ...s.c[idx], ...updates };
+        }
+        
         showToast("Lagret!", "success");
         closeM('m-admin-edit');
         render(); 
@@ -1142,5 +1160,3 @@ function fmtDD(dStr) {
 }
 setInterval(load,10000);
 </script>
-</body>
-</html>
