@@ -573,7 +573,35 @@ function handleTouchEnd(e) {
 
 function togMenu() { $id('more-menu').classList.toggle('open'); $id('menu-bg').classList.toggle('open'); }
 function openActionMenu() { openM('m-action'); }
-async function sendOtp() { const e = $id('l-email').value.trim().toLowerCase(); if (!e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error'); const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } }); if (error) showToast(error.message, 'error'); else { $id('f-email').classList.add('hidden'); $id('f-otp').classList.remove('hidden'); $id('l-otp').focus(); } }
+
+// NY VALIDERINGSLOGIKK HER
+async function sendOtp() {
+    const e = $id('l-email').value.trim().toLowerCase();
+    
+    // Sjekk 1: Må slutte på riktig domene
+    if (!e.endsWith(JOB_DOMAIN)) {
+        return showToast(`Må slutte på ${JOB_DOMAIN}`, 'error');
+    }
+
+    // Sjekk 2: Regex for BID-format (3 bokstaver + 3 tall) før @
+    // ^ = start, [a-zæøå]{3} = 3 bokstaver, \d{3} = 3 tall, @... = resten
+    const bidPattern = /^[a-zæøå]{3}\d{3}@politiet\.no$/;
+    
+    if (!bidPattern.test(e)) {
+        return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
+    }
+
+    const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } });
+    
+    if (error) {
+        showToast(error.message, 'error');
+    } else {
+        $id('f-email').classList.add('hidden');
+        $id('f-otp').classList.remove('hidden');
+        $id('l-otp').focus();
+    }
+}
+
 async function verifyOtp() { const e = $id('l-email').value.trim().toLowerCase(), t = $id('l-otp').value.trim(); const { error } = await _s.auth.verifyOtp({ email: e, token: t, type: 'email' }); if (error) showToast("Feil kode.", 'error'); }
 function resetAuth() { $id('f-email').classList.remove('hidden'); $id('f-otp').classList.add('hidden'); $id('l-otp').value = ""; }
 async function logout() { if (confirm("Logg ut?")) { await _s.auth.signOut(); location.reload(); } }
