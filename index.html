@@ -222,18 +222,6 @@ input, select, textarea {
 <div id="offline-msg" class="hidden fixed top-0 w-full bg-red-600 text-white text-xs font-bold text-center py-1 z-[100]">INGEN INTERNETTFORBINDELSE</div>
 <div id="toast-container"></div>
 
-<!-- PWA TOAST -->
-<div id="pwa-toast" onclick="installPwa()" class="hidden fixed top-4 left-4 right-4 bg-blue-600 text-white p-4 rounded-xl shadow-2xl z-[100] flex justify-between items-center cursor-pointer border border-blue-400 animate-[bounce_1s_infinite]">
-    <div class="flex items-center gap-3">
-        <span class="material-icons-round bg-white/20 p-2 rounded-full">download</span>
-        <div>
-            <h3 class="font-black text-sm">INSTALLER APP</h3>
-            <p class="text-[10px] text-blue-100">Få bedre opplevelse på mobilen</p>
-        </div>
-    </div>
-    <button onclick="event.stopPropagation(); closePwaToast()" class="material-icons-round text-white/70 hover:text-white p-1">close</button>
-</div>
-
 <!-- AUTENTISERING -->
 <div id="auth" class="flex flex-col items-center justify-center h-screen p-6 text-center fixed inset-0 z-[60] bg-[#0f172a]">
  <span class="material-icons-round text-blue-500 text-7xl mb-4">local_police</span>
@@ -258,7 +246,12 @@ input, select, textarea {
  <header class="flex-none pt-6 pb-2 px-4 bg-[#0f172a] z-30 border-b border-slate-800 shadow-sm">
     <div class="flex justify-between items-end mb-4">
         <div>
-            <h1 id="pg-t" class="text-xl font-bold text-white">BookBil Jæren</h1>
+            <div class="flex items-center gap-2">
+                <h1 id="pg-t" class="text-xl font-bold text-white">BookBil Jæren</h1>
+                <button id="install-icon" onclick="installPwa()" class="hidden text-blue-400 bg-blue-900/30 p-1 rounded-full hover:bg-blue-900/50 transition-colors">
+                    <span class="material-icons-round text-sm">download</span>
+                </button>
+            </div>
             <p id="u-disp" class="text-xs text-slate-500 font-medium">Laster bruker...</p>
         </div>
         <!-- Quick Stats Container (Hidden on subpages) -->
@@ -292,7 +285,7 @@ input, select, textarea {
     <div class="text-center mt-20 text-slate-500">Laster...</div>
  </main>
  
- <div id="foot" class="fixed bottom-24 w-full text-center pb-2 pointer-events-none z-30"><p class="text-[10px] text-slate-400 bg-[#0f172a]/80 backdrop-blur inline-block px-2 rounded border border-slate-700">Oppdatert: <span id="l-upd">--:--</span></p></div>
+ <!-- Removed #foot element as requested -->
 
  <!-- BOTTOM NAVIGATION -->
  <nav class="bottom-nav fixed bottom-0 w-full flex justify-between items-center px-8 z-40">
@@ -379,8 +372,9 @@ input, select, textarea {
  </div>
 </div>
 
-<!-- SØK -->
-<div id="m-search" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-search')">
+<!-- SØK (Finn Ledig) - Added Touch Listeners here -->
+<div id="m-search" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-search')"
+     ontouchstart="handleTouchStart(event)" ontouchend="modalTouchEnd(event, 'm-search')">
  <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl relative" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-search',1)"><div class="bar"></div></div>
   <button onclick="closeM('m-search')" class="absolute top-4 right-4 text-slate-500 p-2"><span class="material-icons-round">close</span></button>
@@ -541,12 +535,13 @@ const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
-let s = { u:null, bid:null, c:[], r:[], sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null };
+let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true' };
 let touchStartX = 0;
+let touchStartY = 0; // Added for modal swipe detection
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const toast = $id('pwa-toast'); if(toast) { toast.classList.remove('hidden'); setTimeout(() => toast.classList.add('hidden'), 60000); }});
-async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); const { outcome } = await s.deferredPrompt.userChoice; if (outcome === 'accepted') { s.deferredPrompt = null; $id('pwa-toast').classList.add('hidden'); $id('pwa-settings-btn').classList.add('hidden'); } } }
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); });
+async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); const { outcome } = await s.deferredPrompt.userChoice; if (outcome === 'accepted') { s.deferredPrompt = null; $id('install-icon').classList.add('hidden'); $id('pwa-settings-btn').classList.add('hidden'); } } }
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
 window.addEventListener('online', () => $id('offline-msg').classList.add('hidden'));
 window.addEventListener('offline', () => $id('offline-msg').classList.remove('hidden'));
@@ -556,14 +551,24 @@ window.onpopstate = (event) => { if (s.activeModal) closeM(s.activeModal, false)
 function openM(id) { if (s.activeModal === id) return; $id(id).classList.remove('hidden'); s.activeModal = id; history.pushState({modal: id}, null, ""); }
 function closeM(id, back=true) { $id(id).classList.add('hidden'); s.activeModal = null; if(back) history.back(); }
 
-function tab(v) { s.v=v; render(); updNav(v); if(v === 'cars') load(); }
+function tab(v) { 
+    s.v=v; 
+    render(); 
+    updNav(v); 
+    if(v === 'cars') load(); 
+    if(v === 'logg') loadFullHistory(); 
+}
 function updNav(v) { 
     const tc = $id('nav-btn-cars'); const tm = $id('nav-btn-more');
     tc.className = "flex flex-col items-center justify-center w-16 text-slate-500 transition-colors"; tm.className = "flex flex-col items-center justify-center w-16 text-slate-500 transition-colors";
     if(['cars','res','mine'].includes(v)) tc.className = "flex flex-col items-center justify-center w-16 text-blue-500 transition-colors"; else tm.className = "flex flex-col items-center justify-center w-16 text-blue-500 transition-colors";
 }
 
-function handleTouchStart(e) { touchStartX = e.changedTouches[0].screenX; }
+function handleTouchStart(e) { 
+    touchStartX = e.changedTouches[0].screenX; 
+    touchStartY = e.changedTouches[0].screenY;
+}
+
 function handleTouchEnd(e) {
     if(!['cars','res','mine'].includes(s.v)) return;
     const diff = touchStartX - e.changedTouches[0].screenX;
@@ -576,12 +581,28 @@ function handleTouchEnd(e) {
     }
 }
 
+// NY: Modal Swipe Logic
+let modalTouchX = 0;
+let modalTouchY = 0;
+function modalTouchEnd(e, id) {
+    const diffX = e.changedTouches[0].screenX - touchStartX; // Use global touchStartX set by ontouchstart
+    const diffY = e.changedTouches[0].screenY - touchStartY;
+    
+    // Check if horizontal swipe right (Back) and mostly horizontal
+    if (diffX > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+        // Check if target is inside a scrollable timeline
+        const tl = e.target.closest('.timeline-scroll');
+        if (tl && tl.scrollLeft > 0) return; // Allow timeline scrolling if not at start
+        
+        closeM(id);
+    }
+}
+
 function togMenu() { $id('more-menu').classList.toggle('open'); $id('menu-bg').classList.toggle('open'); }
 function openActionMenu() { openM('m-action'); }
 async function sendOtp() {
     const e = $id('l-email').value.trim().toLowerCase();
     if (!e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
-    // Regex for 3 letters + 3 digits
     const bidPattern = /^[a-zæøå]{3}\d{3}@politiet\.no$/;
     if (!bidPattern.test(e)) return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
 
@@ -597,13 +618,33 @@ function swipe(e,id,m=0) { e.preventDefault(); const start=e.clientY; const fn=(
 async function load() {
     if(!s.u || (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName))) return;
     try {
-        const [c,r,u, conf] = await Promise.all([ _s.from('biler').select('*').order('bil'), _s.from('bookinger').select('*'), _s.from('brukere').select('epost, varsel').eq('brukernavn', s.bid).maybeSingle(), _s.from('konfigurasjon').select('*').eq('nokkel', 'bilansvarlig_epost').maybeSingle() ]);
+        const cutOffDate = new Date();
+        cutOffDate.setDate(cutOffDate.getDate() - 30);
+        
+        const [c,r,u, conf] = await Promise.all([ 
+            _s.from('biler').select('*').order('bil'), 
+            _s.from('bookinger').select('*').gte('slutt_tid', cutOffDate.toISOString()), 
+            _s.from('brukere').select('epost, varsel').eq('brukernavn', s.bid).maybeSingle(), 
+            _s.from('konfigurasjon').select('*').eq('nokkel', 'bilansvarlig_epost').maybeSingle() 
+        ]);
+        
         s.c=c.data||[]; s.r=r.data||[]; 
         if(u.data) { s.savedEmail = u.data.epost; s.varsel = u.data.varsel; }
         if(conf.data) { s.bilansvarlig = conf.data.verdi; }
-        $id('l-upd').innerText = new Date().toLocaleTimeString();
+        
+        // Oppdatert header-visning
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+        $id('u-disp').innerHTML = `Bruker: ${s.bid} <span class="opacity-50 mx-1">•</span> <span class="material-icons-round text-xs align-middle opacity-50">refresh</span> <span class="font-normal opacity-75">${time}</span>`;
+        
         render();
     } catch(e) { console.error(e); }
+}
+
+async function loadFullHistory() {
+    const listDiv = document.querySelector('#main .space-y-3'); 
+    if(listDiv) listDiv.innerHTML = "<div class='text-center text-slate-500 mt-10'>Laster full historikk...</div>";
+    const { data, error } = await _s.from('bookinger').select('*').order('start_tid', { ascending: false }).limit(1000);
+    if(!error) { s.fullLog = data; render(); }
 }
 
 function render() {
@@ -637,49 +678,70 @@ function calcStats() {
     $id('stat-free').innerText = free; $id('stat-total').innerText = total;
 }
 
-// HELPER FOR BADGES
-function getBadgesHtml(b, large=false, showResp=true) {
+function getBadgesHtml(b, large=false, showResp=true, showType=true) {
     if(!b) return '';
     let html = '';
     const size = large ? "text-[10px] px-2 py-1" : "text-[9px] px-1.5 py-0.5";
     const iconSize = large ? "text-xs" : "text-[10px]";
-    
-    // Type Badge (Uniformert/Sivil same color)
-    if(b.kategori === 'Uniformert' || b.kategori === 'Sivil') {
-        html += `<span class="${size} bg-blue-900/40 text-blue-300 rounded border border-blue-800 font-bold uppercase whitespace-nowrap">${b.kategori.toUpperCase()}</span>`;
-    } else if(b.kategori === 'Admin') {
-        html += `<span class="${size} bg-gray-800 text-gray-500 rounded border border-gray-700 font-bold uppercase whitespace-nowrap">ADMIN</span>`;
+    if(showType) {
+        if(b.kategori === 'Uniformert') { html += `<span class="${size} bg-blue-600 text-white rounded border border-blue-500 font-bold uppercase whitespace-nowrap">${b.kategori.toUpperCase()}</span>`; } 
+        else if(b.kategori === 'Sivil') { html += `<span class="${size} bg-blue-900/40 text-blue-300 rounded border border-blue-800 font-bold uppercase whitespace-nowrap">${b.kategori.toUpperCase()}</span>`; } 
+        else if(b.kategori === 'Admin') { html += `<span class="${size} bg-gray-800 text-gray-500 rounded border border-gray-700 font-bold uppercase whitespace-nowrap">ADMIN</span>`; }
     }
-
-    // Ansvarlig Badge - ONLY if showResp is true
-    if(showResp && b.ansvarlig) {
-        html += `<span class="${size} bg-slate-700 text-slate-300 rounded border border-slate-600 font-bold uppercase whitespace-nowrap flex items-center gap-1"><span class="material-icons-round ${iconSize}">person</span> ${b.ansvarlig}</span>`;
-    }
+    if(showResp && b.ansvarlig) { html += `<span class="${size} bg-slate-700 text-slate-300 rounded border border-slate-600 font-bold uppercase whitespace-nowrap flex items-center gap-1"><span class="material-icons-round ${iconSize}">person</span> ${b.ansvarlig}</span>`; }
     return html;
 }
 
 function rCars(c) {
     const now = new Date();
-    const today = new Date(); today.setHours(0,0,0,0);
-    const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+    const twoHours = 2 * 60 * 60 * 1000;
+    let myNextTrip = s.r.find(r => r.bid === s.bid && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now);
+    let tripStatus = "active";
+    if (!myNextTrip) {
+        myNextTrip = s.r.filter(r => r.bid === s.bid && new Date(r.start_tid) > now && (new Date(r.start_tid) - now) < twoHours).sort((a,b) => new Date(a.start_tid) - new Date(b.start_tid))[0];
+        tripStatus = "upcoming";
+    }
+
+    if (myNextTrip) {
+        const tripCar = myNextTrip.bil;
+        const st = new Date(myNextTrip.start_tid);
+        const en = new Date(myNextTrip.slutt_tid);
+        const card = document.createElement('div');
+        card.className = "bg-blue-900/40 border border-blue-500/50 p-4 rounded-xl mb-6 shadow-lg relative overflow-hidden cursor-pointer active:scale-95 transition-transform";
+        card.onclick = () => book(tripCar, myNextTrip.id);
+        let headerText = "", timeText = "", actionBtn = "";
+        if (tripStatus === "active") {
+            headerText = `<span class="flex items-center gap-1 text-emerald-400 font-black uppercase text-[10px] tracking-widest"><span class="material-icons-round text-sm animate-pulse">circle</span> Pågående tur</span>`;
+            timeText = `<div class="text-xs text-blue-200 mt-1">Leveringsfrist: <span class="font-mono font-bold text-white">${fmtT(en)}</span></div>`;
+            actionBtn = `<button onclick="event.stopPropagation();ret(${myNextTrip.id},'${tripCar}')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg text-xs shadow-lg transition-colors">LEVER NÅ</button>`;
+        } else {
+            const minutesToStart = Math.ceil((st - now) / 60000);
+            headerText = `<span class="flex items-center gap-1 text-amber-400 font-black uppercase text-[10px] tracking-widest"><span class="material-icons-round text-sm">schedule</span> Starter snart</span>`;
+            timeText = `<div class="text-xs text-blue-200 mt-1">Starter om <span class="font-mono font-bold text-white">${minutesToStart} min</span> (${fmtT(st)})</div>`;
+            actionBtn = `<button onclick="event.stopPropagation();book('${tripCar}', ${myNextTrip.id})" class="bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-2 px-4 rounded-lg text-xs shadow-lg transition-colors">SE KORT</button>`;
+        }
+        card.innerHTML = `<div class="flex justify-between items-center relative z-10"><div>${headerText}<h2 class="text-2xl font-black text-white mt-1 leading-none">${tripCar}</h2>${timeText}</div><div>${actionBtn}</div></div><div class="absolute -right-6 -bottom-8 opacity-10 pointer-events-none"><span class="material-icons-round text-9xl text-white">directions_car</span></div>`;
+        c.appendChild(card);
+    }
 
     const wrapper = document.createElement('div');
     wrapper.className = "flex flex-col rounded-xl overflow-hidden shadow-lg border border-slate-700/50 mb-6";
-
     const sortedCars = [...s.c].sort((a, b) => {
-        const actA = s.r.find(r => r.bil === a.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
-        const actB = s.r.find(r => r.bil === b.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
-        if (actA && !actB) return -1;
-        if (!actA && actB) return 1;
+        const actA = s.r.some(r => r.bil === a.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
+        const actB = s.r.some(r => r.bil === b.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
+        if (actA && !actB) return -1; if (!actA && actB) return 1;
+        const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 };
+        const pA = catOrder[a.kategori] || 4; const pB = catOrder[b.kategori] || 4;
+        if (pA !== pB) return pA - pB;
         return a.bil.localeCompare(b.bil);
     });
 
+    const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1); tomorrow.setHours(0,0,0,0);
+
     sortedCars.forEach(b => {
         if(s.h.includes(b.bil)) return;
-        
         const act = s.r.find(r => r.bil===b.bil && new Date(r.start_tid)<=now && new Date(r.slutt_tid)>=now);
         const nxt = s.r.filter(r => r.bil===b.bil && new Date(r.start_tid)>now).sort((a,x)=>new Date(a.start_tid)-new Date(x.start_tid))[0];
-        
         let stripeClass="c-green", titleColor="text-white", subText="Ledig nå", subColor="text-emerald-500", rowBg="", rowOp="opacity-100";
         let actionBtn = `<button onclick="event.stopPropagation();book('${b.bil}')" class="btn-action btn-green">RESERVER</button>`;
 
@@ -696,53 +758,27 @@ function rCars(c) {
                  stripeClass="c-purple"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-70";
                  actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
             } else {
-                 if(act.bid === s.bid) {
-                     stripeClass="c-blue"; rowBg="bg-blue-900/10"; subText=`Min tur (Frist: ${fmtT(act.slutt_tid)})`; subColor="text-blue-300";
-                     actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}')" class="btn-action btn-primary">LEVER</button>`;
-                 } else {
-                     actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Ledig</span><span class="block text-xs font-bold text-slate-300 font-mono">${fmtT(act.slutt_tid)}</span></div>`;
-                 }
+                 actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Ledig</span><span class="block text-xs font-bold text-slate-300 font-mono">${fmtT(act.slutt_tid)}</span></div>`;
             }
         }
         else if(nxt) { 
             const nxtStart = new Date(nxt.start_tid);
-            if (nxtStart < tomorrow) {
-                stripeClass="c-yellow"; subText = `Ledig til kl ${fmtT(nxt.start_tid)}`; subColor="text-amber-500";
-            } else {
-                stripeClass="c-green"; subText = `Ledig til ${fmtDD(nxt.start_tid)} kl ${fmtT(nxt.start_tid)}`; subColor="text-emerald-400";
-            }
-        } else {
-            subText = "Ledig nå";
-        }
-
+            if (nxtStart < tomorrow) { stripeClass="c-yellow"; subText = `Ledig til kl ${fmtT(nxt.start_tid)}`; subColor="text-amber-500"; } 
+            else { stripeClass="c-green"; subText = `Ledig til ${fmtDD(nxt.start_tid)} kl ${fmtT(nxt.start_tid)}`; subColor="text-emerald-400"; }
+        } else { subText = "Ledig nå"; }
         if (b.status === 'Aktiv' && b.kommentar) { subText = `⚠ ${b.kommentar}`; subColor = "text-yellow-500"; }
 
         const row = document.createElement('div');
         row.className = `fleet-row ${rowBg} ${rowOp}`;
         row.onclick = () => book(b.bil);
-
         let minBilTag = (act && act.bid === s.bid) ? `<span class="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold uppercase ml-2 flex-shrink-0">Min bil</span>` : '';
-        
-        // Use helper with NO RESPONSIBLE PERSON for list view
-        row.innerHTML = `
-        <div class="flex items-center flex-1 min-w-0 gap-3">
-            <div class="status-stripe ${stripeClass}"></div>
-            <div class="flex-1 min-w-0 py-1 overflow-hidden">
-                <div class="flex items-center gap-1 overflow-x-auto no-scrollbar mask-right">
-                    <h2 class="text-base font-bold ${titleColor} leading-tight whitespace-nowrap mr-1 flex-shrink-0">${b.bil}</h2>
-                    ${getBadgesHtml(b, false, false)} 
-                    ${minBilTag}
-                </div>
-                <p class="text-xs ${subColor} mt-0.5 font-medium truncate">${subText}</p>
-            </div>
-        </div>
-        <div class="flex-shrink-0 ml-2">
-            ${actionBtn}
-        </div>`;
+        row.innerHTML = `<div class="flex items-center flex-1 min-w-0 gap-3"><div class="status-stripe ${stripeClass}"></div><div class="flex-1 min-w-0 py-1 overflow-hidden"><div class="flex items-center gap-1 overflow-x-auto no-scrollbar mask-right"><h2 class="text-base font-bold ${titleColor} leading-tight whitespace-nowrap mr-1 flex-shrink-0">${b.bil}</h2>${getBadgesHtml(b, false, s.visResp, s.visType)} ${minBilTag}</div><p class="text-xs ${subColor} mt-0.5 font-medium truncate">${subText}</p></div></div><div class="flex-shrink-0 ml-2">${actionBtn}</div>`;
         wrapper.appendChild(row);
     });
     c.appendChild(wrapper);
 }
+
+// ... Rest of functions (rRes, expressBook, etc) remain similar ...
 
 function rRes(c, mineOnly) {
     const now=new Date(); let html = `<div class="space-y-3">`;
@@ -779,19 +815,18 @@ function renderExpressList() {
     const availableCars = s.c.filter(b => {
         if(b.status !== 'Aktiv' || s.h.includes(b.bil)) return false;
         return !s.r.some(r => { const rStart = new Date(r.start_tid); const rEnd = new Date(r.slutt_tid); return r.bil === b.bil && now < rEnd && endTime > rStart; });
-    }).sort((a,b) => a.bil.localeCompare(b.bil));
+    }).sort((a,b) => {
+        const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 };
+        const pA = catOrder[a.kategori] || 4; const pB = catOrder[b.kategori] || 4;
+        if (pA !== pB) return pA - pB;
+        return a.bil.localeCompare(b.bil);
+    });
     list.innerHTML = "";
     if(availableCars.length === 0) { list.innerHTML = "<div class='text-center text-red-400 py-4 font-bold'>Ingen ledige biler.</div>"; return; }
     availableCars.forEach(b => {
         const btn = document.createElement('button');
         btn.className = "w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-left font-bold text-white hover:bg-slate-700 flex justify-between items-center mb-2 shadow-lg overflow-hidden";
-        // SINGLE LINE LAYOUT
-        btn.innerHTML = `
-        <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
-            <span class="text-lg flex-shrink-0">${b.bil}</span>
-            <div class="flex items-center gap-1 overflow-hidden">${getBadgesHtml(b, true, true)}</div>
-        </div>
-        <span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded flex-shrink-0 ml-2">LEDIG</span>`;
+        btn.innerHTML = `<div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0"><span class="text-lg flex-shrink-0">${b.bil}</span><div class="flex items-center gap-1 overflow-hidden">${getBadgesHtml(b, true, true, true)}</div></div><span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded flex-shrink-0 ml-2">LEDIG</span>`;
         btn.onclick = () => initExpressConfirm(b.bil, now, endTime);
         list.appendChild(btn);
     });
@@ -799,11 +834,9 @@ function renderExpressList() {
 
 function initExpressConfirm(car, start, end) {
     s.expCar = car; s.expStart = start; s.expEnd = end;
-    // Add extra info here as well?
     const b = s.c.find(x => x.bil === car);
     let extra = "";
     if(b) extra = `<br><span class="text-slate-500 font-normal text-[10px]">${b.kategori||''} ${b.ansvarlig ? '• '+b.ansvarlig : ''}</span>`;
-
     $id('exp-conf-txt').innerHTML = `Du velger ${car} ${extra}<br>for perioden NÅ - ${fmtT(end)}`;
     $id('m-express-list').classList.add('hidden');
     openM('m-express-conf');
@@ -851,22 +884,10 @@ function toggleVerkstedMode(on) {
 }
 
 function setupModal(title, sub="Ny reservasjon") {
-    // 1. Find car data
     const carObj = s.c.find(x => x.bil === title);
-    
-    // 2. Build HTML for Title + Badges inside b-title
     let html = `<span class="truncate">${title}</span>`; 
-    
-    if (carObj) {
-        // Wrapper for badges
-        html += `<div class="flex items-center gap-1 ml-2 flex-shrink-0">`;
-        html += getBadgesHtml(carObj); // Use helper here too
-        html += `</div>`;
-    }
-    
-    // 3. Inject into b-title
+    if (carObj) { html += `<div class="flex items-center gap-1 ml-2 flex-shrink-0">` + getBadgesHtml(carObj) + `</div>`; }
     $id('b-title').innerHTML = html;
-    
     const subEl = $id('b-sub'); if(subEl) subEl.innerText=sub;
     const act=s.r.find(r=>r.bil===title && new Date(r.start_tid)<=new Date() && new Date(r.slutt_tid)>=new Date());
     $id('b-alert').classList.add('hidden'); $id('b-info').classList.add('hidden'); $id('btn-react').classList.add('hidden');
@@ -910,22 +931,11 @@ function handleTimelineScroll(mode) {
     const el = $id(mode === 'search' ? 'ts-search' : 'ts-book');
     const disp = $id(mode === 'search' ? 's-tl-date-disp' : 'b-tl-date-disp');
     if(!el || !disp) return;
-    
-    const dayWidth = 44 * 48;
-    const scrollX = el.scrollLeft;
-    const dayIndex = Math.floor((scrollX + 100) / dayWidth); 
-    
-    const d = new Date();
-    d.setDate(d.getDate() + dayIndex);
-    
-    const today = new Date();
-    let text = fmtDD(d);
-    
+    const dayWidth = 44 * 48; const scrollX = el.scrollLeft; const dayIndex = Math.floor((scrollX + 100) / dayWidth); 
+    const d = new Date(); d.setDate(d.getDate() + dayIndex);
+    const today = new Date(); let text = fmtDD(d);
     if(d.toDateString() === today.toDateString()) text = "I DAG";
-    else {
-        const tom = new Date(); tom.setDate(today.getDate() + 1);
-        if(d.toDateString() === tom.toDateString()) text = "I MORGEN";
-    }
+    else { const tom = new Date(); tom.setDate(today.getDate() + 1); if(d.toDateString() === tom.toDateString()) text = "I MORGEN"; }
     disp.innerText = text;
 }
 
@@ -933,40 +943,21 @@ function togMulti(el, c) { el.classList.toggle('selected'); if(s.sel.includes(c)
 
 function renderTimeline(car, mode) {
     const prefix = mode === 'search' ? 's' : 'b'; const el = $id(mode === 'search' ? 'timeline-search' : 'timeline'); el.innerHTML = "";
-    const now = new Date(); 
-    const daysToRender = 14;
-    const totalSlots = daysToRender * 48;
+    const now = new Date(); const daysToRender = 14; const totalSlots = daysToRender * 48;
     const startOfAll = new Date(); startOfAll.setHours(0,0,0,0);
     const selSt = getVal(prefix, 'st'); const selEn = getVal(prefix, 'en');
-    
     for (let i = 0; i < totalSlots; i++) { 
         const slot = document.createElement('div'); slot.className = 'time-block';
-        const slotTime = new Date(startOfAll.getTime() + i * 1800000); 
-        const h = slotTime.getHours();
+        const slotTime = new Date(startOfAll.getTime() + i * 1800000); const h = slotTime.getHours();
         if (i % 2 === 0) { const lbl = document.createElement('div'); lbl.className = 'time-label'; lbl.innerText = h.toString().padStart(2,'0'); slot.appendChild(lbl); }
-        
-        // NEW: More visible day separator
         if (i > 0 && i % 48 === 0) { slot.style.borderLeft = "3px dashed #94a3b8"; }
-
         let busy = false;
-        if(mode === 'book' && car) {
-            s.r.forEach(r => {
-                if(r.bil === car && r.id != s.editId) {
-                    const rSt = new Date(r.start_tid); const rEn = new Date(r.slutt_tid); const slotEnd = new Date(slotTime.getTime() + 1800000);
-                    if (rSt < slotEnd && rEn > slotTime) busy = true;
-                }
-            });
-        }
-        
+        if(mode === 'book' && car) { s.r.forEach(r => { if(r.bil === car && r.id != s.editId) { const rSt = new Date(r.start_tid); const rEn = new Date(r.slutt_tid); const slotEnd = new Date(slotTime.getTime() + 1800000); if (rSt < slotEnd && rEn > slotTime) busy = true; } }); }
         const slotEnd = new Date(slotTime.getTime() + 1800000);
         if (slotEnd < now) slot.classList.add('past');
-        
         if (busy) slot.classList.add('busy');
-        
-        if (selSt && selEn && selSt < selEn) {
-             if (Math.abs(selSt - slotTime) < 1000) slot.classList.add('start'); else if (Math.abs(selEn - slotEnd) < 1000) slot.classList.add('end'); else if (slotTime > selSt && slotEnd < selEn) slot.classList.add('range');
-        } else if (selSt && Math.abs(selSt - slotTime) < 1000) slot.classList.add('start'); 
-        
+        if (selSt && selEn && selSt < selEn) { if (Math.abs(selSt - slotTime) < 1000) slot.classList.add('start'); else if (Math.abs(selEn - slotEnd) < 1000) slot.classList.add('end'); else if (slotTime > selSt && slotEnd < selEn) slot.classList.add('range'); } 
+        else if (selSt && Math.abs(selSt - slotTime) < 1000) slot.classList.add('start'); 
         slot.onclick = (e) => { e.stopPropagation(); handleBlockClick(slotTime, mode); };
         el.appendChild(slot);
     }
@@ -1090,13 +1081,22 @@ function findC() {
     if(st >= en) return showToast("Velg slutt-tid", "error");
     const av = s.c.filter(b => b.status==='Aktiv' && !s.h.includes(b.bil) && !s.r.some(r=>r.bil===b.bil && st<new Date(r.slutt_tid) && en>new Date(r.start_tid)));
     if(!av.length) l.innerHTML="<div class='text-center text-red-400'>Ingen ledige.</div>";
+    
+    // Sort logic as requested: Uniformert > Sivil > Admin
+    av.sort((a,b) => {
+        const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 };
+        const pA = catOrder[a.kategori] || 4;
+        const pB = catOrder[b.kategori] || 4;
+        if (pA !== pB) return pA - pB;
+        return a.bil.localeCompare(b.bil);
+    });
+
     av.forEach(b => {
-        // Enkel liste også her, nå med "one-line" layout
         l.innerHTML += `
         <button onclick="found('${b.bil}')" class="w-full bg-slate-800 p-3 rounded flex justify-between border border-emerald-900 text-white font-bold mb-2 items-center overflow-hidden">
             <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
                 <span class="block flex-shrink-0">${b.bil}</span>
-                <div class="flex items-center gap-1 overflow-hidden">${getBadgesHtml(b, true, true)}</div>
+                <div class="flex items-center gap-1 overflow-hidden">${getBadgesHtml(b, true, true, true)}</div>
             </div>
             <span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded flex-shrink-0 ml-2">OK</span>
         </button>`;
@@ -1112,16 +1112,12 @@ function found(c) {
 function ret(id, c, type='standard') { s.rid=id; s.rc=c; s.rtype=type; $id('r-name').innerText=c; $id('r-comm').value=""; openM('m-ret'); }
 
 async function subRet(id, c) {
-    // If called with arguments (direct action), update state first
     if(id && c) { s.rid = id; s.rc = c; }
-    
     const cm=$id('r-comm').value || ""; 
     const d={slutt_tid:new Date().toISOString()}; 
     if(cm) d.kommentar=cm;
-    
     await _s.from('bookinger').update(d).eq('id',s.rid);
     if(cm) { await _s.from('biler').update({kommentar:cm}).eq('bil',s.rc); logMsg('Avvik ved levering', cm, s.rc); }
-    
     closeM('m-ret'); 
     load(); 
     showToast("Levert!", "success");
@@ -1129,16 +1125,13 @@ async function subRet(id, c) {
 
 async function react() { if(confirm(`Vil du gjøre ${s.co.bil} tilgjengelig igjen?\nNåværende status: ${s.co.status}`)) { await _s.from('biler').update({status:'Aktiv',kommentar:null}).eq('id',s.co.id); closeM('m-book'); load(); showToast("Bil aktivert", "success"); } }
 
-// ADMIN
 function rAdm(c) {
-    // ... existing rAdm code ...
     let html = `<div class="flex flex-wrap gap-2 mb-4 bg-slate-800 p-3 rounded-xl border border-slate-700">`;
     s.c.forEach(b => {
        let colorClass = 'pill-gray'; if (b.status === 'Aktiv') { if (b.kommentar) colorClass = 'pill-yellow'; else colorClass = 'pill-green'; }
        const carJson = JSON.stringify(b).replace(/"/g, '&quot;');
        html += `<button onclick="openAdmEdit(${carJson})" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold">${b.bil}</button>`;
     });
-    // ... rest of rAdm code ...
     html += `<button onclick="addC()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-blue-900 text-blue-200 border-blue-700">+ NY</button><button onclick="showAdmHelp()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300 border-slate-500">?</button></div>`;
     html += `<div class="text-center text-slate-500 italic mt-10">Trykk på en bil for å endre</div>`;
     c.innerHTML = html;
@@ -1192,20 +1185,45 @@ async function addC() { const v = prompt("Navn:"); if(v) { await _s.from('biler'
 async function delC(id,n) { if(confirm("Slette?")) { await _s.from('bookinger').delete().eq('bil',n); await _s.from('biler').delete().eq('id',id); s.admCar=null; closeM('m-admin-edit'); load(); showToast("Slettet", "info"); } }
 
 function rLog(c) {
-    const l = s.r.sort((a,b)=>new Date(b.start_tid)-new Date(a.start_tid));
-    c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV</button><div class="space-y-3">` + l.map(h => {
+    if(!s.fullLog) {
+        c.innerHTML = "<div class='text-center text-slate-500 mt-10'>Henter historikk...</div>";
+        return;
+    }
+    const l = s.fullLog; 
+    c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV (HISTORIKK)</button><div class="space-y-3">` + l.map(h => {
         const dateOpt = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }; const dateStr = new Date(h.start_tid).toLocaleDateString('no-NO', dateOpt);
         return `<div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-sm"><div class="flex justify-between font-bold text-white mb-1"><span>${h.bil}</span><span class="text-slate-400">${h.bid}</span></div><div class="text-slate-400 text-xs mb-1 capitalize">${dateStr} | ${fmtT(h.start_tid)}-${fmtT(h.slutt_tid)}</div><div class="text-slate-300 italic">"${h.formal}"</div>${h.kommentar?`<div class="mt-1 text-amber-400 bg-amber-900/20 px-2 py-1 rounded inline-block text-xs">${h.kommentar}</div>`:''}</div>`;
     }).join('') + `</div>`;
 }
 
-function csv() { const t = "Bil,Bruker,Start,Slutt,Formål,Merknad\n" + s.r.map(x => `${x.bil},${x.bid},${fmtD(x.start_tid)} ${fmtT(x.start_tid)},${fmtD(x.slutt_tid)} ${fmtT(x.slutt_tid)},"${x.formal}",${x.kommentar||''}`).join('\n'); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv;charset=utf-8;' })); a.download = "logg.csv"; a.click(); }
+async function csv() { 
+    if(!s.fullLog) {
+        showToast("Laster data...", "info");
+        await loadFullHistory();
+    }
+    const t = "Bil,Bruker,Start,Slutt,Formål,Merknad\n" + s.fullLog.map(x => `${x.bil},${x.bid},${fmtD(x.start_tid)} ${fmtT(x.start_tid)},${fmtD(x.slutt_tid)} ${fmtT(x.slutt_tid)},"${x.formal}",${x.kommentar||''}`).join('\n'); 
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv;charset=utf-8;' })); a.download = "logg.csv"; a.click(); 
+}
 
 function rSet(c) {
     let p = s.c.map(b => `<button onclick="tVis('${b.bil}')" class="px-3 py-2 rounded-lg text-xs font-bold ${s.h.includes(b.bil)?'bg-slate-700 text-slate-400 border border-slate-600':'bg-blue-600 text-white border border-blue-500'}">${b.bil}</button>`).join('');
-    c.innerHTML = `<div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-4"><h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span class="material-icons-round text-blue-500">person</span> Min Profil & Visning</h2><div class="mb-4"><label class="text-xs text-slate-500 font-bold uppercase">Innlogget som</label><p class="text-xl font-black text-white">${s.bid}</p></div><div class="border-t border-slate-700 pt-4 mb-4"><p class="text-xs text-slate-400 mb-3 font-bold uppercase">Velg biler i oversikten</p><div class="flex flex-wrap gap-2">${p}</div></div><div class="border-t border-slate-700 pt-4"><div class="flex items-center justify-between mb-2"><label class="text-sm text-slate-300 font-bold">Aktiver e-postvarsling</label><input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-5 h-5 accent-blue-600"></div><p class="text-xs text-slate-500 mb-3">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p><div class="flex gap-2"><input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-lg text-sm bg-slate-900 border border-slate-600 text-white"><button onclick="updEm()" class="bg-blue-600 px-4 rounded-lg text-white font-bold text-xs">LAGRE</button></div></div></div><div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-4"><h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span class="material-icons-round text-blue-500">help</span> Hjelp & App</h2><div class="space-y-2"><button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-slate-700 p-3 rounded-lg font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600"><span class="material-icons-round">auto_stories</span> Åpne Brukermanual</button><button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-lg font-bold border border-blue-800 flex items-center justify-center gap-2"><span class="material-icons-round">download</span> Installer som App</button><a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-slate-700 p-3 rounded-lg font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 text-sm"><span class="material-icons-round text-sm">mail</span> Melde feil</a></div></div><div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mb-4"><h2 class="text-lg font-bold text-slate-400 mb-4 flex items-center gap-2"><span class="material-icons-round text-slate-500">admin_panel_settings</span> Administrasjon</h2><div class="mb-6"><p class="text-xs text-slate-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p><div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div><div class="flex gap-2"><input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-lg text-sm bg-slate-800 border border-slate-700 text-white"><button onclick="addAdminEmail()" class="bg-slate-700 border border-slate-600 px-4 rounded-lg text-white font-bold text-xs">LEGG TIL</button></div></div><details><summary class="text-sm font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors">Avansert: Slett data <span class="material-icons-round">expand_more</span></summary><div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30"><p class="text-xs text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p><button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-lg font-bold hover:bg-red-800 border border-red-700 shadow-lg">SLETT ALLE DATA</button></div></details></div>`;
+    c.innerHTML = `<div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-4"><h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span class="material-icons-round text-blue-500">person</span> Min Profil & Visning</h2><div class="mb-4"><label class="text-xs text-slate-500 font-bold uppercase">Innlogget som</label><p class="text-xl font-black text-white">${s.bid}</p></div><div class="border-t border-slate-700 pt-4 mb-4"><p class="text-xs text-slate-400 mb-3 font-bold uppercase">Velg biler i oversikten</p><div class="flex flex-wrap gap-2">${p}</div></div>
+    
+    <div class="border-t border-slate-700 pt-4 mb-4">
+        <p class="text-xs text-slate-400 mb-3 font-bold uppercase">Tilpass Visning</p>
+        <div class="flex items-center justify-between mb-2">
+            <label class="text-sm text-slate-300">Vis Biltyper (Piller)</label>
+            <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-5 h-5 accent-blue-600">
+        </div>
+        <div class="flex items-center justify-between">
+            <label class="text-sm text-slate-300">Vis Ansvarlig</label>
+            <input type="checkbox" onchange="togVis('visResp', this.checked)" ${s.visResp?'checked':''} class="w-5 h-5 accent-blue-600">
+        </div>
+    </div>
+
+    <div class="border-t border-slate-700 pt-4"><div class="flex items-center justify-between mb-2"><label class="text-sm text-slate-300 font-bold">Aktiver e-postvarsling</label><input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-5 h-5 accent-blue-600"></div><p class="text-xs text-slate-500 mb-3">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p><div class="flex gap-2"><input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-lg text-sm bg-slate-900 border border-slate-600 text-white"><button onclick="updEm()" class="bg-blue-600 px-4 rounded-lg text-white font-bold text-xs">LAGRE</button></div></div></div><div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-4"><h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span class="material-icons-round text-blue-500">help</span> Hjelp & App</h2><div class="space-y-2"><button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-slate-700 p-3 rounded-lg font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600"><span class="material-icons-round">auto_stories</span> Åpne Brukermanual</button><button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-lg font-bold border border-blue-800 flex items-center justify-center gap-2"><span class="material-icons-round">download</span> Installer som App</button><a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-slate-700 p-3 rounded-lg font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 text-sm"><span class="material-icons-round text-sm">mail</span> Melde feil</a></div></div><div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mb-4"><h2 class="text-lg font-bold text-slate-400 mb-4 flex items-center gap-2"><span class="material-icons-round text-slate-500">admin_panel_settings</span> Administrasjon</h2><div class="mb-6"><p class="text-xs text-slate-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p><div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div><div class="flex gap-2"><input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-lg text-sm bg-slate-800 border border-slate-700 text-white"><button onclick="addAdminEmail()" class="bg-slate-700 border border-slate-600 px-4 rounded-lg text-white font-bold text-xs">LEGG TIL</button></div></div><details><summary class="text-sm font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors">Avansert: Slett data <span class="material-icons-round">expand_more</span></summary><div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30"><p class="text-xs text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p><button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-lg font-bold hover:bg-red-800 border border-red-700 shadow-lg">SLETT ALLE DATA</button></div></details></div>`;
     renderAdminEmails();
-    if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); }
+    if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
 }
 function renderAdminEmails() {
     const list = $id('admin-email-list'); if(!list) return; list.innerHTML = "";
@@ -1217,6 +1235,7 @@ async function addAdminEmail() { const input = $id('s-admin-new-em'); const newE
 async function removeAdminEmail(email) { if(!confirm(`Fjerne ${email} som bilansvarlig?`)) return; let currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : []; currentEmails = currentEmails.filter(e => e !== email); await saveAdminConfig(currentEmails.join(',')); }
 async function saveAdminConfig(val) { const { error } = await _s.from('konfigurasjon').upsert({ nokkel: 'bilansvarlig_epost', verdi: val }); if(error) showToast("Feil ved lagring", "error"); else { s.bilansvarlig = val; renderAdminEmails(); showToast("Lagret!", "success"); } }
 function tVis(c) { s.h.includes(c) ? s.h=s.h.filter(x=>x!==c) : s.h.push(c); localStorage.setItem('h',JSON.stringify(s.h)); render(); }
+function togVis(k, v) { s[k] = v; localStorage.setItem(k, v); render(); if(s.v === 'cars') load(); }
 async function togVar(v) { s.varsel = v; const p = { brukernavn: s.bid, varsel: v }; if(s.savedEmail) p.epost = s.savedEmail; await _s.from('brukere').upsert(p, { onConflict: 'brukernavn' }); showToast("Innstilling lagret", "success"); }
 async function updEm() { const e = $id('s-em').value.trim(); if(!e) return showToast("Skriv e-post", "error"); const { error } = await _s.from('brukere').upsert({ brukernavn: s.bid, epost: e, varsel: s.varsel }, { onConflict: 'brukernavn' }); if(error) showToast("Feil.", "error"); else { s.savedEmail = e; showToast("Lagret.", "success"); } }
 async function nuke() { if(prompt("Skriv NULLSTILL for å slette alle data")==="NULLSTILL") { await _s.from('bookinger').delete().gt('id', 0); load(); showToast("Nullstilt.", "info"); } }
