@@ -152,37 +152,40 @@ input, select, textarea {
     border-radius: 8px !important;
 }
 
-/* Range Slider Styling */
+/* Range Slider Styling - ROBUST MOBILE UPDATE (COMPACT) */
 input[type=range] {
   -webkit-appearance: none;
   width: 100%;
   background: transparent;
-  height: 24px; /* Taller touch area */
+  height: 40px; /* Redusert fra 50px */
   position: relative;
   z-index: 20;
+  touch-action: none; /* Forhindrer scrolling mens man drar */
 }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  height: 28px;
-  width: 28px;
+  height: 44px; /* Mye større knapp (Apple standard touch size) */
+  width: 44px;
   border-radius: 50%;
   background: #3b82f6;
   cursor: pointer;
-  margin-top: -12px; /* Center on track */
+  margin-top: -14px; /* (TrackHeight 16px / 2) - (ThumbHeight 44px / 2) = 8 - 22 = -14px */
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  border: 3px solid #fff;
+  border: 4px solid #fff; /* Tykkere hvit kant */
   transition: transform 0.1s;
 }
 input[type=range]:active::-webkit-slider-thumb {
-  transform: scale(1.2);
+  transform: scale(1.1);
   background: #2563eb;
 }
 input[type=range]::-webkit-slider-runnable-track {
   width: 100%;
-  height: 6px;
+  height: 16px; /* Tykkere spor */
   cursor: pointer;
-  background: #334155;
+  background: #0f172a; /* Mørkere bakgrunn for sporet (Aktivt mot box-farge) */
   border-radius: 99px;
+  border: 1px solid #334155; /* Kantlinje for dybde */
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); /* Indre skygge for dybde */
 }
 
 /* Modal overrides for Slate theme */
@@ -372,53 +375,57 @@ input[type=range]::-webkit-slider-runnable-track {
 <div id="m-express-list" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-express-list')">
     <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl" onclick="event.stopPropagation()">
         <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-express-list',1)"><div class="bar"></div></div>
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-between items-center mb-2">
             <h3 class="text-white font-bold text-lg">Ekspress</h3>
             <span class="text-xs text-slate-500 font-mono" id="exp-time-range"></span>
         </div>
         
-        <!-- ROBUST INFO BOX - REDUCED SIZE AND PADDING -->
-        <div class="bg-slate-800 border border-blue-500/30 rounded-xl p-3 mb-6 text-center shadow-lg relative z-10">
-            <span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest block mb-1">Du reserverer i</span>
-            <div class="flex items-baseline justify-center gap-2">
-                <span id="exp-slider-val" class="text-2xl font-black text-white">1 time</span>
+        <!-- INTEGRATED INFO AND SLIDER BOX -->
+        <div class="bg-slate-800 border border-blue-500/30 rounded-2xl p-3 mb-4 text-center shadow-xl relative overflow-visible">
+            
+            <!-- Info Text Content -->
+            <div class="mb-2">
+                <span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest block mb-0.5">Du reserverer i</span>
+                <div class="flex items-baseline justify-center gap-2 mb-1">
+                    <span id="exp-slider-val" class="text-3xl font-black text-white tracking-tight">1 time</span>
+                </div>
+                <div class="text-blue-300 text-[10px] font-bold bg-blue-900/40 inline-block px-2 py-0.5 rounded-full border border-blue-500/20">
+                    Ferdig kl <span id="exp-end-time" class="font-mono text-white">--:--</span>
+                </div>
             </div>
-            <div class="text-blue-300 text-xs font-bold mt-2 bg-blue-900/30 inline-block px-3 py-1 rounded-full border border-blue-500/20">
-                Ferdig kl <span id="exp-end-time" class="font-mono text-white">--:--</span>
-            </div>
-        </div>
 
-        <!-- NY ROBUST SLIDER -->
-        <div class="mb-6 px-2 relative">
-             <!-- TICKS (Hvite prikker) -->
-            <div class="flex justify-between px-[12px] mb-[-20px] relative z-0 opacity-40 pointer-events-none">
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+            <!-- Integrated Slider -->
+            <div class="relative w-full h-10 flex items-center justify-center">
+                 <!-- TICKS (Hvite prikker) -->
+                <div class="flex justify-between px-[12px] w-full absolute z-0 pointer-events-none">
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                </div>
+                
+                <input type="range" id="exp-slider" min="1" max="12" value="1" step="1"
+                       class="w-full h-full bg-transparent appearance-none cursor-pointer relative z-20 focus:outline-none"
+                       oninput="handleExpSlider(this.value)"
+                       ontouchstart="event.stopPropagation()"
+                       ontouchmove="event.stopPropagation()">
             </div>
             
-            <input type="range" id="exp-slider" min="1" max="12" value="1" step="1"
-                   class="w-full h-10 bg-transparent appearance-none cursor-pointer relative z-20 focus:outline-none"
-                   oninput="handleExpSlider(this.value)"
-                   ontouchstart="event.stopPropagation()"
-                   ontouchmove="event.stopPropagation()">
-            
-             <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-2 px-1">
+             <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-0 px-1">
                 <span>1t</span>
                 <span>12t</span>
             </div>
         </div>
 
-        <div id="express-options" class="space-y-2 overflow-y-auto pb-4"></div>
+        <div id="express-options" class="space-y-2 overflow-y-auto pb-4 max-h-[40vh]"></div>
     </div>
 </div>
 
