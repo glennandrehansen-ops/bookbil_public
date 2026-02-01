@@ -1121,11 +1121,34 @@ function renderTimeline(car, mode) {
         slot.onclick = (e) => { e.stopPropagation(); handleBlockClick(slotTime, mode); };
         el.appendChild(slot);
     }
+
+    // Add current time indicator line (AFTER blocks to be on top)
+    const diffMs = now - startOfAll;
+    if(diffMs >= 0 && diffMs < (daysToRender * 24 * 60 * 60 * 1000)) {
+        const diffMins = diffMs / 60000;
+        const slots = Math.floor(diffMins / 30);
+        const rem = diffMins % 30;
+        // 4px padding + slots * (42+2) + fraction of 42
+        const left = 4 + (slots * 44) + ((rem/30)*42);
+        const line = document.createElement('div');
+        line.className = 'time-now-line';
+        line.style.left = `${left}px`;
+        el.appendChild(line);
+    }
 }
 
 function handleBlockClick(time, mode) {
     const prefix = mode === 'search' ? 's' : 'b'; const now = new Date(); 
-    if(time < now) { time = new Date(now); time.setMinutes(Math.ceil(time.getMinutes()/30)*30, 0, 0); }
+    
+    // Logic update: Allow current slot
+    const currentSlotStart = new Date(now);
+    currentSlotStart.setSeconds(0,0);
+    currentSlotStart.setMinutes(Math.floor(currentSlotStart.getMinutes()/30)*30);
+
+    if(time < currentSlotStart) { 
+        time = currentSlotStart; 
+    }
+
     if (s.tlClick === 2) s.tlClick = 0;
     if (s.tlClick === 0) { setVal(prefix, 'st', time); setVal(prefix, 'en', time); s.tlClick = 1; } 
     else { const stTime = getVal(prefix, 'st'); if (time <= stTime) { setVal(prefix, 'st', time); setVal(prefix, 'en', time); } else { const endTime = new Date(time.getTime() + 1800000); setVal(prefix, 'en', endTime); s.tlClick = 2; } }
@@ -1420,3 +1443,5 @@ setInterval(load,10000);
 </script>
 </body>
 </html>
+
+
