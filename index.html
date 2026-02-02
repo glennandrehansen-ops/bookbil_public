@@ -35,6 +35,17 @@ body {
     overflow: hidden; 
 }
 
+/* --- UI LARGE MODE OVERRIDES --- */
+body.ui-large { font-size: 17px; }
+.ui-large .fleet-row { padding: 20px 16px; } /* Større rader */
+.ui-large .fleet-row h2 { font-size: 20px; } /* Større overskrift bil */
+.ui-large .btn-action { padding: 12px 20px; font-size: 13px; } /* Større knapper */
+.ui-large .stat-pill { padding: 14px 0; font-size: 13px; } /* Større tabs */
+.ui-large input, .ui-large select { height: 54px !important; font-size: 16px !important; }
+.ui-large .material-icons-round { transform: scale(1.2); } /* Større ikoner */
+/* Unntak for tidslinjen for å bevare layout */
+.ui-large .time-label { font-size: 11px; } 
+
 /* Fleet Row (Liste-element) */
 .fleet-row {
     background-color: #1e293b; /* Slate 800 */
@@ -157,21 +168,21 @@ input[type=range] {
   -webkit-appearance: none;
   width: 100%;
   background: transparent;
-  height: 40px; 
+  height: 40px; /* Redusert fra 50px */
   position: relative;
   z-index: 20;
-  touch-action: none; 
+  touch-action: none; /* Forhindrer scrolling mens man drar */
 }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  height: 44px;
+  height: 44px; /* Mye større knapp (Apple standard touch size) */
   width: 44px;
   border-radius: 50%;
   background: #3b82f6;
   cursor: pointer;
-  margin-top: -14px; 
+  margin-top: -14px; /* (TrackHeight 16px / 2) - (ThumbHeight 44px / 2) = 8 - 22 = -14px */
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  border: 4px solid #fff; 
+  border: 4px solid #fff; /* Tykkere hvit kant */
   transition: transform 0.1s;
 }
 input[type=range]:active::-webkit-slider-thumb {
@@ -180,12 +191,12 @@ input[type=range]:active::-webkit-slider-thumb {
 }
 input[type=range]::-webkit-slider-runnable-track {
   width: 100%;
-  height: 16px; 
+  height: 16px; /* Tykkere spor */
   cursor: pointer;
-  background: #0f172a; 
+  background: #0f172a; /* Mørkere bakgrunn for sporet (Aktivt mot box-farge) */
   border-radius: 99px;
-  border: 1px solid #334155; 
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); 
+  border: 1px solid #334155; /* Kantlinje for dybde */
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); /* Indre skygge for dybde */
 }
 
 /* Modal overrides for Slate theme */
@@ -619,9 +630,12 @@ const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
-let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true' };
+let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true', uiLarge: localStorage.getItem('uiLarge') === 'true' };
 let touchStartX = 0;
 let touchStartY = 0; 
+
+// Initialiser UI Size ved oppstart
+if(s.uiLarge) document.body.classList.add('ui-large');
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); });
@@ -1433,6 +1447,10 @@ function rSet(c) {
     <div class="border-t border-slate-700 pt-4 mb-4">
         <p class="text-xs text-slate-400 mb-3 font-bold uppercase">Tilpass Visning</p>
         <div class="flex items-center justify-between mb-2">
+            <label class="text-sm text-slate-300">Større tekst og knapper</label>
+            <input type="checkbox" onchange="togUiSize(this.checked)" ${s.uiLarge?'checked':''} class="w-5 h-5 accent-blue-600">
+        </div>
+        <div class="flex items-center justify-between mb-2">
             <label class="text-sm text-slate-300">Vis Biltyper (Piller)</label>
             <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-5 h-5 accent-blue-600">
         </div>
@@ -1457,6 +1475,7 @@ async function removeAdminEmail(email) { if(!confirm(`Fjerne ${email} som bilans
 async function saveAdminConfig(val) { const { error } = await _s.from('konfigurasjon').upsert({ nokkel: 'bilansvarlig_epost', verdi: val }); if(error) showToast("Feil ved lagring", "error"); else { s.bilansvarlig = val; renderAdminEmails(); showToast("Lagret!", "success"); } }
 function tVis(c) { s.h.includes(c) ? s.h=s.h.filter(x=>x!==c) : s.h.push(c); localStorage.setItem('h',JSON.stringify(s.h)); render(); }
 function togVis(k, v) { s[k] = v; localStorage.setItem(k, v); render(); if(s.v === 'cars') load(); }
+function togUiSize(v) { s.uiLarge = v; localStorage.setItem('uiLarge', v); if(v) document.body.classList.add('ui-large'); else document.body.classList.remove('ui-large'); render(); }
 async function togVar(v) { s.varsel = v; const p = { brukernavn: s.bid, varsel: v }; if(s.savedEmail) p.epost = s.savedEmail; await _s.from('brukere').upsert(p, { onConflict: 'brukernavn' }); showToast("Innstilling lagret", "success"); }
 async function updEm() { const e = $id('s-em').value.trim(); if(!e) return showToast("Skriv e-post", "error"); const { error } = await _s.from('brukere').upsert({ brukernavn: s.bid, epost: e, varsel: s.varsel }, { onConflict: 'brukernavn' }); if(error) showToast("Feil.", "error"); else { s.savedEmail = e; showToast("Lagret.", "success"); } }
 async function nuke() { if(prompt("Skriv NULLSTILL for å slette alle data")==="NULLSTILL") { await _s.from('bookinger').delete().gt('id', 0); load(); showToast("Nullstilt.", "info"); } }
