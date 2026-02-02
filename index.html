@@ -157,21 +157,21 @@ input[type=range] {
   -webkit-appearance: none;
   width: 100%;
   background: transparent;
-  height: 40px; /* Redusert fra 50px */
+  height: 40px; 
   position: relative;
   z-index: 20;
-  touch-action: none; /* Forhindrer scrolling mens man drar */
+  touch-action: none; 
 }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  height: 44px; /* Mye større knapp (Apple standard touch size) */
+  height: 44px;
   width: 44px;
   border-radius: 50%;
   background: #3b82f6;
   cursor: pointer;
-  margin-top: -14px; /* (TrackHeight 16px / 2) - (ThumbHeight 44px / 2) = 8 - 22 = -14px */
+  margin-top: -14px; 
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  border: 4px solid #fff; /* Tykkere hvit kant */
+  border: 4px solid #fff; 
   transition: transform 0.1s;
 }
 input[type=range]:active::-webkit-slider-thumb {
@@ -180,12 +180,12 @@ input[type=range]:active::-webkit-slider-thumb {
 }
 input[type=range]::-webkit-slider-runnable-track {
   width: 100%;
-  height: 16px; /* Tykkere spor */
+  height: 16px; 
   cursor: pointer;
-  background: #0f172a; /* Mørkere bakgrunn for sporet (Aktivt mot box-farge) */
+  background: #0f172a; 
   border-radius: 99px;
-  border: 1px solid #334155; /* Kantlinje for dybde */
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); /* Indre skygge for dybde */
+  border: 1px solid #334155; 
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); 
 }
 
 /* Modal overrides for Slate theme */
@@ -607,7 +607,7 @@ input[type=range]::-webkit-slider-runnable-track {
       <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR (SYNLIG)</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Skriv beskjed..."></div>
       <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater kun for admin..."></textarea></div>
   </div>
-  <div class="flex gap-2 mt-4"><button onclick="delC(s.admId, $id('adm-name').value)" class="p-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900"><span class="material-icons-round">delete</span></button><button onclick="saveAdmCar()" class="flex-1 bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm">LAGRE ENDRINGER</button></div>
+  <div class="flex gap-2 mt-4"><button id="btn-adm-del" onclick="delC(s.admId, $id('adm-name').value)" class="p-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900"><span class="material-icons-round">delete</span></button><button onclick="saveAdmCar()" class="flex-1 bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm">LAGRE ENDRINGER</button></div>
  </div>
 </div>
 
@@ -826,7 +826,15 @@ function rCars(c) {
 
         if(b.status!=='Aktiv') { 
             if(b.status === 'Verksted') { stripeClass="c-purple"; titleColor="text-slate-400"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-60"; } 
+            else if(b.status === 'EU-kontroll') { 
+                stripeClass="c-purple"; 
+                titleColor="text-slate-400"; 
+                subText = b.kommentar ? `EU-kontroll: ${b.kommentar}` : "EU-kontroll";
+                subColor="text-purple-400"; 
+                rowOp="opacity-75"; 
+            }
             else { stripeClass="c-gray"; titleColor="text-slate-500"; subText="Ute av drift"; subColor="text-slate-500"; rowOp="opacity-60"; }
+            
             if(b.status === 'Aktiv' && b.kommentar) { subText = `⚠ ${b.kommentar}`; subColor="text-yellow-500"; }
             actionBtn = `<button onclick="event.stopPropagation();stat(${b.id},'Aktiv','${b.bil}')" class="btn-action btn-green">KLAR</button>`;
         }
@@ -1324,7 +1332,17 @@ function rAdm(c) {
        const carJson = JSON.stringify(b).replace(/"/g, '&quot;');
        html += `<button onclick="openAdmEdit(${carJson})" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold">${b.bil}</button>`;
     });
-    html += `<button onclick="addC()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-blue-900 text-blue-200 border-blue-700">+ NY</button><button onclick="showAdmHelp()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300 border-slate-500">?</button></div>`;
+    
+    // SJEKK: Er bruker admin?
+    const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase());
+    
+    if(isAdm) {
+        html += `<button onclick="addC()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-blue-900 text-blue-200 border-blue-700">+ NY</button>`;
+    } else {
+        html += `<button disabled class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-600 border-slate-700 opacity-50 cursor-not-allowed">+ NY</button>`;
+    }
+    
+    html += `<button onclick="showAdmHelp()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300 border-slate-500">?</button></div>`;
     html += `<div class="text-center text-slate-500 italic mt-10">Trykk på en bil for å endre</div>`;
     c.innerHTML = html;
 }
@@ -1338,6 +1356,17 @@ function openAdmEdit(b) {
     $id('adm-stat').value = b.status;
     $id('adm-comm').value = b.kommentar || '';
     $id('adm-info').value = b.intern_info || '';
+    
+    // SJEKK: Er bruker admin?
+    const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase());
+    const delBtn = $id('btn-adm-del');
+    
+    if(isAdm) {
+        delBtn.classList.remove('hidden');
+    } else {
+        delBtn.classList.add('hidden');
+    }
+    
     openM('m-admin-edit');
 }
 
@@ -1443,5 +1472,3 @@ setInterval(load,10000);
 </script>
 </body>
 </html>
-
-
