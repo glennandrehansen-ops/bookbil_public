@@ -839,17 +839,27 @@ function rCars(c) {
         let actionBtn = `<button onclick="event.stopPropagation();book('${b.bil}')" class="btn-action btn-green">RESERVER</button>`;
 
         if(b.status!=='Aktiv') { 
-            if(b.status === 'Verksted') { stripeClass="c-purple"; titleColor="text-slate-400"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-60"; } 
+            // Default setup for unavailable cars (Gray)
+            stripeClass="c-gray"; 
+            titleColor="text-slate-500"; 
+            subColor="text-slate-500"; 
+            rowOp="opacity-75"; 
+            subText = b.kommentar ? b.kommentar : "Ute av drift";
+
+            // Specific overrides for color
+            if(b.status === 'Verksted') { 
+                stripeClass="c-purple"; 
+                titleColor="text-slate-400"; 
+                subColor="text-purple-400"; 
+                subText = "På verksted" + (b.kommentar ? ": " + b.kommentar : "");
+            } 
             else if(b.status === 'EU-kontroll') { 
                 stripeClass="c-purple"; 
                 titleColor="text-slate-400"; 
-                subText = b.kommentar ? `EU-kontroll: ${b.kommentar}` : "EU-kontroll";
                 subColor="text-purple-400"; 
-                rowOp="opacity-75"; 
+                subText = "EU-kontroll" + (b.kommentar ? ": " + b.kommentar : "");
             }
-            else { stripeClass="c-gray"; titleColor="text-slate-500"; subText="Ute av drift"; subColor="text-slate-500"; rowOp="opacity-60"; }
             
-            if(b.status === 'Aktiv' && b.kommentar) { subText = `⚠ ${b.kommentar}`; subColor="text-yellow-500"; }
             actionBtn = `<button onclick="event.stopPropagation();stat(${b.id},'Aktiv','${b.bil}')" class="btn-action btn-green">KLAR</button>`;
         }
         else if(act) { 
