@@ -39,145 +39,157 @@ jobs:
             },
           });
 
-          // Felles stil for e-post (Header og Footer)
+          // Felles stil for e-post
           const mailHeader = `
             <!DOCTYPE html>
             <html>
-            <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #1f2937;">
-              <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <div style="background-color: #111827; padding: 30px; text-align: center;">
-                  <img src="https://img.icons8.com/fluency/96/police-badge.png" alt="Logo" style="width: 64px; height: 64px; display: block; margin: 0 auto 15px auto;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">Bilbooking Jæren</h1>
-                </div>`;
+            <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: sans-serif;">
+              <div style="max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="background-color: #1e293b; padding: 20px; text-align: center;">
+                    <h1 style="color: white; margin: 0; font-size: 24px;">BookBil Jæren</h1>
+                </div>
+                <div style="padding: 30px;">
+          `;
           
           const mailFooter = `
-                <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af;">
-                  &copy; 2026 Bilbooking Jæren
+                </div>
+                <div style="background-color: #f8fafc; padding: 15px; text-align: center; color: #64748b; font-size: 12px;">
+                  <p>Dette er en automatisk melding fra bookingsystemet.</p>
                 </div>
               </div>
             </body>
-            </html>`;
+            </html>
+          `;
 
+          // Funksjon 1: Varsle bruker om kommende booking (Uendret logikk)
           async function checkBookings() {
             const now = new Date();
-            const warningLimit = new Date(now.getTime() + 35 * 60000); 
-
-            console.log("--- JOBB 1: Sjekker utløpende bookinger ---");
-
-            const { data: bookings, error } = await supabase
+            const in30mins = new Date(now.getTime() + 30 * 60000);
+            
+            // Hent bookinger som starter snart og som tilhører brukere med varsling PÅ
+            const { data: bookings } = await supabase
               .from("bookinger")
-              .select("*") 
-              .eq("varslet", false)
-              .gt("slutt_tid", now.toISOString())
-              .lt("slutt_tid", warningLimit.toISOString());
+              .select("*, brukere!inner(varsel, epost)") // Inner join for å kun få de med varsel=true
+              .gt("start_tid", now.toISOString())
+              .lt("start_tid", in30mins.toISOString())
+              .eq("varslet", false); // Eget felt i bookinger-tabellen for å unngå dobbelvarsling
 
-            if (error) { console.error("DB Feil Bookinger:", error); return; }
-            if (!bookings || bookings.length === 0) { console.log("Ingen bookinger å varsle."); }
-            else {
-                for (const b of bookings) {
-                  // Hent bruker
-                  const { data: user } = await supabase.from("brukere").select("epost, varsel").eq("brukernavn", b.bid).single();
-                  if (!user || !user.varsel || !user.epost) continue;
+            if (!bookings || bookings.length === 0) return;
 
-                  const timeOpts = { timeZone: "Europe/Oslo", hour: "2-digit", minute: "2-digit" };
-                  const dateOpts = { timeZone: "Europe/Oslo", day: "2-digit", month: "2-digit", year: "numeric" };
-                  const startDate = new Date(b.start_tid).toLocaleDateString("no-NO", dateOpts);
-                  const startTime = new Date(b.start_tid).toLocaleTimeString("no-NO", timeOpts);
-                  const endTime = new Date(b.slutt_tid).toLocaleTimeString("no-NO", timeOpts);
-
+            for (const b of bookings) {
+               // Sjekk at brukeren faktisk har skrudd på varsel og har epost
+               if (b.brukere && b.brukere.varsel && b.brukere.epost) {
+                  const startTime = new Date(b.start_tid).toLocaleTimeString("no-NO", {hour:"2-digit", minute:"2-digit"});
+                  
                   const htmlContent = `
-                    <div style="padding: 30px;">
-                      <h2 style="color: #1f2937; text-align: center; margin-bottom: 10px; margin-top: 0;">Snart leveringstid</h2>
-                      <p style="text-align: center; color: #4b5563; margin-bottom: 25px;">Din reservasjon utløper om ca. 30 minutter.</p>
-
-                      <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
-                          <table style="width: 100%; border-collapse: collapse;">
-                              <tr><td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Kjøretøy:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${b.bil}</td></tr>
-                              <tr><td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Dato:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${startDate}</td></tr>
-                              <tr><td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Tidsrom:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${startTime} - ${endTime}</td></tr>
-                              <tr><td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Formål:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${b.formal}</td></tr>
-                          </table>
-                      </div>
-
-                      <div style="text-align: center; margin-bottom: 30px;">
-                          <a href="${process.env.APP_LINK}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">ÅPNE APPEN</a>
-                      </div>
-
-                      <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; font-size: 14px; color: #92400e;">
-                          <strong>Husk nøkler!</strong><br>Vennligst legg nøkkelen tilbake i nøkkelskapet når du har parkert.
-                      </div>
+                    <h2 style="color: #1e293b; margin-top: 0;">Din reservasjon starter snart</h2>
+                    <p>Hei! Dette er en påminnelse om at du har reservert bil:</p>
+                    <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
+                        <p style="margin: 0; font-size: 18px; font-weight: bold; color: #1e293b;">${b.bil}</p>
+                        <p style="margin: 5px 0 0; color: #475569;">Kl. ${startTime}</p>
+                    </div>
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">ÅPNE APPEN</a>
                     </div>
                   `;
 
                   try {
-                    await transporter.sendMail({
-                      from: `"Bilbooking Jæren" <${process.env.GMAIL_USER}>`,
-                      to: user.epost,
-                      subject: `Påminnelse: ${b.bil} må leveres snart`,
-                      html: mailHeader + htmlContent + mailFooter
-                    });
-                    console.log(`Varsel sendt til ${user.epost}`);
-                    await supabase.from("bookinger").update({ varslet: true }).eq("id", b.id);
-                  } catch (err) { console.error("Feil ved sending:", err); }
-                }
+                      await transporter.sendMail({
+                        from: `"BookBil Jæren" <${process.env.GMAIL_USER}>`,
+                        to: b.brukere.epost,
+                        subject: `Påminnelse: ${b.bil} kl. ${startTime}`,
+                        html: mailHeader + htmlContent + mailFooter
+                      });
+                      console.log(`Varsel sendt til ${b.brukere.epost}`);
+                  } catch (e) { console.error("Feil ved sending:", e); }
+               }
+               // Merk som varslet uansett utfall for å unngå spam-loop
+               await supabase.from("bookinger").update({ varslet: true }).eq("id", b.id);
             }
           }
 
+          // Funksjon 2: SAMLE-LOGIKK for Meldinger til Bilansvarlig
           async function checkMessages() {
-            console.log("--- JOBB 2: Sjekker nye meldinger til bilansvarlig ---");
+            // Hent alle usendte meldinger
+            const { data: messages, error } = await supabase
+              .from("meldinger")
+              .select("*")
+              .eq("sendt", false)
+              .order("created_at", { ascending: true });
 
-            // 1. Hent e-posten til bilansvarlig
-            const { data: config } = await supabase.from("konfigurasjon").select("verdi").eq("nokkel", "bilansvarlig_epost").single();
-            const adminEmail = config ? config.verdi : null;
+            if (error) { console.error("Feil ved henting:", error); return; }
+            if (!messages || messages.length === 0) return; // Ingen nye meldinger
 
-            if (!adminEmail) { console.log("Ingen bilansvarlig e-post konfigurert."); return; }
+            // Hent liste over bilansvarlige
+            const { data: config } = await supabase.from("konfigurasjon").select("verdi").eq("nokkel", "bilansvarlig_epost").maybeSingle();
+            const adminEmails = config && config.verdi ? config.verdi.split(",").map(e => e.trim()).filter(e => e) : [];
 
-            // 2. Hent uleste meldinger
-            const { data: messages, error } = await supabase.from("meldinger").select("*").eq("sendt", false);
+            if (adminEmails.length === 0) {
+               console.log("Ingen bilansvarlige konfigurert. Markerer meldinger som sendt for å tømme kø.");
+               // Mark as sent to prevent infinite loop
+               const ids = messages.map(m => m.id);
+               await supabase.from("meldinger").update({ sendt: true }).in("id", ids);
+               return;
+            }
 
-            if (error) { console.error("DB Feil Meldinger:", error); return; }
-            if (!messages || messages.length === 0) { console.log("Ingen nye meldinger."); return; }
+            // Bygg HTML-liste over hendelser
+            let listHtml = "";
+            messages.forEach(msg => {
+                const timeStr = new Date(msg.created_at).toLocaleTimeString("no-NO", {
+                  day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit"
+                });
+                
+                // Fargekode basert på type melding
+                let icon = "📝";
+                let color = "#3b82f6"; // Blå default
+                if(msg.type.includes("Skade") || msg.type.includes("Feil")) { icon = "⚠️"; color = "#ef4444"; }
+                else if(msg.type.includes("Verksted")) { icon = "🔧"; color = "#a855f7"; }
+                else if(msg.type.includes("Statusendring")) { icon = "🔄"; color = "#f59e0b"; }
 
-            console.log(`Fant ${messages.length} nye meldinger.`);
-
-            for (const msg of messages) {
-                const timeOpts = { timeZone: "Europe/Oslo", hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" };
-                const timeStr = new Date(msg.created_at).toLocaleString("no-NO", timeOpts);
-
-                const htmlContent = `
-                  <div style="padding: 30px;">
-                    <h2 style="color: #1f2937; text-align: center; margin-bottom: 10px; margin-top: 0;">Ny melding fra appen</h2>
-                    <p style="text-align: center; color: #4b5563; margin-bottom: 25px;">En bruker har registrert et avvik eller en statusendring.</p>
-
-                    <div style="background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr><td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Type:</td><td style="padding: 5px 0; font-weight: bold; text-align: right; color: #dc2626;">${msg.type}</td></tr>
-                            <tr><td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Kjøretøy:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${msg.bil}</td></tr>
-                            <tr><td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Meldt av:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${msg.bruker}</td></tr>
-                            <tr><td style="padding: 5px 0; color: #6b7280; font-size: 14px;">Tidspunkt:</td><td style="padding: 5px 0; font-weight: bold; text-align: right;">${timeStr}</td></tr>
-                        </table>
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e1;">
-                          <p style="margin: 0; font-size: 14px; color: #1f2937;"><strong>Innhold:</strong><br>"${msg.innhold}"</p>
-                        </div>
+                listHtml += `
+                <div style="border-bottom: 1px solid #e2e8f0; padding: 15px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <strong style="color: #0f172a; font-size: 16px;">${icon} ${msg.bil || "Ukjent bil"}</strong>
+                        <span style="color: #64748b; font-size: 12px;">${timeStr}</span>
                     </div>
-
-                    <div style="text-align: center;">
-                        <a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">GÅ TIL BILLAGER</a>
+                    <div style="color: ${color}; font-weight: bold; font-size: 12px; text-transform: uppercase; margin-bottom: 5px;">${msg.type}</div>
+                    <div style="color: #334155; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        ${msg.innhold}
                     </div>
-                  </div>
+                    <div style="color: #94a3b8; font-size: 11px; margin-top: 5px;">Registrert av: ${msg.bruker || "Ukjent"}</div>
+                </div>
                 `;
+            });
 
+            const digestHtml = `
+                <h2 style="color: #1e293b; margin-top: 0;">Oppdatering fra Billageret</h2>
+                <p>Det er registrert <strong>${messages.length}</strong> nye hendelser siden sist:</p>
+                <div style="margin-top: 20px;">
+                    ${listHtml}
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL BILLAGER</a>
+                </div>
+            `;
+
+            // Send én e-post til hver admin
+            for (const email of adminEmails) {
                 try {
                     await transporter.sendMail({
-                      from: `"Bilbooking System" <${process.env.GMAIL_USER}>`,
-                      to: adminEmail,
-                      subject: `Ny melding: ${msg.type} - ${msg.bil}`,
-                      html: mailHeader + htmlContent + mailFooter
+                      from: `"BookBil System" <${process.env.GMAIL_USER}>`,
+                      to: email,
+                      subject: `Billager: ${messages.length} nye hendelser`,
+                      html: mailHeader + digestHtml + mailFooter
                     });
-                    console.log(`Melding sendt til ${adminEmail}`);
-                    await supabase.from("meldinger").update({ sendt: true }).eq("id", msg.id);
-                } catch (err) { console.error("Feil ved sending av melding:", err); }
+                    console.log(`Samle-varsel sendt til ${email}`);
+                } catch (err) { console.error(`Feil ved sending til ${email}:`, err); }
             }
+
+            // Marker alle som sendt i en batch
+            const ids = messages.map(m => m.id);
+            const { error: updateError } = await supabase.from("meldinger").update({ sendt: true }).in("id", ids);
+            if(updateError) console.error("Feil ved oppdatering av status:", updateError);
+            else console.log(`Markerte ${ids.length} meldinger som sendt.`);
           }
 
           async function run() {
