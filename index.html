@@ -1094,8 +1094,8 @@ function setupModal(title, sub="Ny reservasjon") {
         btnOk.disabled = true; btnOk.classList.add('opacity-50', 'cursor-not-allowed'); btnOk.innerText = "IKKE TILGJENGELIG";
         if(dateInputs) dateInputs.classList.add('hidden');
     }
-    else if(act && !s.editId) { $id('b-alert').classList.remove('hidden'); $id('b-reason').innerText = `Opptatt av ${act.bid} til ${fmtT(act.slutt_tid)}`; }
-
+    // REMOVED: The logic that statically showed "Opptatt av..." on modal open is now handled dynamically in check()
+    
     if(!s.editId) { 
         $id('btn-del').classList.add('hidden'); const mc = $id('b-multi'); mc.innerHTML = "";
         s.c.forEach(b => { if(b.bil === title || b.status !== 'Aktiv' || s.h.includes(b.bil)) return; mc.innerHTML += `<button onclick="togMulti(this,'${b.bil}')" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-900">${b.bil}</button>`; });
@@ -1303,29 +1303,74 @@ function findC() {
     if(!st || !en) return showToast("Velg tidsrom", "error");
     const l=$id('s-res'); l.innerHTML=""; l.classList.remove('hidden');
     if(st >= en) return showToast("Velg slutt-tid", "error");
-    const av = s.c.filter(b => b.status==='Aktiv' && !s.h.includes(b.bil) && !s.r.some(r=>r.bil===b.bil && st<new Date(r.slutt_tid) && en>new Date(r.start_tid)));
-    if(!av.length) l.innerHTML="<div class='text-center text-red-400'>Ingen ledige.</div>";
+
+    const cars = s.c.filter(b => b.status==='Aktiv' && !s.h.includes(b.bil));
     
-    // Sort logic as requested: Uniformert > Sivil > Admin
-    av.sort((a,b) => {
+    const available = [];
+    const busy = [];
+
+    cars.forEach(b => {
+        // Find collision
+        const collision = s.r.find(r => r.bil === b.bil && st < new Date(r.slutt_tid) && en > new Date(r.start_tid));
+        if (collision) {
+            b.collision = collision; // Store for display
+            busy.push(b);
+        } else {
+            available.push(b);
+        }
+    });
+
+    // Sort functions (reuse existing sort logic)
+    const sorter = (a,b) => {
         const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 };
         const pA = catOrder[a.kategori] || 4;
         const pB = catOrder[b.kategori] || 4;
         if (pA !== pB) return pA - pB;
         return a.bil.localeCompare(b.bil);
-    });
+    };
 
-    av.forEach(b => {
+    available.sort(sorter);
+    busy.sort(sorter);
+
+    if(available.length === 0 && busy.length === 0) { 
+        l.innerHTML="<div class='text-center text-red-400'>Ingen biler funnet.</div>"; 
+        return; 
+    }
+
+    // Render Available
+    available.forEach(b => {
         l.innerHTML += `
-        <button onclick="found('${b.bil}')" class="w-full bg-slate-800 p-3 rounded flex justify-between border border-emerald-900 text-white font-bold mb-2 items-center overflow-hidden">
+        <button onclick="found('${b.bil}')" class="w-full bg-slate-800 p-3 rounded-xl flex justify-between border border-emerald-900/50 text-white font-bold mb-2 items-center overflow-hidden shadow-lg">
             <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
-                <span class="block flex-shrink-0">${b.bil}</span>
+                <span class="block flex-shrink-0 text-lg">${b.bil}</span>
                 <div class="flex items-center gap-1 overflow-hidden">${getBadgesHtml(b, true, true, true)}</div>
             </div>
-            <span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded flex-shrink-0 ml-2">OK</span>
+            <span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded flex-shrink-0 ml-2 border border-emerald-900/50">LEDIG</span>
         </button>`;
     });
+
+    // Render Busy (if any)
+    if (busy.length > 0) {
+        if (available.length > 0) l.innerHTML += `<div class="text-center text-xs text-slate-500 font-bold uppercase my-3 tracking-widest">- Opptatt i tidsrommet -</div>`;
+        
+        busy.forEach(b => {
+            const r = b.collision;
+            const timeTxt = `${fmtT(r.start_tid)}-${fmtT(r.slutt_tid)}`;
+            l.innerHTML += `
+            <button onclick="found('${b.bil}')" class="w-full bg-slate-800/40 p-3 rounded-xl flex justify-between border border-red-900/30 text-slate-300 font-bold mb-2 items-center overflow-hidden opacity-80">
+                <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
+                    <span class="block flex-shrink-0 text-lg decoration-slate-500 line-through decoration-2">${b.bil}</span>
+                    <div class="flex items-center gap-1 overflow-hidden opacity-50">${getBadgesHtml(b, true, true, true)}</div>
+                </div>
+                <div class="flex flex-col items-end">
+                    <span class="text-red-400 text-[10px] bg-red-900/20 px-2 py-0.5 rounded border border-red-900/30 mb-0.5">OPPTATT</span>
+                    <span class="text-[10px] font-mono text-slate-400">${timeTxt}</span>
+                </div>
+            </button>`;
+        });
+    }
 }
+
 function found(c) { 
     const st = getVal('s', 'st');
     const en = getVal('s', 'en');
