@@ -37,14 +37,14 @@ body {
 
 /* --- UI LARGE MODE OVERRIDES --- */
 body.ui-large { font-size: 17px; }
-.ui-large .fleet-row { padding: 20px 16px; } /* Større rader */
-.ui-large .fleet-row h2 { font-size: 20px; } /* Større overskrift bil */
-.ui-large .btn-action { padding: 12px 20px; font-size: 13px; } /* Større knapper */
-.ui-large .stat-pill { padding: 14px 0; font-size: 13px; } /* Større tabs */
+.ui-large .fleet-row { padding: 20px 16px; } 
+.ui-large .fleet-row h2 { font-size: 20px; } 
+.ui-large .btn-action { padding: 12px 20px; font-size: 13px; }
 .ui-large input, .ui-large select { height: 54px !important; font-size: 16px !important; }
-.ui-large .material-icons-round { transform: scale(1.2); } /* Større ikoner */
-/* Unntak for tidslinjen for å bevare layout */
+.ui-large .material-icons-round { transform: scale(1.2); } 
 .ui-large .time-label { font-size: 11px; } 
+/* FIX: Keep tab font size manageable on mobile even in large mode, but bold it */
+.ui-large .seg-tab { padding: 12px 4px; font-size: 11px; font-weight: 900; }
 
 /* Fleet Row (Liste-element) */
 .fleet-row {
@@ -71,11 +71,12 @@ body.ui-large { font-size: 17px; }
     margin-right: 12px;
     flex-shrink: 0;
 }
-.c-green { background-color: #10b981; } /* Ledig */
-.c-yellow { background-color: #f59e0b; } /* Ledig nå, opptatt snart */
+.c-green { background-color: #10b981; } /* Ledig > 4t */
+.c-yellow { background-color: #f59e0b; } /* Ledig 2-4t */
+.c-orange { background-color: #f97316; } /* Ledig < 2t */
 .c-red { background-color: #ef4444; }   /* Opptatt */
 .c-blue { background-color: #3b82f6; }  /* Min bil */
-.c-purple { background-color: #a855f7; } /* Verksted */
+.c-purple { background-color: #a855f7; } /* Verksted/EU */
 .c-gray { background-color: #64748b; }   /* Ute av drift */
 
 /* Knapper i liste */
@@ -96,125 +97,68 @@ body.ui-large { font-size: 17px; }
     justify-content: center;
     gap: 4px;
 }
-.btn-primary {
-    background-color: #3b82f6; /* Blue 500 */
-    border-color: #2563eb;
-    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
-}
-.btn-green {
-    background-color: #059669; /* Green 600 */
-    border-color: #047857;
-    box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
-}
-.btn-amber {
-    background-color: #d97706; /* Amber 600 */
-    border-color: #b45309;
-    box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3);
-}
+.btn-primary { background-color: #3b82f6; border-color: #2563eb; box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3); }
+.btn-green { background-color: #059669; border-color: #047857; box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3); }
+.btn-amber { background-color: #d97706; border-color: #b45309; box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3); }
 
-/* Dashboard Stats (Pills) */
-.stat-pill {
-    background: #1e293b;
-    padding: 8px 0;
-    flex: 1;
-    text-align: center;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #94a3b8;
-    border: 1px solid #334155;
-    transition: all 0.2s;
+/* Updated Box Tabs (Fixed: Proportional Widths) */
+.seg-tab-container { 
+    background-color: transparent; 
+    padding: 4px; 
+    display: flex; 
+    gap: 8px; 
+    width: 100%;
 }
-.stat-active { border-color: #3b82f6; color: white; background: #1e293b; }
+.seg-tab { 
+    flex: 1 1 auto; /* Allow grow/shrink based on content */
+    text-align: center; 
+    padding: 8px 4px; 
+    font-size: 11px; 
+    font-weight: 700; 
+    color: #94a3b8; 
+    border-radius: 8px; 
+    transition: all 0.2s; 
+    border: 1px solid #334155;
+    background-color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0; /* Important for flex items to shrink properly */
+}
+.seg-tab.active { 
+    background-color: #3b82f6; 
+    color: white; 
+    border-color: #2563eb;
+    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.4); 
+}
 
 /* Bottom Nav */
-.bottom-nav {
-    background: #0f172a; 
-    border-top: 1px solid #1e293b;
-    height: 80px;
-    padding-bottom: env(safe-area-inset-bottom);
-}
-.big-fab {
-    width: 64px; 
-    height: 64px; 
-    background: #2563eb; 
-    border-radius: 999px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); 
-    border: 4px solid #0f172a;
-    transition: transform 0.1s;
-}
+.bottom-nav { background: #0f172a; border-top: 1px solid #1e293b; height: 80px; padding-bottom: env(safe-area-inset-bottom); }
+.big-fab { width: 64px; height: 64px; background: #2563eb; border-radius: 999px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); border: 4px solid #0f172a; transition: transform 0.1s; }
 .big-fab:active { transform: scale(0.95); }
 
 /* Menyer */
 #more-menu { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 #more-menu.open { transform: translateY(0); }
-
 #menu-bg { transition: opacity 0.3s; pointer-events: none; opacity: 0; background: rgba(0,0,0,0.8); }
 #menu-bg.open { pointer-events: auto; opacity: 1; }
 
-/* Input Styles Override */
-input, select, textarea {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
-    color: white !important;
-    border-radius: 8px !important;
-}
+/* Input Styles */
+input, select, textarea { background-color: #1e293b !important; border-color: #334155 !important; color: white !important; border-radius: 8px !important; }
 
-/* Range Slider Styling - ROBUST MOBILE UPDATE (COMPACT) */
-input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  background: transparent;
-  height: 40px; /* Redusert fra 50px */
-  position: relative;
-  z-index: 20;
-  touch-action: none; /* Forhindrer scrolling mens man drar */
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 44px; /* Mye større knapp (Apple standard touch size) */
-  width: 44px;
-  border-radius: 50%;
-  background: #3b82f6;
-  cursor: pointer;
-  margin-top: -14px; /* (TrackHeight 16px / 2) - (ThumbHeight 44px / 2) = 8 - 22 = -14px */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  border: 4px solid #fff; /* Tykkere hvit kant */
-  transition: transform 0.1s;
-}
-input[type=range]:active::-webkit-slider-thumb {
-  transform: scale(1.1);
-  background: #2563eb;
-}
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 16px; /* Tykkere spor */
-  cursor: pointer;
-  background: #0f172a; /* Mørkere bakgrunn for sporet (Aktivt mot box-farge) */
-  border-radius: 99px;
-  border: 1px solid #334155; /* Kantlinje for dybde */
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); /* Indre skygge for dybde */
-}
+/* Range Slider (Compact) */
+input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: 40px; position: relative; z-index: 20; touch-action: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 44px; width: 44px; border-radius: 50%; background: #3b82f6; cursor: pointer; margin-top: -14px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 4px solid #fff; transition: transform 0.1s; }
+input[type=range]:active::-webkit-slider-thumb { transform: scale(1.1); background: #2563eb; }
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cursor: pointer; background: #0f172a; border-radius: 99px; border: 1px solid #334155; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
 
-/* Modal overrides for Slate theme */
+/* Modal */
 .modal-bottom { display: flex; flex-direction: column; justify-content: flex-end; z-index: 100; pointer-events: auto;}
-.modal-content-bottom { 
-    background-color: #0f172a; 
-    border-top: 1px solid #1e293b; 
-    border-radius: 20px 20px 0 0; 
-    width: 100%; 
-    max-height: 90vh; 
-    animation: slideUp 0.25s ease-out; 
-    overflow-y: auto; /* FIX SCROLLING */
-    padding-bottom: 40px;
-}
+.modal-content-bottom { background-color: #0f172a; border-top: 1px solid #1e293b; border-radius: 20px 20px 0 0; width: 100%; max-height: 90vh; animation: slideUp 0.25s ease-out; overflow-y: auto; padding-bottom: 40px; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .bar{width:40px;height:5px;background:#4b5563;border-radius:99px}
 
-/* Tidslinje overrides */
+/* Tidslinje */
 .timeline-scroll { overflow-x: auto; padding-bottom: 25px; padding-top: 10px; display: flex; margin-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .timeline-scroll::-webkit-scrollbar { display: none; }
 .time-grid { display: inline-flex; gap: 2px; height: 50px; padding: 0 4px; position: relative; }
@@ -226,43 +170,29 @@ input[type=range]::-webkit-slider-runnable-track {
 .time-block.end { background-color: #10b981; border-color: #34d399; z-index: 10; transform: scale(1.1); }
 .time-block.range { background-color: #1e40af; border-color: #3b82f6; opacity: 0.8; }
 .time-now-line { position: absolute; width: 2px; height: 100%; background: #ef4444; z-index: 20; pointer-events: none; box-shadow: 0 0 5px red; }
-
-/* A/B Indicators in Timeline */
 .time-block.start::after { content: 'A'; color: white; font-weight: 900; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 .time-block.end::after { content: 'B'; color: white; font-weight: 900; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 
-/* Legend & Tabs */
+/* Legend & Misc */
 .legend-box { display: flex; gap: 8px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 999px; font-size: 9px; color: #94a3b8; align-items: center; margin-right: auto; }
 .dot { width: 6px; height: 6px; border-radius: 50%; }
 .dot.free { background-color: #334155; border: 1px solid #475569; }
 .dot.busy { background-color: #7f1d1d; }
 .dot.selected { background-color: #2563eb; }
-.day-tab { flex: 1; padding: 10px; text-align: center; font-size: 12px; font-weight: bold; color: #94a3b8; transition: all 0.2s; border-radius: 6px; background: #1e293b; border: 1px solid #334155; }
-.day-tab.active { background: #2563eb; color: white; border-color: #3b82f6; }
-
-/* Admin Pills */
 .car-pill { transition: all 0.2s; border: 2px solid transparent; color: white; opacity: 0.7; }
 .car-pill.selected { opacity: 1; border-color: white; transform: scale(1.05); }
 .pill-green { background-color: #064e3b; border-color: #059669; }
 .pill-yellow { background-color: #78350f; border-color: #d97706; }
 .pill-gray { background-color: #1f2937; border-color: #4b5563; }
 .email-pill { background: #334155; border: 1px solid #475569; color: white; padding: 4px 10px; border-radius: 999px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
-
-/* Custom Scrollbar Hiding */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* Scrollbars */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
 
-/* Toast */
-#toast-container { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 100; width: 90%; max-width: 400px; pointer-events: none; }
-.toast { background: #1e293b; color: white; padding: 12px 16px; border-radius: 12px; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); opacity: 0; transform: translateY(20px); transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; border: 1px solid #334155; font-size: 14px; font-weight: bold; pointer-events: auto; }
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast-success { border-left: 4px solid #10b981; }
-.toast-error { border-left: 4px solid #ef4444; }
-.toast-info { border-left: 4px solid #3b82f6; }
+/* Settings Cards */
+.settings-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+.settings-header { font-size: 14px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
@@ -316,11 +246,11 @@ input[type=range]::-webkit-slider-runnable-track {
         </div>
     </div>
 
-    <!-- Filter Tabs (Hidden on subpages) -->
-    <div id="head-tabs" class="flex gap-2 pb-1">
-        <button id="tab-ov" onclick="tab('cars')" class="stat-pill stat-active">OVERSIKT</button>
-        <button id="tab-res" onclick="tab('res')" class="stat-pill">RESERVASJONER</button>
-        <button id="tab-mine" onclick="tab('mine')" class="stat-pill">MINE</button>
+    <!-- Segmented Control Tabs (Updated 1 of 3 UI - Size to text) -->
+    <div id="head-tabs" class="seg-tab-container pb-1">
+        <button id="tab-ov" onclick="tab('cars')" class="seg-tab active">OVERSIKT</button>
+        <button id="tab-res" onclick="tab('res')" class="seg-tab">RESERVASJONER</button>
+        <button id="tab-mine" onclick="tab('mine')" class="seg-tab">MINE</button>
     </div>
  </header>
 
@@ -394,13 +324,13 @@ input[type=range]::-webkit-slider-runnable-track {
         <!-- INTEGRATED INFO AND SLIDER BOX -->
         <div class="bg-slate-800 border border-blue-500/30 rounded-2xl p-3 mb-4 text-center shadow-xl relative overflow-visible">
             
-            <!-- Info Text Content -->
+            <!-- Info Text Content (UPDATED SIZES) -->
             <div class="mb-2">
                 <span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest block mb-0.5">Du reserverer i</span>
                 <div class="flex items-baseline justify-center gap-2 mb-1">
-                    <span id="exp-slider-val" class="text-3xl font-black text-white tracking-tight">1 time</span>
+                    <span id="exp-slider-val" class="text-xl font-black text-white tracking-tight">1 time</span>
                 </div>
-                <div class="text-blue-300 text-[10px] font-bold bg-blue-900/40 inline-block px-2 py-0.5 rounded-full border border-blue-500/20">
+                <div class="text-blue-300 text-lg font-bold bg-blue-900/40 inline-block px-3 py-1 rounded-full border border-blue-500/20 mt-1">
                     Ferdig kl <span id="exp-end-time" class="font-mono text-white">--:--</span>
                 </div>
             </div>
@@ -591,7 +521,7 @@ input[type=range]::-webkit-slider-runnable-track {
 <div id="m-admin-edit" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-admin-edit')">
  <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl relative" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-admin-edit',1)"><div class="bar"></div></div>
-  <h2 class="text-xl font-black text-white mb-4">Rediger Bil</h2>
+  <h2 class="text-xl font-black text-white mb-4" id="adm-title">Rediger Bil</h2>
   <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4">
       <div class="grid grid-cols-2 gap-4">
           <div>
@@ -743,14 +673,21 @@ async function loadFullHistory() {
 function render() {
     if (document.activeElement.tagName === "INPUT" && s.v === 'set') return;
     const c=$id('main'); c.innerHTML=""; 
-    const stats = $id('head-stats'); const tabs = $id('head-tabs'); const title = $id('pg-t');
-    if(stats) stats.classList.remove('hidden'); if(tabs) tabs.classList.remove('hidden'); if(title) title.innerText = "BookBil Jæren";
-    ['ov','res','mine'].forEach(x => { const el = $id('tab-'+x); if(el) el.className = "stat-pill"; });
-    if(s.v==='cars') { $id('tab-ov').className = "stat-pill stat-active"; rCars(c); }
-    else if(s.v==='res') { $id('tab-res').className = "stat-pill stat-active"; rRes(c, false); }
-    else if(s.v==='mine') { $id('tab-mine').className = "stat-pill stat-active"; rRes(c, true); }
+    const stats = $id('head-stats'); const title = $id('pg-t');
+    const tabsContainer = $id('head-tabs');
+    
+    if(stats) stats.classList.remove('hidden'); 
+    if(tabsContainer) tabsContainer.classList.remove('hidden'); 
+    if(title) title.innerText = "BookBil Jæren";
+    
+    // Update segmented control tabs
+    ['ov','res','mine'].forEach(x => { const el = $id('tab-'+x); if(el) el.className = "seg-tab"; });
+    if(s.v==='cars') { $id('tab-ov').className = "seg-tab active"; rCars(c); }
+    else if(s.v==='res') { $id('tab-res').className = "seg-tab active"; rRes(c, false); }
+    else if(s.v==='mine') { $id('tab-mine').className = "seg-tab active"; rRes(c, true); }
     else {
-        if(stats) stats.classList.add('hidden'); if(tabs) tabs.classList.add('hidden');
+        if(stats) stats.classList.add('hidden'); 
+        if(tabsContainer) tabsContainer.classList.add('hidden');
         if(s.v==='admin') { if(title) title.innerText = "Billager"; rAdm(c); }
         else if(s.v==='logg') { if(title) title.innerText = "Logg"; rLog(c); }
         else if(s.v==='set') { if(title) title.innerText = "Innstillinger"; rSet(c); }
@@ -768,7 +705,22 @@ function calcStats() {
             if(!isBusy) free++;
         }
     });
-    $id('stat-free').innerText = free; $id('stat-total').innerText = total;
+    
+    const statFree = $id('stat-free');
+    const statTotal = $id('stat-total');
+    
+    statFree.innerText = free; 
+    statTotal.innerText = total;
+
+    // Gradvis fargeendring basert på tilgjengelighet
+    statFree.className = "block text-2xl font-bold leading-none"; // Reset classes
+    if (free === 0) {
+        statFree.classList.add("text-red-500");
+    } else if (free <= 3) {
+        statFree.classList.add("text-orange-500");
+    } else {
+        statFree.classList.add("text-emerald-400");
+    }
 }
 
 function getBadgesHtml(b, large=false, showResp=true, showType=true) {
@@ -1204,11 +1156,49 @@ function check(src) {
     const stDate = getVal(prefix, 'st'); const enDate = getVal(prefix, 'en');
     if(mode === 'book' && s.co) renderTimeline(s.co.bil, 'book');
     const instr = $id(mode === 'search' ? 's-instr' : 'b-instr'); if(instr) { if(s.tlClick === 0) instr.innerText = "Trykk starttid (A)"; else if(s.tlClick === 1) instr.innerText = "Velg SLUTTID (B)"; else instr.innerText = ""; }
-    let conf = false; if(s.activeModal === 'm-book' && stDate && enDate) { conf = s.sel.some(c => s.r.some(r => r.id != s.editId && r.bil===c && new Date(r.start_tid) < enDate && new Date(r.slutt_tid) > stDate)); }
+    
+    // NEW LOGIC: Use stDate and enDate to check for collision OR if empty check 'now'
+    let collision = null;
+    if(stDate && enDate) {
+        collision = s.sel.some(c => s.r.some(r => r.id != s.editId && r.bil===c && new Date(r.start_tid) < enDate && new Date(r.slutt_tid) > stDate)) ? 
+                    s.r.find(r => r.id != s.editId && s.sel.includes(r.bil) && new Date(r.start_tid) < enDate && new Date(r.slutt_tid) > stDate) : null;
+    } else {
+        // Fallback check if no dates selected yet (implies 'now')
+        const now = new Date();
+        collision = s.sel.some(c => s.r.some(r => r.id != s.editId && r.bil===c && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now)) ?
+                    s.r.find(r => r.id != s.editId && s.sel.includes(r.bil) && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now) : null;
+    }
+
     const btn = $id('btn-ok'); 
+    
     if(btn) {
-        if(conf || !stDate || !enDate) { if(conf) $id('warn').classList.remove('hidden'); else $id('warn').classList.add('hidden'); btn.disabled = true; btn.classList.add('opacity-50'); } 
-        else { if(s.co && s.co.status !== 'Aktiv') { btn.disabled = true; btn.classList.add('opacity-50'); } else { $id('warn').classList.add('hidden'); btn.disabled = false; btn.classList.remove('opacity-50'); } }
+        if(collision) {
+             // Show Alert because of collision
+             $id('b-alert').classList.remove('hidden');
+             $id('al-t').innerHTML = '<span class="material-icons-round">error</span> OPPTATT';
+             $id('b-reason').innerText = `Opptatt av ${collision.bid} (${fmtT(collision.start_tid)} - ${fmtT(collision.slutt_tid)})`;
+             btn.disabled = true; 
+             btn.classList.add('opacity-50'); 
+        } 
+        else if (!stDate || !enDate) {
+             // Invalid dates, but no collision (e.g. just empty)
+             // Hide alert unless car status is bad
+             if(s.co && s.co.status === 'Aktiv') $id('b-alert').classList.add('hidden');
+             btn.disabled = true; 
+             btn.classList.add('opacity-50');
+        }
+        else { 
+             // Valid dates, no collision
+             if(s.co && s.co.status !== 'Aktiv') { 
+                 // Car is broken/garage, keep alert from setupModal
+                 btn.disabled = true; btn.classList.add('opacity-50'); 
+             } else { 
+                 $id('b-alert').classList.add('hidden'); // HIDE ALERT
+                 $id('warn').classList.add('hidden'); 
+                 btn.disabled = false; 
+                 btn.classList.remove('opacity-50'); 
+             } 
+        }
     }
 }
 
@@ -1399,7 +1389,8 @@ function rAdm(c) {
     s.c.forEach(b => {
        let colorClass = 'pill-gray'; if (b.status === 'Aktiv') { if (b.kommentar) colorClass = 'pill-yellow'; else colorClass = 'pill-green'; }
        const carJson = JSON.stringify(b).replace(/"/g, '&quot;');
-       html += `<button onclick="openAdmEdit(${carJson})" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold">${b.bil}</button>`;
+       // FIX: Use ID instead of JSON object to prevent onclick issues
+       html += `<button onclick="openAdmEdit({id: '${b.id}'})" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold">${b.bil}</button>`;
     });
     
     // SJEKK: Er bruker admin?
@@ -1416,21 +1407,31 @@ function rAdm(c) {
     c.innerHTML = html;
 }
 
-function openAdmEdit(b) {
-    s.admCar = b.bil;
-    s.admId = b.id;
-    $id('adm-name').value = b.bil;
-    $id('adm-resp').value = b.ansvarlig || ''; 
-    $id('adm-cat').value = b.kategori || 'SivilAdm'; 
-    $id('adm-stat').value = b.status;
-    $id('adm-comm').value = b.kommentar || '';
-    $id('adm-info').value = b.intern_info || '';
+function openAdmEdit(params) {
+    let b = null;
     
-    // SJEKK: Er bruker admin?
+    if(params && params.id) {
+        // Find car by ID from the global state s.c
+        b = s.c.find(car => car.id == params.id);
+    }
+    
+    s.admCar = b ? b.bil : null;
+    s.admId = b ? b.id : null; // If null, it's a new car
+    
+    // Reset or fill form
+    $id('adm-title').innerText = b ? "Rediger Bil" : "Ny Bil";
+    $id('adm-name').value = b ? b.bil : "";
+    $id('adm-resp').value = b && b.ansvarlig ? b.ansvarlig : "";
+    $id('adm-cat').value = b && b.kategori ? b.kategori : "Uniformert";
+    $id('adm-stat').value = b ? b.status : "Aktiv";
+    $id('adm-comm').value = b && b.kommentar ? b.kommentar : "";
+    $id('adm-info').value = b && b.intern_info ? b.intern_info : "";
+
+    // Visibility logic for delete button
     const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase());
     const delBtn = $id('btn-adm-del');
     
-    if(isAdm) {
+    if(isAdm && s.admId) { // Only show delete if user is admin AND it's an existing car
         delBtn.classList.remove('hidden');
     } else {
         delBtn.classList.add('hidden');
@@ -1449,29 +1450,36 @@ async function saveAdmCar() {
     
     if(!name) return showToast("Mangler navn", "error");
 
-    const updates = { bil: name, ansvarlig: resp, kategori: cat, status: stat, kommentar: comm, intern_info: info };
-    const { error } = await _s.from('biler').update(updates).eq('id', s.admId);
+    const data = { bil: name, ansvarlig: resp, kategori: cat, status: stat, kommentar: comm, intern_info: info };
+
+    let error;
+    if (s.admId) {
+        // UPDATE existing
+        const { error: err } = await _s.from('biler').update(data).eq('id', s.admId);
+        error = err;
+        if(!err) {
+             if(stat !== 'Aktiv') logMsg('Statusendring', `Ny status: ${stat}`, name);
+             if(comm) logMsg('Ny kommentar', comm, name);
+        }
+    } else {
+        // INSERT new
+        const { error: err } = await _s.from('biler').insert([data]);
+        error = err;
+        if(!err) logMsg('Ny bil opprettet', 'Lagt til i systemet', name);
+    }
     
     if(error) {
         showToast("Feil: " + error.message, "error");
     } else {
-        if(stat !== 'Aktiv') logMsg('Statusendring', `Ny status: ${stat}`, name);
-        if(comm) logMsg('Ny kommentar', comm, name);
-        
-        const idx = s.c.findIndex(c => c.id === s.admId);
-        if(idx !== -1) {
-            s.c[idx] = { ...s.c[idx], ...updates };
-        }
-        
         showToast("Lagret!", "success");
         closeM('m-admin-edit');
-        render(); 
+        load(); // Reload full list to show new car
     }
 }
 
 async function updateInternalNote(id, val) { const { error } = await _s.from('biler').update({ intern_info: val }).eq('id', id); if(error) showToast("Feil ved lagring", "error"); else showToast("Intern info lagret", "success"); }
 function showAdmHelp() { showToast("Grønn: OK. Gul: Har kommentar. Grå: Ute av drift.", "info"); }
-async function addC() { const v = prompt("Navn:"); if(v) { await _s.from('biler').insert({bil:v.toUpperCase()}); load(); showToast("Lagt til", "success"); } }
+function addC() { openAdmEdit(null); } // Modified to use modal
 async function delC(id,n) { if(confirm("Slette?")) { await _s.from('bookinger').delete().eq('bil',n); await _s.from('biler').delete().eq('id',id); s.admCar=null; closeM('m-admin-edit'); load(); showToast("Slettet", "info"); } }
 
 function rLog(c) {
@@ -1496,26 +1504,105 @@ async function csv() {
 }
 
 function rSet(c) {
-    let p = s.c.map(b => `<button onclick="tVis('${b.bil}')" class="px-3 py-2 rounded-lg text-xs font-bold ${s.h.includes(b.bil)?'bg-slate-700 text-slate-400 border border-slate-600':'bg-blue-600 text-white border border-blue-500'}">${b.bil}</button>`).join('');
-    c.innerHTML = `<div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-4"><h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span class="material-icons-round text-blue-500">person</span> Min Profil & Visning</h2><div class="mb-4"><label class="text-xs text-slate-500 font-bold uppercase">Innlogget som</label><p class="text-xl font-black text-white">${s.bid}</p></div><div class="border-t border-slate-700 pt-4 mb-4"><p class="text-xs text-slate-400 mb-3 font-bold uppercase">Velg biler i oversikten</p><div class="flex flex-wrap gap-2">${p}</div></div>
+    let p = s.c.map(b => `<button onclick="tVis('${b.bil}')" class="px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${s.h.includes(b.bil)?'bg-slate-800 text-slate-500 border-slate-700 opacity-50':'bg-blue-600 text-white border-blue-500 shadow-md'}">${b.bil}</button>`).join('');
     
-    <div class="border-t border-slate-700 pt-4 mb-4">
-        <p class="text-xs text-slate-400 mb-3 font-bold uppercase">Tilpass Visning</p>
-        <div class="flex items-center justify-between mb-2">
-            <label class="text-sm text-slate-300">Større tekst og knapper</label>
-            <input type="checkbox" onchange="togUiSize(this.checked)" ${s.uiLarge?'checked':''} class="w-5 h-5 accent-blue-600">
-        </div>
-        <div class="flex items-center justify-between mb-2">
-            <label class="text-sm text-slate-300">Vis Biltyper (Piller)</label>
-            <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-5 h-5 accent-blue-600">
-        </div>
-        <div class="flex items-center justify-between">
-            <label class="text-sm text-slate-300">Vis Ansvarlig</label>
-            <input type="checkbox" onchange="togVis('visResp', this.checked)" ${s.visResp?'checked':''} class="w-5 h-5 accent-blue-600">
+    c.innerHTML = `
+    <!-- Card 1: Min Profil -->
+    <div class="settings-card">
+        <div class="settings-header"><span class="material-icons-round text-blue-500">person</span> Min Profil</div>
+        <div class="flex flex-col gap-1">
+             <label class="text-[10px] text-slate-500 font-bold uppercase">Innlogget som</label>
+             <p class="text-xl font-black text-white tracking-tight">${s.bid}</p>
+             <p class="text-xs text-slate-500 font-mono">${s.u}</p>
         </div>
     </div>
 
-    <div class="border-t border-slate-700 pt-4"><div class="flex items-center justify-between mb-2"><label class="text-sm text-slate-300 font-bold">Aktiver e-postvarsling</label><input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-5 h-5 accent-blue-600"></div><p class="text-xs text-slate-500 mb-3">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p><div class="flex gap-2"><input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-lg text-sm bg-slate-900 border border-slate-600 text-white"><button onclick="updEm()" class="bg-blue-600 px-4 rounded-lg text-white font-bold text-xs">LAGRE</button></div></div></div><div class="bg-slate-800 p-5 rounded-xl border border-slate-700 mb-4"><h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><span class="material-icons-round text-blue-500">help</span> Hjelp & App</h2><div class="space-y-2"><button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-slate-700 p-3 rounded-lg font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600"><span class="material-icons-round">auto_stories</span> Åpne Brukermanual</button><button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-lg font-bold border border-blue-800 flex items-center justify-center gap-2"><span class="material-icons-round">download</span> Installer som App</button><a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-slate-700 p-3 rounded-lg font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 text-sm"><span class="material-icons-round text-sm">mail</span> Melde feil</a></div></div><div class="bg-slate-900 p-5 rounded-xl border border-slate-800 mb-4"><h2 class="text-lg font-bold text-slate-400 mb-4 flex items-center gap-2"><span class="material-icons-round text-slate-500">admin_panel_settings</span> Administrasjon</h2><div class="mb-6"><p class="text-xs text-slate-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p><div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div><div class="flex gap-2"><input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-lg text-sm bg-slate-800 border border-slate-700 text-white"><button onclick="addAdminEmail()" class="bg-slate-700 border border-slate-600 px-4 rounded-lg text-white font-bold text-xs">LEGG TIL</button></div></div><details><summary class="text-sm font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors">Avansert: Slett data <span class="material-icons-round">expand_more</span></summary><div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30"><p class="text-xs text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p><button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-lg font-bold hover:bg-red-800 border border-red-700 shadow-lg">SLETT ALLE DATA</button></div></details></div>`;
+    <!-- Card 2: Visning -->
+    <div class="settings-card">
+        <div class="settings-header"><span class="material-icons-round text-purple-500">visibility</span> Visningsvalg</div>
+        
+        <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
+                <div class="flex flex-col">
+                    <span class="text-sm text-slate-200 font-medium">Større tekst og knapper</span>
+                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Øker størrelsen på elementer for bedre lesbarhet på mobil.</p>
+                </div>
+                <input type="checkbox" onchange="togUiSize(this.checked)" ${s.uiLarge?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
+            </div>
+             <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
+                <div class="flex flex-col">
+                    <span class="text-sm text-slate-200 font-medium">Vis biltyper (Piller)</span>
+                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Viser type bil (Uniformert/Sivil) som merker i oversikten.</p>
+                </div>
+                <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
+            </div>
+             <div class="flex items-center justify-between">
+                <div class="flex flex-col">
+                    <span class="text-sm text-slate-200 font-medium">Vis bilansvarlig</span>
+                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Viser hvem som er ansvarlig for hver bil i listen.</p>
+                </div>
+                <input type="checkbox" onchange="togVis('visResp', this.checked)" ${s.visResp?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
+            </div>
+            
+            <div class="pt-2">
+                <p class="text-[10px] text-slate-500 font-bold uppercase mb-3">Velg biler som skal vises</p>
+                <div class="flex flex-wrap gap-2">
+                    ${p}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Varsling -->
+    <div class="settings-card">
+        <div class="settings-header"><span class="material-icons-round text-amber-500">notifications</span> Varsling</div>
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span>
+            <input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-6 h-6 accent-amber-600 rounded cursor-pointer">
+        </div>
+        <div class="flex gap-2">
+            <input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white focus:border-amber-500 outline-none transition-colors">
+            <button onclick="updEm()" class="bg-amber-600 hover:bg-amber-500 px-4 rounded-xl text-white font-bold text-xs shadow-lg transition-transform active:scale-95">LAGRE</button>
+        </div>
+        <p class="text-[10px] text-slate-500 mt-2">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p>
+    </div>
+
+    <!-- Card 4: Info -->
+    <div class="settings-card">
+        <div class="settings-header"><span class="material-icons-round text-emerald-500">info</span> Hjelp & Info</div>
+        <div class="space-y-2">
+            <button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-slate-700/50 p-3 rounded-xl font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors">
+                <span class="material-icons-round text-sm">auto_stories</span> Åpne Brukermanual
+            </button>
+            <button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-xl font-bold border border-blue-800 flex items-center justify-center gap-2">
+                <span class="material-icons-round text-sm">download</span> Installer som App
+            </button>
+            <a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-slate-700/50 p-3 rounded-xl font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors text-sm no-underline">
+                <span class="material-icons-round text-sm">mail</span> Melde feil
+            </a>
+        </div>
+    </div>
+    
+    <!-- Admin Section -->
+    <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800">
+        <h2 class="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2"><span class="material-icons-round text-slate-500">admin_panel_settings</span> Administrasjon</h2>
+        <div class="mb-6">
+            <p class="text-[10px] text-slate-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p>
+            <div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div>
+            <div class="flex gap-2">
+                <input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white outline-none focus:border-blue-500">
+                <button onclick="addAdminEmail()" class="bg-slate-700 border border-slate-600 px-4 rounded-xl text-white font-bold text-xs hover:bg-slate-600">LEGG TIL</button>
+            </div>
+        </div>
+        <details>
+            <summary class="text-xs font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors p-2 rounded hover:bg-slate-800">Avansert: Slett data <span class="material-icons-round text-sm">expand_more</span></summary>
+            <div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30">
+                <p class="text-[10px] text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p>
+                <button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-xl font-bold hover:bg-red-800 border border-red-700 shadow-lg text-xs">SLETT ALLE DATA</button>
+            </div>
+        </details>
+    </div>
+    `;
     renderAdminEmails();
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
 }
