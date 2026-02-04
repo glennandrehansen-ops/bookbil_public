@@ -43,8 +43,6 @@ body.ui-large { font-size: 17px; }
 .ui-large input, .ui-large select { height: 54px !important; font-size: 16px !important; }
 .ui-large .material-icons-round { transform: scale(1.2); } 
 .ui-large .time-label { font-size: 11px; } 
-/* FIX: Keep tab font size manageable on mobile even in large mode, but bold it */
-.ui-large .seg-tab { padding: 12px 4px; font-size: 11px; font-weight: 900; }
 
 /* Fleet Row (Liste-element) */
 .fleet-row {
@@ -436,6 +434,15 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
   <h3 id="b-sub" class="text-sm text-slate-300 mb-2 font-bold flex flex-col">
       <span>Ny reservasjon</span>
   </h3>
+  
+  <!-- New Warning Box for Foreign Booking -->
+  <div id="b-owner-warn" class="hidden mb-4 bg-orange-900/30 border border-orange-500/50 p-4 rounded-xl flex items-center gap-3">
+    <span class="material-icons-round text-orange-500 text-2xl">warning</span>
+    <div>
+        <h3 class="text-orange-400 font-bold text-xs uppercase">Advarsel</h3>
+        <p class="text-orange-200 text-xs">Du redigerer en reservasjon som tilhører <span id="b-owner-name" class="font-black text-white"></span>.</p>
+    </div>
+  </div>
 
   <p id="b-info" class="text-xs text-yellow-500 mb-3 bg-yellow-900/20 p-2 rounded border border-yellow-700/50 hidden"></p>
   <div class="mb-4">
@@ -560,7 +567,7 @@ const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
-let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true', uiLarge: localStorage.getItem('uiLarge') === 'true' };
+let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, oldAdmCarName: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true', uiLarge: localStorage.getItem('uiLarge') === 'true' };
 let touchStartX = 0;
 let touchStartY = 0; 
 
@@ -935,7 +942,10 @@ async function confirmExpress() {
 }
 
 function book(car, id=null, st=null, en=null) { 
-    s.sel=[car]; s.editId=id; s.co=s.c.find(x=>x.bil===car); s.workshopMode = false;
+    s.sel=[car]; 
+    s.editId=id; 
+    s.co=s.c.find(x=>x.bil===car); 
+    s.workshopMode = false;
     const now = new Date(); now.setHours(0,0,0,0);
     s.tlDay = 0; 
     
@@ -1046,14 +1056,27 @@ function setupModal(title, sub="Ny reservasjon") {
         btnOk.disabled = true; btnOk.classList.add('opacity-50', 'cursor-not-allowed'); btnOk.innerText = "IKKE TILGJENGELIG";
         if(dateInputs) dateInputs.classList.add('hidden');
     }
-    // REMOVED: The logic that statically showed "Opptatt av..." on modal open is now handled dynamically in check()
+    
+    // Warn if not my booking
+    $id('b-owner-warn').classList.add('hidden');
+    if(s.editId) {
+        const booking = s.r.find(r => r.id === s.editId);
+        if(booking && booking.bid !== s.bid) {
+            $id('b-owner-warn').classList.remove('hidden');
+            $id('b-owner-name').innerText = booking.bid;
+        }
+    }
     
     if(!s.editId) { 
         $id('btn-del').classList.add('hidden'); const mc = $id('b-multi'); mc.innerHTML = "";
         s.c.forEach(b => { if(b.bil === title || b.status !== 'Aktiv' || s.h.includes(b.bil)) return; mc.innerHTML += `<button onclick="togMulti(this,'${b.bil}')" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-900">${b.bil}</button>`; });
     } else { $id('btn-del').classList.remove('hidden'); $id('b-multi').innerHTML=""; }
 
-    openM('m-book'); renderTimeline(title, 'book'); setTimeout(() => scrollToView('book'), 50); check(); rFut(title); 
+    openM('m-book'); 
+    renderTimeline(title, 'book'); 
+    setTimeout(() => scrollToView('book'), 50); 
+    check(); 
+    rFut(title); 
     const instr = $id('b-instr'); if(instr) { if(s.tlClick === 0) instr.innerText = "Trykk starttid (A)"; else if(s.tlClick === 1) instr.innerText = "Velg SLUTTID (B)"; else instr.innerText = ""; }
 }
 
@@ -1086,7 +1109,11 @@ function handleTimelineScroll(mode) {
 function togMulti(el, c) { el.classList.toggle('selected'); if(s.sel.includes(c)) s.sel = s.sel.filter(x => x !== c); else s.sel.push(c); check(); }
 
 function renderTimeline(car, mode) {
-    const prefix = mode === 'search' ? 's' : 'b'; const el = $id(mode === 'search' ? 'timeline-search' : 'timeline'); el.innerHTML = "";
+    const prefix = mode === 'search' ? 's' : 'b'; 
+    const el = $id(mode === 'search' ? 'timeline-search' : 'timeline'); 
+    if(!el) return;
+    el.innerHTML = "";
+    
     const now = new Date(); const daysToRender = 14; const totalSlots = daysToRender * 48;
     const startOfAll = new Date(); startOfAll.setHours(0,0,0,0);
     const selSt = getVal(prefix, 'st'); const selEn = getVal(prefix, 'en');
@@ -1154,7 +1181,10 @@ function check(src) {
     }
 
     const stDate = getVal(prefix, 'st'); const enDate = getVal(prefix, 'en');
+    
+    // Only re-render timeline if car exists (prevents clearing on load)
     if(mode === 'book' && s.co) renderTimeline(s.co.bil, 'book');
+    
     const instr = $id(mode === 'search' ? 's-instr' : 'b-instr'); if(instr) { if(s.tlClick === 0) instr.innerText = "Trykk starttid (A)"; else if(s.tlClick === 1) instr.innerText = "Velg SLUTTID (B)"; else instr.innerText = ""; }
     
     // NEW LOGIC: Use stDate and enDate to check for collision OR if empty check 'now'
@@ -1251,6 +1281,12 @@ async function delB(id) {
     const delId = id || s.editId;
     const r = s.r.find(x => x.id === delId);
     if(!r) return;
+    
+    // NEW SECURITY CHECK: If it's not my booking, ask for extra confirmation
+    if (r.bid !== s.bid) {
+        if(!confirm(`ADVARSEL: Denne reservasjonen tilhører ${r.bid}. Er du helt sikker på at du vil slette den?`)) return;
+    }
+
     const txt = `Vil du slette reservasjon for ${r.bil}?\n\nTid: ${fmtDD(r.start_tid)} kl. ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}\nFormål: ${r.formal}`;
     if(confirm(txt)) { await _s.from('bookinger').delete().eq('id', delId); if(s.editId && s.activeModal === 'm-book') closeM('m-book'); load(); showToast("Slettet", "info"); } 
 }
@@ -1437,6 +1473,9 @@ function openAdmEdit(params) {
         delBtn.classList.add('hidden');
     }
     
+    // Store old car name for rename logic
+    s.oldAdmCarName = s.admCar;
+
     openM('m-admin-edit');
 }
 
@@ -1454,9 +1493,16 @@ async function saveAdmCar() {
 
     let error;
     if (s.admId) {
-        // UPDATE existing
+        // UPDATE existing - FIRST update bookings, THEN car
+        if (s.oldAdmCarName && s.oldAdmCarName !== name) {
+             const { error: bookingErr } = await _s.from('bookinger').update({ bil: name }).eq('bil', s.oldAdmCarName);
+             if (bookingErr) console.error("Feil ved oppdatering av bookinger:", bookingErr);
+             else console.log(`Oppdaterte bookinger fra ${s.oldAdmCarName} til ${name}`);
+        }
+
         const { error: err } = await _s.from('biler').update(data).eq('id', s.admId);
         error = err;
+        
         if(!err) {
              if(stat !== 'Aktiv') logMsg('Statusendring', `Ny status: ${stat}`, name);
              if(comm) logMsg('Ny kommentar', comm, name);
