@@ -43,6 +43,8 @@ body.ui-large { font-size: 17px; }
 .ui-large input, .ui-large select { height: 54px !important; font-size: 16px !important; }
 .ui-large .material-icons-round { transform: scale(1.2); } 
 .ui-large .time-label { font-size: 11px; } 
+/* FIX: Keep tab font size manageable on mobile even in large mode, but bold it */
+.ui-large .seg-tab { padding: 12px 4px; font-size: 11px; font-weight: 900; }
 
 /* Fleet Row (Liste-element) */
 .fleet-row {
@@ -157,10 +159,20 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 .bar{width:40px;height:5px;background:#4b5563;border-radius:99px}
 
 /* Tidslinje */
-.timeline-scroll { overflow-x: auto; padding-bottom: 25px; padding-top: 10px; display: flex; margin-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.timeline-scroll { 
+    overflow-x: auto; 
+    padding-bottom: 25px; 
+    padding-top: 10px; 
+    display: flex; 
+    margin-bottom: 5px; 
+    -webkit-overflow-scrolling: touch; 
+    scrollbar-width: none; 
+    cursor: grab; /* Shows hand cursor for dragging */
+}
+.timeline-scroll.active { cursor: grabbing; } /* Closed hand when dragging */
 .timeline-scroll::-webkit-scrollbar { display: none; }
 .time-grid { display: inline-flex; gap: 2px; height: 50px; padding: 0 4px; position: relative; }
-.time-block { width: 42px; height: 100%; background-color: #1e293b; border-radius: 6px; position: relative; flex-shrink: 0; cursor: pointer; border: 1px solid #334155; display: flex; justify-content: center; align-items: center; }
+.time-block { width: 42px; height: 100%; background-color: #1e293b; border-radius: 6px; position: relative; flex-shrink: 0; cursor: pointer; border: 1px solid #334155; display: flex; justify-content: center; align-items: center; user-select: none; }
 .time-label { position: absolute; bottom: -24px; left: 0; width: 100%; text-align: center; font-size: 11px; color: #94a3b8; font-weight: 800; pointer-events: none; opacity: 0.8; }
 .time-block.past { opacity: 0.3; background-color: #111; border-color: transparent; pointer-events: none; }
 .time-block.busy { background-color: #451a1a; border-color: #7f1d1d; opacity: 0.9; pointer-events: none; background-image: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.05) 3px, rgba(255,255,255,0.05) 6px); }
@@ -191,6 +203,45 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 /* Settings Cards */
 .settings-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
 .settings-header { font-size: 14px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+/* TOAST - FLOATING PILL FIXED */
+#toast-container { 
+    position: fixed; 
+    bottom: 90px; /* Over bottom nav */
+    left: 50%; 
+    transform: translateX(-50%); 
+    z-index: 200; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    width: auto;
+    max-width: 90%;
+}
+.toast { 
+    background: rgba(30, 41, 59, 0.95); 
+    backdrop-filter: blur(8px);
+    color: white; 
+    padding: 12px 24px; 
+    border-radius: 999px; 
+    margin-top: 8px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+    opacity: 0; 
+    transform: translateY(20px); 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    border: 1px solid rgba(255,255,255,0.1); 
+    font-size: 14px; 
+    font-weight: 600; 
+    pointer-events: auto; 
+    white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-success { border-bottom: 3px solid #10b981; }
+.toast-error { border-bottom: 3px solid #ef4444; }
+.toast-info { border-bottom: 3px solid #3b82f6; }
 </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
@@ -561,13 +612,14 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 
 <script>
 const JOB_DOMAIN = "@politiet.no"; 
+const KIOSK_USER = "skjermbook@politiet.no"; // KIOSK MODE EMAIL
 const S_URL = "https://huxyflpzmfajrvluhxaw.supabase.co";
 const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1eHlmbHB6bWZhanJ2bHVoeGF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1ODk1NDYsImV4cCI6MjA4NDE2NTU0Nn0.7obBykQfPmfxxzHf348iDO9aHWldQPqibnRKlrMDHAI";
 
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
-let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, oldAdmCarName: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true', uiLarge: localStorage.getItem('uiLarge') === 'true' };
+let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, oldAdmCarName: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true', uiLarge: localStorage.getItem('uiLarge') === 'true', kioskMode: false };
 let touchStartX = 0;
 let touchStartY = 0; 
 
@@ -580,7 +632,36 @@ async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); 
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
 window.addEventListener('online', () => $id('offline-msg').classList.add('hidden'));
 window.addEventListener('offline', () => $id('offline-msg').classList.remove('hidden'));
-_s.auth.onAuthStateChange((event, session) => { if (session) { s.u = session.user.email; s.bid = s.u.split('@')[0].toUpperCase(); $id('auth').classList.add('hidden'); $id('app').classList.remove('hidden'); $id('u-disp').innerText = "Bruker: " + s.bid; tab('cars'); load(); } else { $id('auth').classList.remove('hidden'); $id('app').classList.add('hidden'); s.u = null; s.bid = null; }});
+_s.auth.onAuthStateChange((event, session) => { 
+    if (session) { 
+        s.u = session.user.email; 
+        
+        // KIOSK MODE LOGIC
+        if(s.u === KIOSK_USER) {
+            s.kioskMode = true;
+            s.bid = ""; // Force manual entry
+            s.uiLarge = true; // FORCE LARGE IN KIOSK
+            document.body.classList.add('ui-large');
+            $id('u-disp').innerText = "KIOSK-MODUS";
+        } else {
+            s.kioskMode = false;
+            s.bid = s.u.split('@')[0].toUpperCase(); 
+            $id('u-disp').innerText = "Bruker: " + s.bid;
+        }
+
+        $id('auth').classList.add('hidden'); 
+        $id('app').classList.remove('hidden'); 
+        tab('cars'); 
+        load(); 
+    } else { 
+        $id('auth').classList.remove('hidden'); 
+        $id('app').classList.add('hidden'); 
+        s.u = null; 
+        s.bid = null; 
+        s.kioskMode = false;
+    }
+});
+
 function showToast(msg, type = 'info') { const c = $id('toast-container'); const t = document.createElement('div'); t.className = `toast toast-${type}`; let icon = type==='success'?'check_circle':(type==='error'?'error':'info'); t.innerHTML = `<span class="material-icons-round text-lg">${icon}</span> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>t.classList.add('show'),10); setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000); }
 window.onpopstate = (event) => { if (s.activeModal) closeM(s.activeModal, false); };
 function openM(id) { if (s.activeModal === id) return; $id(id).classList.remove('hidden'); s.activeModal = id; history.pushState({modal: id}, null, ""); }
@@ -629,9 +710,12 @@ function togMenu() { $id('more-menu').classList.toggle('open'); $id('menu-bg').c
 function openActionMenu() { openM('m-action'); }
 async function sendOtp() {
     const e = $id('l-email').value.trim().toLowerCase();
-    if (!e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
+    
+    // ALLOW KIOSK USER OR STANDARD PATTERN
     const bidPattern = /^[a-zæøå]{3}\d{3}@politiet\.no$/;
-    if (!bidPattern.test(e)) return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
+    if (e !== KIOSK_USER && !e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
+    if (e !== KIOSK_USER && !bidPattern.test(e)) return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
+    
     const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } });
     if (error) showToast(error.message, 'error'); 
     else { $id('f-email').classList.add('hidden'); $id('f-otp').classList.remove('hidden'); $id('l-otp').focus(); }
@@ -661,7 +745,11 @@ async function load() {
         
         // Oppdatert header-visning
         const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
-        $id('u-disp').innerHTML = `Bruker: ${s.bid} <span class="opacity-50 mx-1">•</span> <span class="material-icons-round text-xs align-middle opacity-50">refresh</span> <span class="font-normal opacity-75">${time}</span>`;
+        if (!s.kioskMode) {
+             $id('u-disp').innerHTML = `Bruker: ${s.bid} <span class="opacity-50 mx-1">•</span> <span class="material-icons-round text-xs align-middle opacity-50">refresh</span> <span class="font-normal opacity-75">${time}</span>`;
+        } else {
+             $id('u-disp').innerHTML = `KIOSK-MODUS <span class="opacity-50 mx-1">•</span> <span class="font-normal opacity-75">${time}</span>`;
+        }
         
         render();
     } catch(e) { 
@@ -687,6 +775,14 @@ function render() {
     if(tabsContainer) tabsContainer.classList.remove('hidden'); 
     if(title) title.innerText = "BookBil Jæren";
     
+    // KIOSK MODE: Hide "Mine" tab logic inside render to ensure dynamic update
+    if (s.kioskMode) {
+        $id('tab-mine').style.display = 'none'; // Force hide
+        if(s.v === 'mine') tab('cars'); // Reset if active
+    } else {
+        $id('tab-mine').style.display = 'block'; // Ensure visible
+    }
+
     // Update segmented control tabs
     ['ov','res','mine'].forEach(x => { const el = $id('tab-'+x); if(el) el.className = "seg-tab"; });
     if(s.v==='cars') { $id('tab-ov').className = "seg-tab active"; rCars(c); }
@@ -826,7 +922,12 @@ function rCars(c) {
             subText = `Opptatt av ${act.bid} til ${fmtT(act.slutt_tid)}`;
             if(act.formal && (act.formal.includes('Verksted') || act.formal.includes('Service'))) {
                  stripeClass="c-purple"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-70";
-                 actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
+                 // Check if I am the one who booked it or if kiosk mode
+                 if (act.bid === s.bid || s.kioskMode) {
+                     actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
+                 } else {
+                     actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Opptatt</span></div>`;
+                 }
             } else {
                  actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Ledig</span><span class="block text-xs font-bold text-slate-300 font-mono">${fmtT(act.slutt_tid)}</span></div>`;
             }
@@ -841,7 +942,7 @@ function rCars(c) {
         const row = document.createElement('div');
         row.className = `fleet-row ${rowBg} ${rowOp}`;
         row.onclick = () => book(b.bil);
-        let minBilTag = (act && act.bid === s.bid) ? `<span class="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold uppercase ml-2 flex-shrink-0">Min bil</span>` : '';
+        let minBilTag = (act && act.bid === s.bid && !s.kioskMode) ? `<span class="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold uppercase ml-2 flex-shrink-0">Min bil</span>` : '';
         row.innerHTML = `<div class="flex items-center flex-1 min-w-0 gap-3"><div class="status-stripe ${stripeClass}"></div><div class="flex-1 min-w-0 py-1 overflow-hidden"><div class="flex items-center gap-1 overflow-x-auto no-scrollbar mask-right"><h2 class="text-base font-bold ${titleColor} leading-tight whitespace-nowrap mr-1 flex-shrink-0">${b.bil}</h2>${getBadgesHtml(b, false, s.visResp, s.visType)} ${minBilTag}</div><p class="text-xs ${subColor} mt-0.5 font-medium truncate">${subText}</p></div></div><div class="flex-shrink-0 ml-2">${actionBtn}</div>`;
         wrapper.appendChild(row);
     });
@@ -864,10 +965,21 @@ function rRes(c, mineOnly) {
         let statusTxt = active ? "PÅGÅENDE" : "KOMMENDE";
         let icon = active ? "play_circle" : "schedule";
         let actionBtns = "";
-        if(isVerksted) { borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; }
+        
+        // Buttons logic
+        if(isVerksted) { 
+            borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; 
+        }
+        
         if (!isVerksted) {
-            if (active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();subRet(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
-            else if (!active && (mineOnly || r.bid === s.bid)) actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
+            // Kiosk mode: No delete/edit unless owning session (which kiosk rarely does for persistent bookings)
+            // But if it's active, allow return
+            if (active && (mineOnly || r.bid === s.bid || s.kioskMode)) {
+                 actionBtns = `<button onclick="event.stopPropagation();subRet(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
+            }
+            else if (!active && (mineOnly || r.bid === s.bid) && !s.kioskMode) {
+                 actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
+            }
         }
         html += `<div onclick="book('${r.bil}',${r.id})" class="${bgCol} border-l-4 ${borderCol} p-4 rounded-r-xl border-y border-r border-slate-700/50 cursor-pointer relative flex justify-between items-center"><div><div class="flex items-center gap-2 mb-1"><span class="text-xs font-black ${active ? 'text-white' : 'text-slate-300'}">${r.bil}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${statusTxt}</span></div><div class="text-sm font-bold text-white mb-0.5">${formalText}</div><div class="text-xs text-slate-400 font-mono">${fmtDD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</div>${!mineOnly ? `<div class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${r.bid}</div>` : ''}</div><div class="flex flex-col items-end gap-2"><span class="material-icons-round text-slate-600 mb-1">${icon}</span>${actionBtns}</div></div>`;
     });
@@ -950,7 +1062,7 @@ function book(car, id=null, st=null, en=null) {
     s.tlDay = 0; 
     
     // Clear fields
-    $id('b-bid').value=s.bid; 
+    $id('b-bid').value = s.kioskMode ? "" : s.bid;
     $id('b-form').value = "";
     $id('b-extra').value = "";
     
@@ -1067,10 +1179,21 @@ function setupModal(title, sub="Ny reservasjon") {
         }
     }
     
-    if(!s.editId) { 
-        $id('btn-del').classList.add('hidden'); const mc = $id('b-multi'); mc.innerHTML = "";
+    // Kiosk Mode: Hide delete logic
+    const delBtn = $id('btn-del');
+    if(!s.editId || s.kioskMode) { 
+        delBtn.classList.add('hidden'); 
+    } else { 
+        delBtn.classList.remove('hidden'); 
+    }
+    
+    // Multi-car logic
+    if(!s.editId) {
+        const mc = $id('b-multi'); mc.innerHTML = "";
         s.c.forEach(b => { if(b.bil === title || b.status !== 'Aktiv' || s.h.includes(b.bil)) return; mc.innerHTML += `<button onclick="togMulti(this,'${b.bil}')" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-900">${b.bil}</button>`; });
-    } else { $id('btn-del').classList.remove('hidden'); $id('b-multi').innerHTML=""; }
+    } else {
+        $id('b-multi').innerHTML=""; 
+    }
 
     openM('m-book'); 
     renderTimeline(title, 'book'); 
@@ -1181,54 +1304,13 @@ function check(src) {
     }
 
     const stDate = getVal(prefix, 'st'); const enDate = getVal(prefix, 'en');
-    
-    // Only re-render timeline if car exists (prevents clearing on load)
     if(mode === 'book' && s.co) renderTimeline(s.co.bil, 'book');
-    
     const instr = $id(mode === 'search' ? 's-instr' : 'b-instr'); if(instr) { if(s.tlClick === 0) instr.innerText = "Trykk starttid (A)"; else if(s.tlClick === 1) instr.innerText = "Velg SLUTTID (B)"; else instr.innerText = ""; }
-    
-    // NEW LOGIC: Use stDate and enDate to check for collision OR if empty check 'now'
-    let collision = null;
-    if(stDate && enDate) {
-        collision = s.sel.some(c => s.r.some(r => r.id != s.editId && r.bil===c && new Date(r.start_tid) < enDate && new Date(r.slutt_tid) > stDate)) ? 
-                    s.r.find(r => r.id != s.editId && s.sel.includes(r.bil) && new Date(r.start_tid) < enDate && new Date(r.slutt_tid) > stDate) : null;
-    } else {
-        // Fallback check if no dates selected yet (implies 'now')
-        const now = new Date();
-        collision = s.sel.some(c => s.r.some(r => r.id != s.editId && r.bil===c && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now)) ?
-                    s.r.find(r => r.id != s.editId && s.sel.includes(r.bil) && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now) : null;
-    }
-
+    let conf = false; if(s.activeModal === 'm-book' && stDate && enDate) { conf = s.sel.some(c => s.r.some(r => r.id != s.editId && r.bil===c && new Date(r.start_tid) < enDate && new Date(r.slutt_tid) > stDate)); }
     const btn = $id('btn-ok'); 
-    
     if(btn) {
-        if(collision) {
-             // Show Alert because of collision
-             $id('b-alert').classList.remove('hidden');
-             $id('al-t').innerHTML = '<span class="material-icons-round">error</span> OPPTATT';
-             $id('b-reason').innerText = `Opptatt av ${collision.bid} (${fmtT(collision.start_tid)} - ${fmtT(collision.slutt_tid)})`;
-             btn.disabled = true; 
-             btn.classList.add('opacity-50'); 
-        } 
-        else if (!stDate || !enDate) {
-             // Invalid dates, but no collision (e.g. just empty)
-             // Hide alert unless car status is bad
-             if(s.co && s.co.status === 'Aktiv') $id('b-alert').classList.add('hidden');
-             btn.disabled = true; 
-             btn.classList.add('opacity-50');
-        }
-        else { 
-             // Valid dates, no collision
-             if(s.co && s.co.status !== 'Aktiv') { 
-                 // Car is broken/garage, keep alert from setupModal
-                 btn.disabled = true; btn.classList.add('opacity-50'); 
-             } else { 
-                 $id('b-alert').classList.add('hidden'); // HIDE ALERT
-                 $id('warn').classList.add('hidden'); 
-                 btn.disabled = false; 
-                 btn.classList.remove('opacity-50'); 
-             } 
-        }
+        if(conf || !stDate || !enDate) { if(conf) $id('warn').classList.remove('hidden'); else $id('warn').classList.add('hidden'); btn.disabled = true; btn.classList.add('opacity-50'); } 
+        else { if(s.co && s.co.status !== 'Aktiv') { btn.disabled = true; btn.classList.add('opacity-50'); } else { $id('warn').classList.add('hidden'); btn.disabled = false; btn.classList.remove('opacity-50'); } }
     }
 }
 
@@ -1281,12 +1363,6 @@ async function delB(id) {
     const delId = id || s.editId;
     const r = s.r.find(x => x.id === delId);
     if(!r) return;
-    
-    // NEW SECURITY CHECK: If it's not my booking, ask for extra confirmation
-    if (r.bid !== s.bid) {
-        if(!confirm(`ADVARSEL: Denne reservasjonen tilhører ${r.bid}. Er du helt sikker på at du vil slette den?`)) return;
-    }
-
     const txt = `Vil du slette reservasjon for ${r.bil}?\n\nTid: ${fmtDD(r.start_tid)} kl. ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}\nFormål: ${r.formal}`;
     if(confirm(txt)) { await _s.from('bookinger').delete().eq('id', delId); if(s.editId && s.activeModal === 'm-book') closeM('m-book'); load(); showToast("Slettet", "info"); } 
 }
@@ -1675,6 +1751,46 @@ function fmtDD(dStr) {
     const date = d.toLocaleDateString([], {day:'2-digit', month:'2-digit'});
     return `${day} ${date}`;
 }
+
+// Function to enable drag scrolling
+function enableDragScroll(id) {
+    const ele = document.getElementById(id);
+    if(!ele) return;
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    ele.addEventListener('mousedown', (e) => {
+        isDown = true;
+        ele.classList.add('active'); // CSS class for grabbing cursor
+        startX = e.pageX - ele.offsetLeft;
+        scrollLeft = ele.scrollLeft;
+    });
+    ele.addEventListener('mouseleave', () => { isDown = false; ele.classList.remove('active'); });
+    ele.addEventListener('mouseup', () => { isDown = false; ele.classList.remove('active'); });
+    ele.addEventListener('mousemove', (e) => {
+        if(!isDown) return;
+        e.preventDefault(); // Stop text selection while dragging
+        const x = e.pageX - ele.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll-fast multiplier
+        ele.scrollLeft = scrollLeft - walk;
+    });
+}
+
+// Initialize drag scroll on load (safe for mobile too as it uses mouse events)
+document.addEventListener('DOMContentLoaded', () => {
+    // Add drag scroll to both possible timelines
+    // Note: The elements might be hidden initially but exist in DOM
+    // For dynamically shown modals, we might want to re-init or just rely on DOM existence
+    // Since index.html structure is static, we can attach listeners once.
+    // However, setupModal() might re-render innerHTML of timeline container? 
+    // No, renderTimeline() clears innerHTML but the container #ts-book / #ts-search remains.
+    
+    // We can call this, but the elements need to exist. They do in the static HTML.
+    enableDragScroll('ts-book');
+    enableDragScroll('ts-search');
+});
+
 setInterval(load,10000);
 </script>
 </body>
