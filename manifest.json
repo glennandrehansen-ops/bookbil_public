@@ -1,12 +1,14 @@
 {
   "name": "Bilbooking Jæren",
   "short_name": "Bilbooking",
-  "id": "/index.html",
-  "start_url": "./index.html",
+  "id": "/",
+  "start_url": "/index.html",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "description": "Bilbooking for tjenestebiler på Jæren",
+  "gcm_sender_id": "103953800507",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/7840/7840958.png",
