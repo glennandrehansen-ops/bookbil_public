@@ -670,6 +670,23 @@ async function togglePush() {
         return;
     }
 
+    // ANDROID HACK: Prøv å be om tillatelse direkte hvis den er default (ikke spurt ennå)
+    // Noen ganger feiler OneSignal sin overlegg på Android PWA
+    if (Notification.permission === 'default') {
+        try {
+            const result = await Notification.requestPermission();
+            if (result === 'granted') {
+                 // Hvis nettleseren sier OK, fortell OneSignal at vi vil opt-in
+                 window.OneSignalDeferred.push(function(OneSignal) {
+                     OneSignal.User.PushSubscription.optIn();
+                 });
+                 return; // La OneSignal håndtere resten av flyten
+            }
+        } catch (e) {
+            console.error("Native requestPermission failed", e);
+        }
+    }
+
     window.OneSignalDeferred.push(async function(OneSignal) {
         try {
             console.log("Forsøker å aktivere push...");
