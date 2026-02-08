@@ -11,15 +11,18 @@
 
 <!-- Manifest -->
 <link rel="manifest" href="manifest.json">
-<!-- Oppdatert ikon (Car Rental) -->
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/7840/7840958.png">
-<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7840/7840958.png">
+<!-- Ikoner -->
+<link rel="apple-touch-icon" href="https://img.icons8.com/color/512/police-car.png">
+<link rel="icon" type="image/png" href="https://img.icons8.com/color/512/police-car.png">
 
 <!-- Biblioteker -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- OneSignal SDK -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
 <style>
 /* Base */
@@ -74,10 +77,10 @@ body.ui-large { font-size: 17px; }
 .c-green { background-color: #10b981; } /* Ledig > 4t */
 .c-yellow { background-color: #f59e0b; } /* Ledig 2-4t */
 .c-orange { background-color: #f97316; } /* Ledig < 2t */
-.c-red { background-color: #ef4444; }   /* Opptatt */
-.c-blue { background-color: #3b82f6; }  /* Min bil */
+.c-red { background-color: #ef4444; }    /* Opptatt */
+.c-blue { background-color: #3b82f6; }   /* Min bil */
 .c-purple { background-color: #a855f7; } /* Verksted/EU */
-.c-gray { background-color: #64748b; }   /* Ute av drift */
+.c-gray { background-color: #64748b; }    /* Ute av drift */
 
 /* Knapper i liste */
 .btn-action {
@@ -211,11 +214,11 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
     left: 50%; 
     transform: translateX(-50%); 
     z-index: 200; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    pointer-events: none;
-    width: auto;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    pointer-events: none; 
+    width: auto; 
     max-width: 90%;
 }
 .toast { 
@@ -308,7 +311,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
  
  <!-- MAIN CONTENT LIST -->
  <main id="main" class="flex-1 overflow-y-auto px-4 pb-32 pt-4 w-full" 
-       ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event)">
+        ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event)">
     <div class="text-center mt-20 text-slate-500">Laster...</div>
  </main>
  
@@ -616,6 +619,9 @@ const KIOSK_USER = "skjermbook@politiet.no"; // KIOSK MODE EMAIL
 const S_URL = "https://huxyflpzmfajrvluhxaw.supabase.co";
 const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1eHlmbHB6bWZhanJ2bHVoeGF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1ODk1NDYsImV4cCI6MjA4NDE2NTU0Nn0.7obBykQfPmfxxzHf348iDO9aHWldQPqibnRKlrMDHAI";
 
+// --- ONESIGNAL CONFIG ---
+const ONESIGNAL_APP_ID = "dd7175bc-fd00-4043-a7d4-11de95137faf";
+
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
@@ -626,12 +632,84 @@ let touchStartY = 0;
 // Initialiser UI Size ved oppstart
 if(s.uiLarge) document.body.classList.add('ui-large');
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+// --- SERVICE WORKER & PWA INSTALL ---
+// VIKTIG: Vi fjerner manuell registrering her for å la OneSignal håndtere det via init.
+// Dette unngår konflikt mellom to registreringer.
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); });
 async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); const { outcome } = await s.deferredPrompt.userChoice; if (outcome === 'accepted') { s.deferredPrompt = null; $id('install-icon').classList.add('hidden'); $id('pwa-settings-btn').classList.add('hidden'); } } }
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
 window.addEventListener('online', () => $id('offline-msg').classList.add('hidden'));
 window.addEventListener('offline', () => $id('offline-msg').classList.remove('hidden'));
+
+// --- ONESIGNAL INIT & LOGIC ---
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+window.OneSignalDeferred.push(function(OneSignal) {
+    // Slå på verbose logging midlertidig for feilsøking
+    OneSignal.Debug.setLogLevel("VERBOSE");
+    
+    OneSignal.init({
+        appId: ONESIGNAL_APP_ID,
+        safari_web_id: "web.onesignal.auto.637b3b3a-5302-4f30-802d-7d34559c76b7",
+        notifyButton: { enable: false }, // Vi bruker vår egen knapp
+        allowLocalhostAsSecureOrigin: true,
+        // La OneSignal registrere SW for oss for å unngå konflikter
+        serviceWorkerPath: 'sw.js',
+        serviceWorkerParam: { scope: '/' }
+    });
+    
+    // Lytt til endringer i abonnementet for å oppdatere UI hvis nødvendig
+    OneSignal.User.PushSubscription.addEventListener("change", (event) => {
+        console.log("Push subscription changed:", event);
+    });
+});
+
+async function togglePush() {
+    // Sjekk status først
+    if (Notification.permission === 'denied') {
+        alert("Du har blokkert varsler for denne nettsiden.\n\nDu må endre dette i telefonens innstillinger under Varsler -> Safari/Chrome.");
+        return;
+    }
+
+    // ANDROID HACK: Prøv å be om tillatelse direkte hvis den er default (ikke spurt ennå)
+    // Noen ganger feiler OneSignal sin overlegg på Android PWA
+    if (Notification.permission === 'default') {
+        try {
+            const result = await Notification.requestPermission();
+            if (result === 'granted') {
+                 // Hvis nettleseren sier OK, fortell OneSignal at vi vil opt-in
+                 window.OneSignalDeferred.push(function(OneSignal) {
+                     OneSignal.User.PushSubscription.optIn();
+                 });
+                 return; // La OneSignal håndtere resten av flyten
+            }
+        } catch (e) {
+            console.error("Native requestPermission failed", e);
+        }
+    }
+
+    window.OneSignalDeferred.push(async function(OneSignal) {
+        try {
+            console.log("Forsøker å aktivere push...");
+            // Dette er den kritiske metoden for iOS som krever brukerhandling
+            await OneSignal.User.PushSubscription.optIn();
+            
+            // Sjekk om vi fikk det til
+            const isPushEnabled = OneSignal.User.PushSubscription.optedIn;
+            if(isPushEnabled) {
+                // Sørg for at brukeren er logget inn med riktig ID
+                if(s.bid) await OneSignal.login(s.bid);
+                showToast("Varsler er aktivert!", "success");
+            } else {
+                // Hvis brukeren avbrøt dialogen eller noe annet skjedde
+                console.log("Bruker opt-in fullført, men status er ikke aktiv.");
+            }
+        } catch (e) {
+            console.error("Feil under aktivering av push:", e);
+            showToast("Kunne ikke aktivere: " + e.message, "error");
+        }
+    });
+}
+
 _s.auth.onAuthStateChange((event, session) => { 
     if (session) { 
         s.u = session.user.email; 
@@ -647,6 +725,11 @@ _s.auth.onAuthStateChange((event, session) => {
             s.kioskMode = false;
             s.bid = s.u.split('@')[0].toUpperCase(); 
             $id('u-disp').innerText = "Bruker: " + s.bid;
+
+            // Logg inn i OneSignal når bruker logger inn i appen
+            window.OneSignalDeferred.push(function(OneSignal) {
+                OneSignal.login(s.bid);
+            });
         }
 
         $id('auth').classList.add('hidden'); 
@@ -659,6 +742,11 @@ _s.auth.onAuthStateChange((event, session) => {
         s.u = null; 
         s.bid = null; 
         s.kioskMode = false;
+        
+        // Logg ut av OneSignal når bruker logger ut
+        window.OneSignalDeferred.push(function(OneSignal) {
+            OneSignal.logout();
+        });
     }
 });
 
@@ -1678,6 +1766,12 @@ function rSet(c) {
     <!-- Card 3: Varsling -->
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-amber-500">notifications</span> Varsling</div>
+        
+        <!-- PUSH KNAPP (NY FUNKSJONALITET) -->
+        <button onclick="togglePush()" class="w-full bg-amber-900/30 text-amber-400 p-3 rounded-xl font-bold border border-amber-800 flex items-center justify-center gap-2 mb-4 hover:bg-amber-900/50 transition-colors">
+            <span class="material-icons-round text-sm">notifications_active</span> Aktiver Push-varsler på denne enheten
+        </button>
+
         <div class="flex items-center justify-between mb-4">
             <span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span>
             <input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-6 h-6 accent-amber-600 rounded cursor-pointer">
