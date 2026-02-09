@@ -100,9 +100,17 @@ jobs:
 
               const payload = JSON.stringify({ title, body, url });
 
+              // ENDRING HER: Legger til options med urgency: high
+              const options = {
+                  headers: {
+                      "Urgency": "high" 
+                  }
+              };
+
               const promises = subs.map(async (subRecord) => {
                   try {
-                      await webpush.sendNotification(subRecord.subscription, payload);
+                      // Legger til options som tredje parameter
+                      await webpush.sendNotification(subRecord.subscription, payload, options);
                       console.log(`Push sendt til enhet ${subRecord.id} for ${bid}`);
                   } catch (error) {
                       if (error.statusCode === 410 || error.statusCode === 404) {
@@ -140,10 +148,8 @@ jobs:
                   hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
                });
                
-               // NYTT: Henter formål eller setter standardtekst
                const formalText = b.formal || "Tur";
 
-               // OPPDATERT PUSH TEKST MED FORMÅL
                await sendPush(
                    b.bid, 
                    "Klar for tur?", 
@@ -197,7 +203,6 @@ jobs:
                   hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
                });
 
-               // NY TEKST: "Reservasjonen avsluttes klokken XX:XX..."
                const pushBody = `Reservasjonen avsluttes klokken ${endTime}. Trenger du mer tid? Utvid i appen (hvis ledig). Husk å levere nøkler!`;
 
                await sendPush(
@@ -279,10 +284,10 @@ jobs:
             });
 
             const digestHtml = `
-                <h2 style=\"color: #1e293b; margin-top: 0;\">Oppdatering fra Billageret</h2>
+                <h2 style="color: #1e293b; margin-top: 0;">Oppdatering fra Billageret</h2>
                 <p>Det er registrert <strong>${messages.length}</strong> nye hendelser siden sist:</p>
-                <div style=\"margin-top: 20px;\">${listHtml}</div>
-                <div style=\"text-align: center; margin-top: 30px;\"><a href=\"${process.env.APP_LINK}\" style=\"background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;\">GÅ TIL BILLAGER</a></div>
+                <div style="margin-top: 20px;">${listHtml}</div>
+                <div style="text-align: center; margin-top: 30px;"><a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL BILLAGER</a></div>
             `;
 
             for (const email of adminEmails) {
