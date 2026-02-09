@@ -14,14 +14,19 @@ self.addEventListener('push', (e) => {
 
   const data = e.data.json();
   const title = data.title || 'BookBil Jæren';
+  
   const options = {
     body: data.body || 'Ny beskjed',
     icon: 'https://cdn-icons-png.flaticon.com/512/7840/7840958.png', // App-ikon
     badge: 'https://cdn-icons-png.flaticon.com/512/7840/7840958.png', // Lite ikon for statusbar (Android)
     vibrate: [100, 50, 100],
     data: {
-      url: data.url || '/' // Hvor skal vi når brukeren trykker?
+      url: data.url || '/' 
     },
+    // VIKTIG FOR ANDROID:
+    tag: 'bookbil-notification', // Grupperer varsler så de ikke spammer varslingssenteret
+    renotify: true, // Tvinger ny lyd/vibrasjon selv om et gammelt varsel ligger der
+    requireInteraction: true, // Prøver å holde varselet synlig til brukeren gjør noe (kan hjelpe mot batterisparing)
     actions: [
       { action: 'open', title: 'Åpne app' }
     ]
@@ -50,3 +55,5 @@ self.addEventListener('notificationclick', (e) => {
     })
   );
 });
+
+
