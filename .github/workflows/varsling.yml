@@ -136,12 +136,15 @@ jobs:
                const startTime = new Date(b.start_tid).toLocaleTimeString("no-NO", {
                   hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
                });
+               const endTime = new Date(b.slutt_tid).toLocaleTimeString("no-NO", {
+                  hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
+               });
 
-               // OPPDATERT PUSH TEKST
+               // OPPDATERT PUSH TEKST: Inkluderer nå hele tidsrommet
                await sendPush(
                    b.bid, 
                    "Klar for tur?", 
-                   `Husk reservasjon av ${b.bil} som starter kl. ${startTime}. God tur!`, 
+                   `Husk reservasjon av ${b.bil} i dag kl. ${startTime} - ${endTime}. God tur!`, 
                    process.env.APP_LINK
                );
 
@@ -151,7 +154,7 @@ jobs:
                     <h2 style="color: #1e293b; margin-top: 0;">Din reservasjon starter snart</h2>
                     <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
                         <p style="margin: 0; font-size: 18px; font-weight: bold; color: #1e293b;">${b.bil}</p>
-                        <p style="margin: 5px 0 0; color: #475569;">Kl. ${startTime}</p>
+                        <p style="margin: 5px 0 0; color: #475569;">Kl. ${startTime} - ${endTime}</p>
                     </div>
                     <div style="text-align: center; margin-top: 30px;">
                         <a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">ÅPNE APPEN</a>
@@ -171,31 +174,35 @@ jobs:
             }
           }
 
-          // 2. RETUR-VARSEL (30 min før slutt) - OPPDATERT LOGIKK
+          // 2. RETUR-VARSEL (30 min før slutt)
           async function checkReturns() {
             const now = new Date();
             const in30mins = new Date(now.getTime() + 30 * 60000).toISOString();
             
-            // Sjekker nå etter bookings som slutter de neste 30 min, som IKKE er varslet om retur enda
             const { data: bookings } = await supabase
               .from("bookinger")
               .select("*")
               .gt("slutt_tid", now.toISOString())
               .lt("slutt_tid", in30mins)
-              .eq("varslet_slutt", false); // Krever at kolonnen varslet_slutt finnes i DB
+              .eq("varslet_slutt", false); 
 
             if (!bookings || bookings.length === 0) return;
 
             for (const b of bookings) {
-               // A) Prøv Push
+               const endTime = new Date(b.slutt_tid).toLocaleTimeString("no-NO", {
+                  hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
+               });
+
+               // NY TEKST: "Reservasjonen avsluttes klokken XX:XX..."
+               const pushBody = `Reservasjonen avsluttes klokken ${endTime}. Trenger du mer tid? Utvid i appen (hvis ledig). Husk å levere nøkler!`;
+
                await sendPush(
                    b.bid, 
-                   "Snart levering", 
-                   `Fristen for ${b.bil} nærmer seg. 1. Lever nøkkel. 2. Avslutt i appen. Trenger du mer tid? Sjekk om du kan utvide.`, 
+                   `Snart levering (${b.bil})`, 
+                   pushBody, 
                    process.env.APP_LINK
                );
 
-               // B) Prøv E-post
                const email = await getUserEmail(b.bid);
                if (email) {
                   const startDate = new Date(b.start_tid);
@@ -213,8 +220,8 @@ jobs:
                         <p style="margin: 2px 0 0; color: #b45309;">Tid: ${startStr} - ${endStr}</p>
                     </div>
                     <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;">
-                         <p style="margin: 0; font-weight: bold; color: #166534; font-size: 16px;">🔑 HUSK NØKLER!</p>
-                         <p style="margin: 5px 0 0; color: #15803d; font-size: 13px;">Heng nøkkelen tilbake i skapet etter bruk og avslutt i appen.</p>
+                         <p style="margin: 0; font-weight: bold; color: #166534; font-size: 16px;">NB! HUSK NØKLER</p>
+                         <p style="margin: 5px 0 0; color: #15803d; font-size: 13px;">Lever nøkkelen i skapet. Reservasjonen avsluttes automatisk.</p>
                     </div>
                     <div style="text-align: center; margin-top: 30px;">
                         <a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL APPEN</a>
@@ -231,7 +238,6 @@ jobs:
                   } catch (e) { console.error("Feil ved sending:", e); }
                }
 
-               // MARKER SOM VARSLET I DB
                await supabase.from("bookinger").update({ varslet_slutt: true }).eq("id", b.id);
             }
           }
