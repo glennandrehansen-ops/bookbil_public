@@ -632,9 +632,18 @@ let touchStartY = 0;
 // Initialiser UI Size ved oppstart
 if(s.uiLarge) document.body.classList.add('ui-large');
 
-// --- SERVICE WORKER & PWA INSTALL ---
-// VIKTIG: Vi fjerner manuell registrering her for å la OneSignal håndtere det via init.
-// Dette unngår konflikt mellom to registreringer.
+// --- 1. MANUELL SW REGISTRERING (FIX FOR ERROR) ---
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+}
+
+// --- PWA INSTALL LOGIC ---
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); });
 async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); const { outcome } = await s.deferredPrompt.userChoice; if (outcome === 'accepted') { s.deferredPrompt = null; $id('install-icon').classList.add('hidden'); $id('pwa-settings-btn').classList.add('hidden'); } } }
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
@@ -644,71 +653,145 @@ window.addEventListener('offline', () => $id('offline-msg').classList.remove('hi
 // --- ONESIGNAL INIT & LOGIC ---
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 window.OneSignalDeferred.push(function(OneSignal) {
-    // Slå på verbose logging midlertidig for feilsøking
     OneSignal.Debug.setLogLevel("VERBOSE");
     
     OneSignal.init({
-        appId: ONESIGNAL_APP_ID,
+        appId: ONESIGNAL_APP_ID, 
         safari_web_id: "web.onesignal.auto.637b3b3a-5302-4f30-802d-7d34559c76b7",
-        notifyButton: { enable: false }, // Vi bruker vår egen knapp
+        notifyButton: { enable: false },
         allowLocalhostAsSecureOrigin: true,
-        // La OneSignal registrere SW for oss for å unngå konflikter
+        // Vi peker fortsatt på sw.js her, men den manuelle registreringen over sikrer at den er klar.
         serviceWorkerPath: 'sw.js',
         serviceWorkerParam: { scope: '/' }
     });
     
-    // Lytt til endringer i abonnementet for å oppdatere UI hvis nødvendig
     OneSignal.User.PushSubscription.addEventListener("change", (event) => {
         console.log("Push subscription changed:", event);
+        if(typeof updateDebugInfo === 'function') updateDebugInfo();
     });
 });
 
 async function togglePush() {
-    // Sjekk status først
     if (Notification.permission === 'denied') {
-        alert("Du har blokkert varsler for denne nettsiden.\n\nDu må endre dette i telefonens innstillinger under Varsler -> Safari/Chrome.");
+        alert("Du har blokkert varsler. Gå til innstillinger for nettstedet i nettleseren for å oppheve blokkeringen.");
         return;
     }
 
-    // ANDROID HACK: Prøv å be om tillatelse direkte hvis den er default (ikke spurt ennå)
-    // Noen ganger feiler OneSignal sin overlegg på Android PWA
     if (Notification.permission === 'default') {
         try {
             const result = await Notification.requestPermission();
-            if (result === 'granted') {
-                 // Hvis nettleseren sier OK, fortell OneSignal at vi vil opt-in
-                 window.OneSignalDeferred.push(function(OneSignal) {
-                     OneSignal.User.PushSubscription.optIn();
-                 });
-                 return; // La OneSignal håndtere resten av flyten
+            if (result !== 'granted') {
+                return;
             }
         } catch (e) {
-            console.error("Native requestPermission failed", e);
+            console.error("Kunne ikke be om native tillatelse:", e);
         }
     }
 
     window.OneSignalDeferred.push(async function(OneSignal) {
         try {
-            console.log("Forsøker å aktivere push...");
-            // Dette er den kritiske metoden for iOS som krever brukerhandling
+            console.log("Aktiverer OneSignal...");
             await OneSignal.User.PushSubscription.optIn();
             
-            // Sjekk om vi fikk det til
-            const isPushEnabled = OneSignal.User.PushSubscription.optedIn;
-            if(isPushEnabled) {
-                // Sørg for at brukeren er logget inn med riktig ID
-                if(s.bid) await OneSignal.login(s.bid);
-                showToast("Varsler er aktivert!", "success");
-            } else {
-                // Hvis brukeren avbrøt dialogen eller noe annet skjedde
-                console.log("Bruker opt-in fullført, men status er ikke aktiv.");
-            }
+            setTimeout(async () => {
+                const id = OneSignal.User.PushSubscription.id;
+                if(id) {
+                    if(typeof s !== 'undefined' && s.bid) await OneSignal.login(s.bid);
+                    showToast("Varsler er aktivert!", "success");
+                    if(typeof updateDebugInfo === 'function') updateDebugInfo();
+                } else {
+                    if (Notification.permission === 'granted') {
+                        showToast("Tillatelse gitt. Oppdaterer...", "info");
+                        setTimeout(() => location.reload(), 1500); 
+                    } else {
+                        showToast("Kunne ikke aktivere varsler.", "error");
+                    }
+                }
+            }, 1000);
+            
         } catch (e) {
-            console.error("Feil under aktivering av push:", e);
-            showToast("Kunne ikke aktivere: " + e.message, "error");
+            console.error("Feil ved OneSignal opt-in:", e);
+            showToast("Feil: " + e.message, "error");
         }
     });
 }
+
+// DEBUG FUNKSJONALITET
+function updateDebugInfo() {
+    window.OneSignalDeferred.push(function(OneSignal) {
+        const perm = Notification.permission;
+        const id = OneSignal.User.PushSubscription.id;
+        const optedIn = OneSignal.User.PushSubscription.optedIn;
+        const token = OneSignal.User.PushSubscription.token;
+        
+        const permEl = $id('dbg-perm');
+        const idEl = $id('dbg-id');
+        
+        if(permEl) permEl.innerText = `${perm} (OptedIn: ${optedIn})`;
+        
+        if(idEl) {
+            if (id) {
+                idEl.innerText = `ID OK: ${id.substring(0, 8)}...`;
+                idEl.style.color = "#4ade80"; 
+            } else if (token) {
+                idEl.innerText = "Har Token, mangler ID (Sync feil)";
+                idEl.style.color = "#facc15"; 
+            } else {
+                idEl.innerText = "Mangler Token (Sjekk Manifest/SW)";
+                idEl.style.color = "#ef4444"; 
+            }
+        }
+    });
+}
+
+function testLocalNotif() {
+    if (Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then(function(registration) {
+            registration.active.postMessage({type: 'TEST_NOTIFICATION'});
+        });
+        showToast("Sender testvarsel...", "info");
+    } else {
+        alert("Du må godta varsler først!");
+    }
+}
+
+async function forceResetOneSignal() {
+    if(!confirm("Dette nullstiller ALT og sletter lokal database. Er du sikker?")) return;
+    
+    showToast("Nullstiller... vent...", "info");
+
+    const dbs = await window.indexedDB.databases();
+    for (const db of dbs) {
+        if (db.name && db.name.includes("OneSignal")) {
+            window.indexedDB.deleteDatabase(db.name);
+        }
+    }
+
+    localStorage.clear();
+    sessionStorage.clear();
+
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for(let registration of registrations) {
+        await registration.unregister();
+    }
+
+    alert("Appen er totalt nullstilt. Den laster nå på nytt.");
+    window.location.reload(true);
+}
+
+// --- AUTENTISERING ---
+async function sendOtp() {
+    const e = $id('l-email').value.trim().toLowerCase();
+    const bidPattern = /^[a-zæøå]{3}\d{3}@politiet\.no$/;
+    if (e !== KIOSK_USER && !e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
+    if (e !== KIOSK_USER && !bidPattern.test(e)) return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
+    const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } });
+    if (error) showToast(error.message, 'error'); 
+    else { $id('f-email').classList.add('hidden'); $id('f-otp').classList.remove('hidden'); $id('l-otp').focus(); }
+}
+async function verifyOtp() { const e = $id('l-email').value.trim().toLowerCase(), t = $id('l-otp').value.trim(); const { error } = await _s.auth.verifyOtp({ email: e, token: t, type: 'email' }); if (error) showToast("Feil kode.", 'error'); }
+function resetAuth() { $id('f-email').classList.remove('hidden'); $id('f-otp').classList.add('hidden'); $id('l-otp').value = ""; }
+async function logout() { if (confirm("Logg ut?")) { await _s.auth.signOut(); location.reload(); } }
 
 _s.auth.onAuthStateChange((event, session) => { 
     if (session) { 
@@ -729,6 +812,7 @@ _s.auth.onAuthStateChange((event, session) => {
             // Logg inn i OneSignal når bruker logger inn i appen
             window.OneSignalDeferred.push(function(OneSignal) {
                 OneSignal.login(s.bid);
+                updateDebugInfo();
             });
         }
 
@@ -796,22 +880,6 @@ function modalTouchEnd(e, id) {
 
 function togMenu() { $id('more-menu').classList.toggle('open'); $id('menu-bg').classList.toggle('open'); }
 function openActionMenu() { openM('m-action'); }
-async function sendOtp() {
-    const e = $id('l-email').value.trim().toLowerCase();
-    
-    // ALLOW KIOSK USER OR STANDARD PATTERN
-    const bidPattern = /^[a-zæøå]{3}\d{3}@politiet\.no$/;
-    if (e !== KIOSK_USER && !e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
-    if (e !== KIOSK_USER && !bidPattern.test(e)) return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
-    
-    const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } });
-    if (error) showToast(error.message, 'error'); 
-    else { $id('f-email').classList.add('hidden'); $id('f-otp').classList.remove('hidden'); $id('l-otp').focus(); }
-}
-async function verifyOtp() { const e = $id('l-email').value.trim().toLowerCase(), t = $id('l-otp').value.trim(); const { error } = await _s.auth.verifyOtp({ email: e, token: t, type: 'email' }); if (error) showToast("Feil kode.", 'error'); }
-function resetAuth() { $id('f-email').classList.remove('hidden'); $id('f-otp').classList.add('hidden'); $id('l-otp').value = ""; }
-async function logout() { if (confirm("Logg ut?")) { await _s.auth.signOut(); location.reload(); } }
-function swipe(e,id,m=0) { e.preventDefault(); const start=e.clientY; const fn=()=>{ if(event.clientY-start>50) { if(m)closeM(id); else togMenu(); } document.removeEventListener('pointerup',fn); }; document.addEventListener('pointerup',fn); }
 
 async function load() {
     if(!s.u || (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName))) return;
@@ -1772,6 +1840,18 @@ function rSet(c) {
             <span class="material-icons-round text-sm">notifications_active</span> Aktiver Push-varsler på denne enheten
         </button>
 
+        <!-- DEBUG INFO -->
+        <div class="mt-4 p-3 bg-slate-900 rounded border border-slate-700 font-mono text-[10px] text-slate-500 break-all mb-4">
+            <p class="font-bold text-slate-400 mb-2">DEBUG INFO</p>
+            <p>Tillatelse: <span id="dbg-perm" class="text-white">-</span></p>
+            <p>User ID: <span id="dbg-id" class="text-white">-</span></p>
+            <div class="flex gap-2 mt-3">
+                <button onclick="testLocalNotif()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-3 rounded text-xs transition-colors border border-slate-600">TEST LOKAL VARSEL</button>
+                <button onclick="forceResetOneSignal()" class="flex-1 bg-red-900/50 hover:bg-red-900 text-red-200 font-bold py-2 px-3 rounded text-xs transition-colors border border-red-800">TOTAL RESET (FIX)</button>
+            </div>
+            <p class="mt-2 text-[9px] text-slate-600">Trykk for å teste om telefonen kan vise varsler i det hele tatt (utenom internett).</p>
+        </div>
+
         <div class="flex items-center justify-between mb-4">
             <span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span>
             <input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-6 h-6 accent-amber-600 rounded cursor-pointer">
@@ -1820,6 +1900,8 @@ function rSet(c) {
     </div>
     `;
     renderAdminEmails();
+    // Kall updateDebugInfo kun hvis den finnes (sikkerhetssjekk)
+    if(typeof updateDebugInfo === 'function') updateDebugInfo();
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
 }
 function renderAdminEmails() {
