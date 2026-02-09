@@ -611,6 +611,9 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 </div>
 
 <script>
+// PUSH NØKKEL - Generert for BookBil
+const VAPID_PUBLIC_KEY = 'BG6M_bZd_mrC1MUj6JfLtV6m5HgdkRCxY7fxNDIGufoe_vYxsqGUKhcYjLIdbCoj0rBHNECBIIZv7uyP2fr3ZHU';
+
 const JOB_DOMAIN = "@politiet.no"; 
 const KIOSK_USER = "skjermbook@politiet.no"; // KIOSK MODE EMAIL
 const S_URL = "https://huxyflpzmfajrvluhxaw.supabase.co";
@@ -619,14 +622,26 @@ const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
-let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, oldAdmCarName: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true', uiLarge: localStorage.getItem('uiLarge') === 'true', kioskMode: false };
+let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, pushEnabled: false, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, oldAdmCarName: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true', uiLarge: localStorage.getItem('uiLarge') === 'true', kioskMode: false };
 let touchStartX = 0;
 let touchStartY = 0; 
 
 // Initialiser UI Size ved oppstart
 if(s.uiLarge) document.body.classList.add('ui-large');
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+// Service Worker Registration for PWA & PUSH
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+  .then(function(reg) {
+     // Sjekk om vi allerede har push-abonnement
+     if(reg.pushManager) {
+        reg.pushManager.getSubscription().then(function(sub) {
+           if(sub) s.pushEnabled = true;
+        });
+     }
+  });
+}
+
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); });
 async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); const { outcome } = await s.deferredPrompt.userChoice; if (outcome === 'accepted') { s.deferredPrompt = null; $id('install-icon').classList.add('hidden'); $id('pwa-settings-btn').classList.add('hidden'); } } }
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
@@ -1678,7 +1693,18 @@ function rSet(c) {
     <!-- Card 3: Varsling -->
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-amber-500">notifications</span> Varsling</div>
-        <div class="flex items-center justify-between mb-4">
+        
+        <!-- PUSH SECTION -->
+        <div class="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl mb-6">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-blue-200 font-black uppercase">Push-varsel på denne enheten</span>
+                <input type="checkbox" onchange="togPush(this.checked)" ${s.pushEnabled ? 'checked' : ''} class="w-6 h-6 accent-blue-500 rounded cursor-pointer">
+            </div>
+            <p class="text-[10px] text-slate-400">Dette aktiverer varsling direkte på mobilen/PC-en du bruker nå (uten e-post).</p>
+        </div>
+
+        <!-- EMAIL SECTION -->
+        <div class="flex items-center justify-between mb-2">
             <span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span>
             <input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-6 h-6 accent-amber-600 rounded cursor-pointer">
         </div>
@@ -1741,6 +1767,80 @@ function tVis(c) { s.h.includes(c) ? s.h=s.h.filter(x=>x!==c) : s.h.push(c); loc
 function togVis(k, v) { s[k] = v; localStorage.setItem(k, v); render(); if(s.v === 'cars') load(); }
 function togUiSize(v) { s.uiLarge = v; localStorage.setItem('uiLarge', v); if(v) document.body.classList.add('ui-large'); else document.body.classList.remove('ui-large'); render(); }
 async function togVar(v) { s.varsel = v; const p = { brukernavn: s.bid, varsel: v }; if(s.savedEmail) p.epost = s.savedEmail; await _s.from('brukere').upsert(p, { onConflict: 'brukernavn' }); showToast("Innstilling lagret", "success"); }
+
+// --- PUSH VARSEL LOGIKK ---
+async function togPush(checked) {
+  if (!checked) {
+    // Bruker skrudde AV
+    s.pushEnabled = false;
+    showToast("Push-varsel deaktivert", "info");
+    // Her kunne vi slettet fra DB, men backend håndterer "døde" abonnementer automatisk
+    return;
+  }
+
+  // Bruker skrudde PÅ
+  if (!('serviceWorker' in navigator)) {
+    showToast("Nettleseren støtter ikke Push", "error");
+    s.pushEnabled = false; render(); return;
+  }
+
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    subscribeUserToPush();
+  } else {
+    showToast("Varsler ble blokkert.", "error");
+    s.pushEnabled = false; render();
+  }
+}
+
+async function subscribeUserToPush() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    
+    // Lagre abonnement i DB
+    const { error } = await _s.from('push_subscriptions').insert([{
+        bid: s.bid,
+        subscription: sub
+    }]);
+
+    if (error) {
+        // Ignorer duplikater, men vis feil ellers
+        if(!error.message.includes('unique constraint')) {
+            console.error(error);
+            showToast("Feil ved lagring av push.", "error");
+            s.pushEnabled = false; render();
+            return;
+        }
+    }
+    
+    s.pushEnabled = true;
+    showToast("Push aktivert!", "success");
+    render();
+
+  } catch (e) {
+    console.error(e);
+    showToast("Kunne ikke abonnere.", "error");
+    s.pushEnabled = false; render();
+  }
+}
+
+// Konverter nøkkel-format
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+// --------------------------
+
 async function updEm() { const e = $id('s-em').value.trim(); if(!e) return showToast("Skriv e-post", "error"); const { error } = await _s.from('brukere').upsert({ brukernavn: s.bid, epost: e, varsel: s.varsel }, { onConflict: 'brukernavn' }); if(error) showToast("Feil.", "error"); else { s.savedEmail = e; showToast("Lagret.", "success"); } }
 async function nuke() { if(prompt("Skriv NULLSTILL for å slette alle data")==="NULLSTILL") { await _s.from('bookinger').delete().gt('id', 0); load(); showToast("Nullstilt.", "info"); } }
 function fmtT(d) { return new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
