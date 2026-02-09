@@ -12,8 +12,8 @@
 <!-- Manifest -->
 <link rel="manifest" href="manifest.json">
 <!-- Ikon -->
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/7840/7840958.png">
-<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7840/7840958.png">
+<link rel="apple-touch-icon" href="https://img.icons8.com/fluency/192/police-car.png">
+<link rel="icon" type="image/png" href="https://img.icons8.com/fluency/192/police-car.png">
 
 <!-- OneSignal SDK -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -25,6 +25,7 @@
       safari_web_id: "web.onesignal.auto.xxxxx", 
       notifyButton: { enable: false },
       allowLocalhostAsSecureOrigin: true,
+      // OneSignal vil nå stå for registreringen av sw.js
       serviceWorkerPath: "/sw.js", 
       serviceWorkerParam: { scope: "/" } 
     });
@@ -445,7 +446,6 @@ let touchStartY = 0;
 
 if(s.uiLarge) document.body.classList.add('ui-large');
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); });
 async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); const { outcome } = await s.deferredPrompt.userChoice; if (outcome === 'accepted') { s.deferredPrompt = null; $id('install-icon').classList.add('hidden'); $id('pwa-settings-btn').classList.add('hidden'); } } }
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
@@ -460,7 +460,6 @@ _s.auth.onAuthStateChange((event, session) => {
         } else {
             s.kioskMode = false; s.bid = s.u.split('@')[0].toUpperCase(); $id('u-disp').innerText = "Bruker: " + s.bid;
             
-            // --- ONESIGNAL LOGIN (VIKTIG) ---
             if (window.OneSignalDeferred) {
                 window.OneSignalDeferred.push(function(OneSignal) {
                     OneSignal.login(s.bid);
@@ -472,7 +471,6 @@ _s.auth.onAuthStateChange((event, session) => {
     } else { 
         $id('auth').classList.remove('hidden'); $id('app').classList.add('hidden'); s.u = null; s.bid = null; s.kioskMode = false;
         
-        // --- ONESIGNAL LOGOUT ---
         if (window.OneSignalDeferred) {
             window.OneSignalDeferred.push(function(OneSignal) {
                 OneSignal.logout();
