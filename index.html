@@ -11,18 +11,15 @@
 
 <!-- Manifest -->
 <link rel="manifest" href="manifest.json">
-<!-- Ikoner -->
-<link rel="apple-touch-icon" href="https://img.icons8.com/color/512/police-car.png">
-<link rel="icon" type="image/png" href="https://img.icons8.com/color/512/police-car.png">
+<!-- Oppdatert ikon (Car Rental) -->
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/7840/7840958.png">
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7840/7840958.png">
 
 <!-- Biblioteker -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- OneSignal SDK -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
 <style>
 /* Base */
@@ -77,10 +74,10 @@ body.ui-large { font-size: 17px; }
 .c-green { background-color: #10b981; } /* Ledig > 4t */
 .c-yellow { background-color: #f59e0b; } /* Ledig 2-4t */
 .c-orange { background-color: #f97316; } /* Ledig < 2t */
-.c-red { background-color: #ef4444; }    /* Opptatt */
-.c-blue { background-color: #3b82f6; }   /* Min bil */
+.c-red { background-color: #ef4444; }   /* Opptatt */
+.c-blue { background-color: #3b82f6; }  /* Min bil */
 .c-purple { background-color: #a855f7; } /* Verksted/EU */
-.c-gray { background-color: #64748b; }    /* Ute av drift */
+.c-gray { background-color: #64748b; }   /* Ute av drift */
 
 /* Knapper i liste */
 .btn-action {
@@ -214,11 +211,11 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
     left: 50%; 
     transform: translateX(-50%); 
     z-index: 200; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    pointer-events: none; 
-    width: auto; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    width: auto;
     max-width: 90%;
 }
 .toast { 
@@ -311,7 +308,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
  
  <!-- MAIN CONTENT LIST -->
  <main id="main" class="flex-1 overflow-y-auto px-4 pb-32 pt-4 w-full" 
-        ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event)">
+       ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event)">
     <div class="text-center mt-20 text-slate-500">Laster...</div>
  </main>
  
@@ -619,9 +616,6 @@ const KIOSK_USER = "skjermbook@politiet.no"; // KIOSK MODE EMAIL
 const S_URL = "https://huxyflpzmfajrvluhxaw.supabase.co";
 const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1eHlmbHB6bWZhanJ2bHVoeGF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1ODk1NDYsImV4cCI6MjA4NDE2NTU0Nn0.7obBykQfPmfxxzHf348iDO9aHWldQPqibnRKlrMDHAI";
 
-// --- ONESIGNAL CONFIG ---
-const ONESIGNAL_APP_ID = "dd7175bc-fd00-4043-a7d4-11de95137faf";
-
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
@@ -632,159 +626,12 @@ let touchStartY = 0;
 // Initialiser UI Size ved oppstart
 if(s.uiLarge) document.body.classList.add('ui-large');
 
-// --- 1. MANUELL SW REGISTRERING (FIX FOR ERROR) ---
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js').then(function(registration) {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        }, function(err) {
-            console.log('ServiceWorker registration failed: ', err);
-        });
-    });
-}
-
-// --- PWA INSTALL LOGIC ---
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); });
 async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); const { outcome } = await s.deferredPrompt.userChoice; if (outcome === 'accepted') { s.deferredPrompt = null; $id('install-icon').classList.add('hidden'); $id('pwa-settings-btn').classList.add('hidden'); } } }
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
 window.addEventListener('online', () => $id('offline-msg').classList.add('hidden'));
 window.addEventListener('offline', () => $id('offline-msg').classList.remove('hidden'));
-
-// --- ONESIGNAL INIT & LOGIC ---
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-window.OneSignalDeferred.push(function(OneSignal) {
-    OneSignal.Debug.setLogLevel("VERBOSE");
-    
-    OneSignal.init({
-        appId: ONESIGNAL_APP_ID, 
-        safari_web_id: "web.onesignal.auto.637b3b3a-5302-4f30-802d-7d34559c76b7",
-        notifyButton: { enable: false },
-        allowLocalhostAsSecureOrigin: true,
-        serviceWorkerPath: 'sw.js',
-        serviceWorkerParam: { scope: '/' }
-    });
-    
-    OneSignal.User.PushSubscription.addEventListener("change", (event) => {
-        console.log("Push subscription changed:", event);
-        if(typeof updateDebugInfo === 'function') updateDebugInfo();
-    });
-});
-
-async function togglePush() {
-    // 1. Sjekk manuell blokkering
-    if (Notification.permission === 'denied') {
-        alert("Du har blokkert varsler. Gå til innstillinger for nettstedet i nettleseren for å oppheve blokkeringen.");
-        return;
-    }
-
-    // 2. Be om tillatelse (Native prompt)
-    if (Notification.permission === 'default') {
-        try {
-            const result = await Notification.requestPermission();
-            if (result !== 'granted') {
-                return; // Bruker avslo
-            }
-        } catch (e) {
-            console.error("Native permission error:", e);
-        }
-    }
-
-    // 3. Aktiver OneSignal
-    window.OneSignalDeferred.push(async function(OneSignal) {
-        try {
-            console.log("Aktiverer OneSignal...");
-            await OneSignal.User.PushSubscription.optIn();
-            
-            // Vent litt på at ID skal settes
-            setTimeout(async () => {
-                const id = OneSignal.User.PushSubscription.id;
-                if(id) {
-                    if(typeof s !== 'undefined' && s.bid) await OneSignal.login(s.bid);
-                    showToast("Varsler er aktivert!", "success");
-                    if(typeof updateDebugInfo === 'function') updateDebugInfo();
-                } else {
-                    // Hvis vi har tillatelse men ingen ID, prøv reload
-                    if (Notification.permission === 'granted') {
-                        showToast("Oppdaterer system...", "info");
-                        setTimeout(() => location.reload(), 1500); 
-                    } else {
-                        showToast("Kunne ikke aktivere.", "error");
-                    }
-                }
-            }, 1000);
-            
-        } catch (e) {
-            console.error("OneSignal Error:", e);
-            showToast("Feil: " + e.message, "error");
-        }
-    });
-}
-
-// DEBUG FUNKSJONALITET
-function updateDebugInfo() {
-    window.OneSignalDeferred.push(function(OneSignal) {
-        const perm = Notification.permission;
-        const id = OneSignal.User.PushSubscription.id;
-        const optedIn = OneSignal.User.PushSubscription.optedIn;
-        const token = OneSignal.User.PushSubscription.token;
-        
-        const permEl = $id('dbg-perm');
-        const idEl = $id('dbg-id');
-        
-        if(permEl) permEl.innerText = `${perm} (OptedIn: ${optedIn})`;
-        
-        if(idEl) {
-            if (id) {
-                idEl.innerText = `ID OK: ${id.substring(0, 8)}...`;
-                idEl.style.color = "#4ade80"; 
-            } else if (token) {
-                idEl.innerText = "Mangler ID (Slett logg/Reset)";
-                idEl.style.color = "#facc15"; 
-            } else {
-                idEl.innerText = "Mangler Token (Sjekk Manifest!)";
-                idEl.style.color = "#ef4444"; 
-            }
-        }
-    });
-}
-
-function testLocalNotif() {
-    if (Notification.permission === 'granted') {
-        navigator.serviceWorker.ready.then(function(registration) {
-            registration.active.postMessage({type: 'TEST_NOTIFICATION'});
-        });
-        showToast("Sender testvarsel...", "info");
-    } else {
-        alert("Du må godta varsler først!");
-    }
-}
-
-async function forceResetOneSignal() {
-    if(!confirm("Dette sletter all lokal data for å fikse varsler. Fortsette?")) return;
-    
-    showToast("Nullstiller...", "info");
-
-    try {
-        const dbs = await window.indexedDB.databases();
-        for (const db of dbs) {
-            if (db.name && db.name.includes("OneSignal")) {
-                window.indexedDB.deleteDatabase(db.name);
-            }
-        }
-    } catch(e) { console.log("Kunne ikke slette DB", e); }
-
-    localStorage.clear();
-    sessionStorage.clear();
-
-    const registrations = await navigator.serviceWorker.getRegistrations();
-    for(let registration of registrations) {
-        await registration.unregister();
-    }
-
-    alert("Appen er nullstilt. Last siden på nytt.");
-    window.location.reload(true);
-}
-    
 _s.auth.onAuthStateChange((event, session) => { 
     if (session) { 
         s.u = session.user.email; 
@@ -800,12 +647,6 @@ _s.auth.onAuthStateChange((event, session) => {
             s.kioskMode = false;
             s.bid = s.u.split('@')[0].toUpperCase(); 
             $id('u-disp').innerText = "Bruker: " + s.bid;
-
-            // Logg inn i OneSignal når bruker logger inn i appen
-            window.OneSignalDeferred.push(function(OneSignal) {
-                OneSignal.login(s.bid);
-                updateDebugInfo();
-            });
         }
 
         $id('auth').classList.add('hidden'); 
@@ -818,11 +659,6 @@ _s.auth.onAuthStateChange((event, session) => {
         s.u = null; 
         s.bid = null; 
         s.kioskMode = false;
-        
-        // Logg ut av OneSignal når bruker logger ut
-        window.OneSignalDeferred.push(function(OneSignal) {
-            OneSignal.logout();
-        });
     }
 });
 
@@ -872,6 +708,22 @@ function modalTouchEnd(e, id) {
 
 function togMenu() { $id('more-menu').classList.toggle('open'); $id('menu-bg').classList.toggle('open'); }
 function openActionMenu() { openM('m-action'); }
+async function sendOtp() {
+    const e = $id('l-email').value.trim().toLowerCase();
+    
+    // ALLOW KIOSK USER OR STANDARD PATTERN
+    const bidPattern = /^[a-zæøå]{3}\d{3}@politiet\.no$/;
+    if (e !== KIOSK_USER && !e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
+    if (e !== KIOSK_USER && !bidPattern.test(e)) return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
+    
+    const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } });
+    if (error) showToast(error.message, 'error'); 
+    else { $id('f-email').classList.add('hidden'); $id('f-otp').classList.remove('hidden'); $id('l-otp').focus(); }
+}
+async function verifyOtp() { const e = $id('l-email').value.trim().toLowerCase(), t = $id('l-otp').value.trim(); const { error } = await _s.auth.verifyOtp({ email: e, token: t, type: 'email' }); if (error) showToast("Feil kode.", 'error'); }
+function resetAuth() { $id('f-email').classList.remove('hidden'); $id('f-otp').classList.add('hidden'); $id('l-otp').value = ""; }
+async function logout() { if (confirm("Logg ut?")) { await _s.auth.signOut(); location.reload(); } }
+function swipe(e,id,m=0) { e.preventDefault(); const start=e.clientY; const fn=()=>{ if(event.clientY-start>50) { if(m)closeM(id); else togMenu(); } document.removeEventListener('pointerup',fn); }; document.addEventListener('pointerup',fn); }
 
 async function load() {
     if(!s.u || (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName))) return;
@@ -1826,24 +1678,6 @@ function rSet(c) {
     <!-- Card 3: Varsling -->
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-amber-500">notifications</span> Varsling</div>
-        
-        <!-- PUSH KNAPP (NY FUNKSJONALITET) -->
-        <button onclick="togglePush()" class="w-full bg-amber-900/30 text-amber-400 p-3 rounded-xl font-bold border border-amber-800 flex items-center justify-center gap-2 mb-4 hover:bg-amber-900/50 transition-colors">
-            <span class="material-icons-round text-sm">notifications_active</span> Aktiver Push-varsler på denne enheten
-        </button>
-
-        <!-- DEBUG INFO -->
-        <div class="mt-4 p-3 bg-slate-900 rounded border border-slate-700 font-mono text-[10px] text-slate-500 break-all mb-4">
-            <p class="font-bold text-slate-400 mb-2">DEBUG INFO</p>
-            <p>Tillatelse: <span id="dbg-perm" class="text-white">-</span></p>
-            <p>User ID: <span id="dbg-id" class="text-white">-</span></p>
-            <div class="flex gap-2 mt-3">
-                <button onclick="testLocalNotif()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-3 rounded text-xs transition-colors border border-slate-600">TEST LOKAL VARSEL</button>
-                <button onclick="forceResetOneSignal()" class="flex-1 bg-red-900/50 hover:bg-red-900 text-red-200 font-bold py-2 px-3 rounded text-xs transition-colors border border-red-800">TOTAL RESET (FIX)</button>
-            </div>
-            <p class="mt-2 text-[9px] text-slate-600">Trykk for å teste om telefonen kan vise varsler i det hele tatt (utenom internett).</p>
-        </div>
-
         <div class="flex items-center justify-between mb-4">
             <span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span>
             <input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-6 h-6 accent-amber-600 rounded cursor-pointer">
@@ -1892,8 +1726,6 @@ function rSet(c) {
     </div>
     `;
     renderAdminEmails();
-    // Kall updateDebugInfo kun hvis den finnes (sikkerhetssjekk)
-    if(typeof updateDebugInfo === 'function') updateDebugInfo();
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
 }
 function renderAdminEmails() {
