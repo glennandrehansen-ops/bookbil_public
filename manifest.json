@@ -9,13 +9,13 @@
   "description": "Bilbooking for tjenestebiler på Jæren",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/7840/7840958.png",
+      "src": "https://img.icons8.com/fluency/512/police-car.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/192/7840/7840958.png",
+      "src": "https://img.icons8.com/fluency/192/police-car.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
