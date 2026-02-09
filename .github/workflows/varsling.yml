@@ -1,4 +1,4 @@
-name: Varsle med Gmail
+name: Varsle med Gmail og Web Push
 
 on:
   # Vi fjerner schedule her for å la cron-job.org styre tiden 100%
@@ -16,7 +16,8 @@ jobs:
           node-version: '20'
 
       - name: Install Deps
-        run: npm install @supabase/supabase-js nodemailer
+        # Vi legger til web-push her
+        run: npm install @supabase/supabase-js nodemailer web-push
 
       - name: Kjor Script
         env:
@@ -25,12 +26,27 @@ jobs:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
           APP_LINK: ${{ secrets.APP_URL }}
+          # Den private nøkkelen fra GitHub Secrets
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          # Den offentlige nøkkelen (samme som i index.html)
+          VAPID_PUBLIC_KEY: "BG6M_bZd_mrC1MUj6JfLtV6m5HgdkRCxY7fxNDIGufoe_vYxsqGUKhcYjLIdbCoj0rBHNECBIIZv7uyP2fr3ZHU"
+          CONTACT_EMAIL: "mailto:glenn.andre.hansen@gmail.com"
         run: |
           node -e '
           const { createClient } = require("@supabase/supabase-js");
           const nodemailer = require("nodemailer");
+          const webpush = require("web-push");
           
           const supabase = createClient(process.env.SUPA_URL, process.env.SUPA_KEY);
+
+          // Konfigurer Web Push
+          if (process.env.VAPID_PRIVATE_KEY) {
+            webpush.setVapidDetails(
+              process.env.CONTACT_EMAIL,
+              process.env.VAPID_PUBLIC_KEY,
+              process.env.VAPID_PRIVATE_KEY
+            );
+          }
 
           const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -39,6 +55,8 @@ jobs:
               pass: process.env.GMAIL_PASS,
             },
           });
+
+          // --- HJELPEFUNKSJONER ---
 
           const mailHeader = `
             <!DOCTYPE html>
@@ -61,7 +79,7 @@ jobs:
             </html>
           `;
 
-          // Hjelpefunksjon: Hent epost manuelt basert på BID
+          // Hent epost manuelt basert på BID
           async function getUserEmail(bid) {
               if (!bid) return null;
               const { data } = await supabase
@@ -76,16 +94,50 @@ jobs:
               return null;
           }
 
+          // NY: Send Push til bruker
+          async function sendPush(bid, title, body, url = "/") {
+              if (!process.env.VAPID_PRIVATE_KEY) return;
+
+              // 1. Hent alle abonnementer for denne brukeren
+              const { data: subs } = await supabase
+                  .from("push_subscriptions")
+                  .select("*")
+                  .eq("bid", bid);
+
+              if (!subs || subs.length === 0) return;
+
+              const payload = JSON.stringify({ title, body, url });
+
+              // 2. Send til alle enheter brukeren har
+              const promises = subs.map(async (subRecord) => {
+                  try {
+                      await webpush.sendNotification(subRecord.subscription, payload);
+                      console.log(`Push sendt til enhet ${subRecord.id} for ${bid}`);
+                  } catch (error) {
+                      // Hvis Google/Mozilla sier at abonnementet er dødt (410 Gone), slett det fra DB
+                      if (error.statusCode === 410 || error.statusCode === 404) {
+                          console.log(`Abonnement ${subRecord.id} er utløpt, sletter...`);
+                          await supabase.from("push_subscriptions").delete().eq("id", subRecord.id);
+                      } else {
+                          console.error("Feil ved sending av push:", error);
+                      }
+                  }
+              });
+
+              await Promise.all(promises);
+          }
+
+          // --- HOVEDLOGIKK ---
+
           // 1. START-VARSEL (30 min før)
           async function checkBookings() {
             const now = new Date();
             const in30mins = new Date(now.getTime() + 30 * 60000);
             
-            // Hent bookinger som starter snart (UTEN join, bare enkle data)
             const { data: bookings, error } = await supabase
               .from("bookinger")
               .select("*") 
-              .gt("start_tid", now.toISOString()) // Strengt frem i tid
+              .gt("start_tid", now.toISOString()) 
               .lt("start_tid", in30mins.toISOString())
               .eq("varslet", false); 
 
@@ -93,16 +145,17 @@ jobs:
             if (!bookings || bookings.length === 0) return;
 
             for (const b of bookings) {
+               // Tidspunkt string
+               const startTime = new Date(b.start_tid).toLocaleTimeString("no-NO", {
+                  hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
+               });
+
+               // A) Prøv Push
+               await sendPush(b.bid, "Start varsel", `Din booking av ${b.bil} starter kl. ${startTime}`, process.env.APP_LINK);
+
+               // B) Prøv E-post
                const email = await getUserEmail(b.bid);
-               
                if (email) {
-                  // Tving norsk tidssone
-                  const startTime = new Date(b.start_tid).toLocaleTimeString("no-NO", {
-                      hour:"2-digit", 
-                      minute:"2-digit", 
-                      timeZone: "Europe/Oslo"
-                  });
-                  
                   const htmlContent = `
                     <h2 style="color: #1e293b; margin-top: 0;">Din reservasjon starter snart</h2>
                     <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
@@ -113,7 +166,6 @@ jobs:
                         <a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">ÅPNE APPEN</a>
                     </div>
                   `;
-
                   try {
                       await transporter.sendMail({
                         from: `"BookBil Jæren" <${process.env.GMAIL_USER}>`,
@@ -121,9 +173,11 @@ jobs:
                         subject: `Påminnelse: ${b.bil} kl. ${startTime}`,
                         html: mailHeader + htmlContent + mailFooter
                       });
-                      console.log(`Start-varsel sendt til ${email}`);
+                      console.log(`Start-epost sendt til ${email}`);
                   } catch (e) { console.error("Feil ved sending:", e); }
                }
+               
+               // Marker som varslet
                await supabase.from("bookinger").update({ varslet: true }).eq("id", b.id);
             }
           }
@@ -143,8 +197,11 @@ jobs:
             if (!bookings || bookings.length === 0) return;
 
             for (const b of bookings) {
-               const email = await getUserEmail(b.bid);
+               // A) Prøv Push
+               await sendPush(b.bid, "Levering", `På tide å levere ${b.bil}. Husk nøkler!`, process.env.APP_LINK);
 
+               // B) Prøv E-post
+               const email = await getUserEmail(b.bid);
                if (email) {
                   const startDate = new Date(b.start_tid);
                   const endDate = new Date(b.slutt_tid);
@@ -189,13 +246,13 @@ jobs:
                         subject: `Påminnelse: Levering av ${b.bil}`,
                         html: mailHeader + htmlContent + mailFooter
                       });
-                      console.log(`Innleveringsvarsel sendt til ${email}`);
+                      console.log(`Innleverings-epost sendt til ${email}`);
                   } catch (e) { console.error("Feil ved sending:", e); }
                }
             }
           }
 
-          // 3. ADMIN SAMLE-VARSEL
+          // 3. ADMIN SAMLE-VARSEL (Kun e-post, admin push kan legges til senere ved behov)
           async function checkMessages() {
             const { data: messages, error } = await supabase
               .from("meldinger")
