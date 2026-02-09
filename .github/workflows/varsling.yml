@@ -16,7 +16,6 @@ jobs:
           node-version: '20'
 
       - name: Install Deps
-        # Vi legger til web-push her
         run: npm install @supabase/supabase-js nodemailer web-push
 
       - name: Kjor Script
@@ -26,9 +25,7 @@ jobs:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
           APP_LINK: ${{ secrets.APP_URL }}
-          # Den private nøkkelen fra GitHub Secrets
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
-          # Den offentlige nøkkelen (samme som i index.html)
           VAPID_PUBLIC_KEY: "BG6M_bZd_mrC1MUj6JfLtV6m5HgdkRCxY7fxNDIGufoe_vYxsqGUKhcYjLIdbCoj0rBHNECBIIZv7uyP2fr3ZHU"
           CONTACT_EMAIL: "mailto:glenn.andre.hansen@gmail.com"
         run: |
@@ -56,8 +53,6 @@ jobs:
             },
           });
 
-          // --- HJELPEFUNKSJONER ---
-
           const mailHeader = `
             <!DOCTYPE html>
             <html>
@@ -79,7 +74,6 @@ jobs:
             </html>
           `;
 
-          // Hent epost manuelt basert på BID
           async function getUserEmail(bid) {
               if (!bid) return null;
               const { data } = await supabase
@@ -94,11 +88,9 @@ jobs:
               return null;
           }
 
-          // NY: Send Push til bruker
           async function sendPush(bid, title, body, url = "/") {
               if (!process.env.VAPID_PRIVATE_KEY) return;
 
-              // 1. Hent alle abonnementer for denne brukeren
               const { data: subs } = await supabase
                   .from("push_subscriptions")
                   .select("*")
@@ -108,13 +100,11 @@ jobs:
 
               const payload = JSON.stringify({ title, body, url });
 
-              // 2. Send til alle enheter brukeren har
               const promises = subs.map(async (subRecord) => {
                   try {
                       await webpush.sendNotification(subRecord.subscription, payload);
                       console.log(`Push sendt til enhet ${subRecord.id} for ${bid}`);
                   } catch (error) {
-                      // Hvis Google/Mozilla sier at abonnementet er dødt (410 Gone), slett det fra DB
                       if (error.statusCode === 410 || error.statusCode === 404) {
                           console.log(`Abonnement ${subRecord.id} er utløpt, sletter...`);
                           await supabase.from("push_subscriptions").delete().eq("id", subRecord.id);
@@ -126,8 +116,6 @@ jobs:
 
               await Promise.all(promises);
           }
-
-          // --- HOVEDLOGIKK ---
 
           // 1. START-VARSEL (30 min før)
           async function checkBookings() {
@@ -145,15 +133,18 @@ jobs:
             if (!bookings || bookings.length === 0) return;
 
             for (const b of bookings) {
-               // Tidspunkt string
                const startTime = new Date(b.start_tid).toLocaleTimeString("no-NO", {
                   hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
                });
 
-               // A) Prøv Push
-               await sendPush(b.bid, "Start varsel", `Din booking av ${b.bil} starter kl. ${startTime}`, process.env.APP_LINK);
+               // OPPDATERT PUSH TEKST
+               await sendPush(
+                   b.bid, 
+                   "Klar for tur?", 
+                   `Husk reservasjon av ${b.bil} som starter kl. ${startTime}. God tur!`, 
+                   process.env.APP_LINK
+               );
 
-               // B) Prøv E-post
                const email = await getUserEmail(b.bid);
                if (email) {
                   const htmlContent = `
@@ -173,11 +164,9 @@ jobs:
                         subject: `Påminnelse: ${b.bil} kl. ${startTime}`,
                         html: mailHeader + htmlContent + mailFooter
                       });
-                      console.log(`Start-epost sendt til ${email}`);
                   } catch (e) { console.error("Feil ved sending:", e); }
                }
                
-               // Marker som varslet
                await supabase.from("bookinger").update({ varslet: true }).eq("id", b.id);
             }
           }
@@ -197,43 +186,34 @@ jobs:
             if (!bookings || bookings.length === 0) return;
 
             for (const b of bookings) {
-               // A) Prøv Push
-               await sendPush(b.bid, "Levering", `På tide å levere ${b.bil}. Husk nøkler!`, process.env.APP_LINK);
+               // OPPDATERT PUSH TEKST MED INSTRUKSJONER
+               await sendPush(
+                   b.bid, 
+                   "Snart levering", 
+                   `Fristen for ${b.bil} nærmer seg. 1. Lever nøkkel. 2. Avslutt i appen. Trenger du mer tid? Sjekk om du kan utvide.`, 
+                   process.env.APP_LINK
+               );
 
-               // B) Prøv E-post
                const email = await getUserEmail(b.bid);
                if (email) {
                   const startDate = new Date(b.start_tid);
                   const endDate = new Date(b.slutt_tid);
-                  
-                  const dateStr = startDate.toLocaleDateString("no-NO", {
-                      day:"2-digit", month:"2-digit", year:"numeric", timeZone: "Europe/Oslo"
-                  });
-                  const startStr = startDate.toLocaleTimeString("no-NO", {
-                      hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
-                  });
-                  const endStr = endDate.toLocaleTimeString("no-NO", {
-                      hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
-                  });
+                  const dateStr = startDate.toLocaleDateString("no-NO", {day:"2-digit", month:"2-digit", year:"numeric", timeZone: "Europe/Oslo"});
+                  const startStr = startDate.toLocaleTimeString("no-NO", {hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"});
+                  const endStr = endDate.toLocaleTimeString("no-NO", {hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"});
                   
                   const htmlContent = `
                     <h2 style="color: #1e293b; margin-top: 0;">Reservasjonen utløper snart</h2>
                     <p>Hei! Dette er en påminnelse om at din reservasjon utløper om ca. 30 minutter.</p>
-                    
                     <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
                         <p style="margin: 0; font-size: 18px; font-weight: bold; color: #1e293b;">${b.bil}</p>
                         <p style="margin: 5px 0 0; color: #b45309; font-weight: bold;">Dato: ${dateStr}</p>
                         <p style="margin: 2px 0 0; color: #b45309;">Tid: ${startStr} - ${endStr}</p>
-                        <hr style="border: 0; border-top: 1px dashed #d1d5db; margin: 15px 0;">
-                        <p style="margin: 0; font-size: 14px;"><strong>Er du ferdig?</strong> Lever bilen i appen nå.</p>
-                        <p style="margin: 5px 0 0; font-size: 14px;"><strong>Trenger du mer tid?</strong> Sjekk om du kan utvide reservasjonen.</p>
                     </div>
-
                     <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;">
                          <p style="margin: 0; font-weight: bold; color: #166534; font-size: 16px;">🔑 HUSK NØKLER!</p>
-                         <p style="margin: 5px 0 0; color: #15803d; font-size: 13px;">Heng nøkkelen tilbake i skapet etter bruk.</p>
+                         <p style="margin: 5px 0 0; color: #15803d; font-size: 13px;">Heng nøkkelen tilbake i skapet etter bruk og avslutt i appen.</p>
                     </div>
-
                     <div style="text-align: center; margin-top: 30px;">
                         <a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL APPEN</a>
                     </div>
@@ -246,22 +226,14 @@ jobs:
                         subject: `Påminnelse: Levering av ${b.bil}`,
                         html: mailHeader + htmlContent + mailFooter
                       });
-                      console.log(`Innleverings-epost sendt til ${email}`);
                   } catch (e) { console.error("Feil ved sending:", e); }
                }
             }
           }
 
-          // 3. ADMIN SAMLE-VARSEL (Kun e-post, admin push kan legges til senere ved behov)
           async function checkMessages() {
-            const { data: messages, error } = await supabase
-              .from("meldinger")
-              .select("*")
-              .eq("sendt", false)
-              .order("created_at", { ascending: true });
-
+            const { data: messages, error } = await supabase.from("meldinger").select("*").eq("sendt", false).order("created_at", { ascending: true });
             if (error || !messages || messages.length === 0) return;
-
             const { data: config } = await supabase.from("konfigurasjon").select("verdi").eq("nokkel", "bilansvarlig_epost").maybeSingle();
             const adminEmails = config && config.verdi ? config.verdi.split(",").map(e => e.trim()).filter(e => e) : [];
 
@@ -273,12 +245,8 @@ jobs:
 
             let listHtml = "";
             messages.forEach(msg => {
-                const timeStr = new Date(msg.created_at).toLocaleTimeString("no-NO", {
-                  day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Oslo"
-                });
-                
-                let icon = "📝";
-                let color = "#3b82f6";
+                const timeStr = new Date(msg.created_at).toLocaleTimeString("no-NO", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Oslo"});
+                let icon = "📝"; let color = "#3b82f6";
                 if(msg.type.includes("Skade") || msg.type.includes("Feil")) { icon = "⚠️"; color = "#ef4444"; }
                 else if(msg.type.includes("Verksted")) { icon = "🔧"; color = "#a855f7"; }
                 else if(msg.type.includes("Statusendring")) { icon = "🔄"; color = "#f59e0b"; }
@@ -290,23 +258,16 @@ jobs:
                         <span style="color: #64748b; font-size: 12px;">${timeStr}</span>
                     </div>
                     <div style="color: ${color}; font-weight: bold; font-size: 12px; text-transform: uppercase; margin-bottom: 5px;">${msg.type}</div>
-                    <div style="color: #334155; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        ${msg.innhold}
-                    </div>
+                    <div style="color: #334155; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">${msg.innhold}</div>
                     <div style="color: #94a3b8; font-size: 11px; margin-top: 5px;">Registrert av: ${msg.bruker || "Ukjent"}</div>
-                </div>
-                `;
+                </div>`;
             });
 
             const digestHtml = `
                 <h2 style="color: #1e293b; margin-top: 0;">Oppdatering fra Billageret</h2>
                 <p>Det er registrert <strong>${messages.length}</strong> nye hendelser siden sist:</p>
-                <div style="margin-top: 20px;">
-                    ${listHtml}
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL BILLAGER</a>
-                </div>
+                <div style="margin-top: 20px;">${listHtml}</div>
+                <div style="text-align: center; margin-top: 30px;"><a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL BILLAGER</a></div>
             `;
 
             for (const email of adminEmails) {
@@ -317,10 +278,8 @@ jobs:
                       subject: `Billager: ${messages.length} nye hendelser`,
                       html: mailHeader + digestHtml + mailFooter
                     });
-                    console.log(`Samle-varsel sendt til ${email}`);
                 } catch (err) { console.error(`Feil ved sending til ${email}:`, err); }
             }
-
             const ids = messages.map(m => m.id);
             await supabase.from("meldinger").update({ sendt: true }).in("id", ids);
           }
@@ -330,6 +289,5 @@ jobs:
             await checkReturns();
             await checkMessages();
           }
-          
           run();
           '
