@@ -661,6 +661,7 @@ window.OneSignalDeferred.push(function(OneSignal) {
         if(event.current.id) {
             // Hvis vi har en ID, sørg for at den er koblet til brukeren
             if(s.bid) OneSignal.login(s.bid);
+            updateOneSignalStatusDisplay();
         }
     });
 });
@@ -677,7 +678,6 @@ async function togglePush() {
     window.OneSignalDeferred.push(async function(OneSignal) {
         try {
             // 2. Be om tilgang (Native Prompt)
-            // Vi bruker en race condition, men med lengre timeout og polling
             const optInPromise = OneSignal.User.PushSubscription.optIn();
             
             // Start polling etter ID
@@ -691,23 +691,21 @@ async function togglePush() {
                     clearInterval(checkInterval);
                     if(s.bid) await OneSignal.login(s.bid);
                     showToast("Varsler er aktivert!", "success");
+                    updateOneSignalStatusDisplay();
                     console.log("Push ID mottatt:", pushId);
-                } else if (attempts >= 10) { // 5 sekunder (10 * 500ms)
+                } else if (attempts >= 10) { // 5 sekunder
                     clearInterval(checkInterval);
                     console.log("Tidsavbrudd: Fikk ingen Push ID fra nettverket.");
                     
                     if (Notification.permission === 'granted') {
-                        // Hvis vi har lov, men ingen ID, prøv en hard SW-registrering
                         showToast("Venter på nettverk... prøver på nytt.", "info");
                         if(navigator.serviceWorker) {
                             navigator.serviceWorker.register('/sw.js').then(() => {
                                 console.log("Tvang ny SW-registrering.");
-                                // Prøv optIn en gang til
                                 OneSignal.User.PushSubscription.optIn();
                             });
                         }
                     } else {
-                        // Fallback: Prøv manuell Slidedown hvis native feilet
                          OneSignal.Slidedown.promptPush();
                     }
                 }
@@ -719,6 +717,25 @@ async function togglePush() {
             console.error("Feil under aktivering av push:", e);
             showToast("Feil: " + e.message, "error");
         }
+    });
+}
+
+function updateOneSignalStatusDisplay() {
+    const el = $id('os-status-debug');
+    if(!el) return;
+    
+    window.OneSignalDeferred.push(function(OneSignal) {
+        const isOptedIn = OneSignal.User.PushSubscription.optedIn;
+        const pushId = OneSignal.User.PushSubscription.id;
+        const extId = OneSignal.User.externalId;
+        
+        let html = "";
+        if(isOptedIn && pushId) {
+             html = `<span class="text-green-400 font-bold">Subscribed</span><br>Push ID: ${pushId.substring(0,8)}...<br>External ID: ${extId || 'Mangler'}`;
+        } else {
+             html = `<span class="text-red-400">Not Subscribed</span><br>Permission: ${Notification.permission}`;
+        }
+        el.innerHTML = html;
     });
 }
 
@@ -738,15 +755,11 @@ _s.auth.onAuthStateChange((event, session) => {
             s.bid = s.u.split('@')[0].toUpperCase(); 
             $id('u-disp').innerText = "Bruker: " + s.bid;
 
-            // VIKTIG ENDRING: Ikke logg inn i OneSignal før vi vet om de har push
-            // Dette forhindrer "User created but not subscribed"
             window.OneSignalDeferred.push(function(OneSignal) {
-                // Sjekk om vi allerede har en aktiv subscription ID
                 if (OneSignal.User.PushSubscription.id) {
                      OneSignal.login(s.bid);
-                } else {
-                    console.log("Venter med OneSignal login til bruker aktiverer push.");
                 }
+                setTimeout(updateOneSignalStatusDisplay, 1000);
             });
         }
 
@@ -761,7 +774,6 @@ _s.auth.onAuthStateChange((event, session) => {
         s.bid = null; 
         s.kioskMode = false;
         
-        // Logg ut av OneSignal når bruker logger ut
         window.OneSignalDeferred.push(function(OneSignal) {
             OneSignal.logout();
         });
@@ -1535,7 +1547,7 @@ function findC() {
         const pB = catOrder[b.kategori] || 4;
         if (pA !== pB) return pA - pB;
         return a.bil.localeCompare(b.bil);
-    };
+    });
 
     available.sort(sorter);
     busy.sort(sorter);
@@ -1599,8 +1611,6 @@ async function subRet(id, c) {
     load(); 
     showToast("Levert!", "success");
 }
-
-async function react() { if(confirm(`Vil du gjøre ${s.co.bil} tilgjengelig igjen?\nNåværende status: ${s.co.status}`)) { await _s.from('biler').update({status:'Aktiv',kommentar:null}).eq('id',s.co.id); closeM('m-book'); load(); showToast("Bil aktivert", "success"); } }
 
 function rAdm(c) {
     let html = `<div class="flex flex-wrap gap-2 mb-4 bg-slate-800 p-3 rounded-xl border border-slate-700">`;
@@ -1789,6 +1799,10 @@ function rSet(c) {
         <button onclick="togglePush()" class="w-full bg-amber-900/30 text-amber-400 p-3 rounded-xl font-bold border border-amber-800 flex items-center justify-center gap-2 mb-4 hover:bg-amber-900/50 transition-colors">
             <span class="material-icons-round text-sm">notifications_active</span> Aktiver Push-varsler på denne enheten
         </button>
+        
+        <div class="mb-4 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 text-[10px] font-mono" id="os-status-debug">
+           Sjekker status...
+        </div>
 
         <div class="flex items-center justify-between mb-4">
             <span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span>
@@ -1839,6 +1853,7 @@ function rSet(c) {
     `;
     renderAdminEmails();
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
+    updateOneSignalStatusDisplay();
 }
 function renderAdminEmails() {
     const list = $id('admin-email-list'); if(!list) return; list.innerHTML = "";
