@@ -139,12 +139,15 @@ jobs:
                const endTime = new Date(b.slutt_tid).toLocaleTimeString("no-NO", {
                   hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
                });
+               
+               // NYTT: Henter formål eller setter standardtekst
+               const formalText = b.formal || "Tur";
 
-               // OPPDATERT PUSH TEKST: Inkluderer nå hele tidsrommet
+               // OPPDATERT PUSH TEKST MED FORMÅL
                await sendPush(
                    b.bid, 
                    "Klar for tur?", 
-                   `Husk reservasjon av ${b.bil} i dag kl. ${startTime} - ${endTime}. God tur!`, 
+                   `Husk ${b.bil} (${formalText}) i dag kl. ${startTime} - ${endTime}. God tur!`, 
                    process.env.APP_LINK
                );
 
@@ -154,6 +157,7 @@ jobs:
                     <h2 style="color: #1e293b; margin-top: 0;">Din reservasjon starter snart</h2>
                     <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
                         <p style="margin: 0; font-size: 18px; font-weight: bold; color: #1e293b;">${b.bil}</p>
+                        <p style="margin: 5px 0 0; font-weight: bold; color: #2563eb;">${formalText}</p>
                         <p style="margin: 5px 0 0; color: #475569;">Kl. ${startTime} - ${endTime}</p>
                     </div>
                     <div style="text-align: center; margin-top: 30px;">
@@ -275,10 +279,10 @@ jobs:
             });
 
             const digestHtml = `
-                <h2 style="color: #1e293b; margin-top: 0;">Oppdatering fra Billageret</h2>
+                <h2 style=\"color: #1e293b; margin-top: 0;\">Oppdatering fra Billageret</h2>
                 <p>Det er registrert <strong>${messages.length}</strong> nye hendelser siden sist:</p>
-                <div style="margin-top: 20px;">${listHtml}</div>
-                <div style="text-align: center; margin-top: 30px;"><a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL BILLAGER</a></div>
+                <div style=\"margin-top: 20px;\">${listHtml}</div>
+                <div style=\"text-align: center; margin-top: 30px;\"><a href=\"${process.env.APP_LINK}\" style=\"background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;\">GÅ TIL BILLAGER</a></div>
             `;
 
             for (const email of adminEmails) {
@@ -302,3 +306,5 @@ jobs:
           }
           run();
           '
+
+
