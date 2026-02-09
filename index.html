@@ -620,7 +620,7 @@ const S_URL = "https://huxyflpzmfajrvluhxaw.supabase.co";
 const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1eHlmbHB6bWZhanJ2bHVoeGF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1ODk1NDYsImV4cCI6MjA4NDE2NTU0Nn0.7obBykQfPmfxxzHf348iDO9aHWldQPqibnRKlrMDHAI";
 
 // --- ONESIGNAL CONFIG ---
-const ONESIGNAL_APP_ID = "0388a3d7-82a7-4eb7-9b9f-152ac6161ee2";
+const ONESIGNAL_APP_ID = "dd7175bc-fd00-4043-a7d4-11de95137faf";
 
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
@@ -650,8 +650,8 @@ window.OneSignalDeferred.push(function(OneSignal) {
         safari_web_id: "web.onesignal.auto.637b3b3a-5302-4f30-802d-7d34559c76b7",
         notifyButton: { enable: false }, // Vi bruker vår egen knapp
         allowLocalhostAsSecureOrigin: true,
-        // Sørg for at path er absolutt og peker på roten
-        serviceWorkerPath: '/sw.js',
+        // Vi går tilbake til den enklere stien som fungerte før
+        serviceWorkerPath: 'sw.js',
         serviceWorkerParam: { scope: '/' }
     });
     
@@ -661,6 +661,7 @@ window.OneSignalDeferred.push(function(OneSignal) {
         if(event.current.id) {
             // Hvis vi har en ID, sørg for at den er koblet til brukeren
             if(s.bid) OneSignal.login(s.bid);
+            updateOneSignalStatusDisplay();
         }
     });
 });
@@ -677,43 +678,24 @@ async function togglePush() {
     window.OneSignalDeferred.push(async function(OneSignal) {
         try {
             // 2. Be om tilgang (Native Prompt)
-            // Vi bruker en race condition, men med lengre timeout og polling
             const optInPromise = OneSignal.User.PushSubscription.optIn();
+            await optInPromise;
             
-            // Start polling etter ID
-            let attempts = 0;
-            const checkInterval = setInterval(async () => {
-                attempts++;
+            // 3. Sjekk status etterpå
+            setTimeout(async () => {
                 const isOptedIn = OneSignal.User.PushSubscription.optedIn;
                 const pushId = OneSignal.User.PushSubscription.id;
                 
-                if (isOptedIn && pushId) {
-                    clearInterval(checkInterval);
+                if(isOptedIn && pushId) {
                     if(s.bid) await OneSignal.login(s.bid);
                     showToast("Varsler er aktivert!", "success");
-                    console.log("Push ID mottatt:", pushId);
-                } else if (attempts >= 10) { // 5 sekunder (10 * 500ms)
-                    clearInterval(checkInterval);
-                    console.log("Tidsavbrudd: Fikk ingen Push ID fra nettverket.");
-                    
-                    if (Notification.permission === 'granted') {
-                        // Hvis vi har lov, men ingen ID, prøv en hard SW-registrering
-                        showToast("Venter på nettverk... prøver på nytt.", "info");
-                        if(navigator.serviceWorker) {
-                            navigator.serviceWorker.register('/sw.js').then(() => {
-                                console.log("Tvang ny SW-registrering.");
-                                // Prøv optIn en gang til
-                                OneSignal.User.PushSubscription.optIn();
-                            });
-                        }
-                    } else {
-                        // Fallback: Prøv manuell Slidedown hvis native feilet
-                         OneSignal.Slidedown.promptPush();
-                    }
+                    updateOneSignalStatusDisplay();
+                } else if(isOptedIn) {
+                    showToast("Godkjent, venter på nettverk...", "info");
+                } else {
+                    OneSignal.Slidedown.promptPush();
                 }
-            }, 500); // Sjekk hvert halve sekund
-
-            await optInPromise;
+            }, 1000);
 
         } catch (e) {
             console.error("Feil under aktivering av push:", e);
@@ -722,49 +704,76 @@ async function togglePush() {
     });
 }
 
-_s.auth.onAuthStateChange((event, session) => { 
-    if (session) { 
-        s.u = session.user.email; 
+function updateOneSignalStatusDisplay() {
+    // Sjekk om elementet finnes før vi prøver å oppdatere det
+    const el = document.getElementById('os-status-debug');
+    if(!el) return;
+    
+    window.OneSignalDeferred.push(function(OneSignal) {
+        const isOptedIn = OneSignal.User.PushSubscription.optedIn;
+        const pushId = OneSignal.User.PushSubscription.id;
+        const extId = OneSignal.User.externalId;
         
-        // KIOSK MODE LOGIC
-        if(s.u === KIOSK_USER) {
-            s.kioskMode = true;
-            s.bid = ""; // Force manual entry
-            s.uiLarge = true; // FORCE LARGE IN KIOSK
-            document.body.classList.add('ui-large');
-            $id('u-disp').innerText = "KIOSK-MODUS";
+        let html = "";
+        if(isOptedIn && pushId) {
+             html = `<span class="text-green-400 font-bold">Subscribed</span><br>Push ID: ${pushId.substring(0,8)}...<br>External ID: ${extId || 'Mangler'}`;
         } else {
-            s.kioskMode = false;
-            s.bid = s.u.split('@')[0].toUpperCase(); 
-            $id('u-disp').innerText = "Bruker: " + s.bid;
+             html = `<span class="text-red-400">Not Subscribed</span><br>Permission: ${Notification.permission}`;
+        }
+        if(el) el.innerHTML = html;
+    });
+}
 
-            // VIKTIG ENDRING: Ikke logg inn i OneSignal før vi vet om de har push
-            // Dette forhindrer "User created but not subscribed"
+_s.auth.onAuthStateChange(async (event, session) => { 
+    try {
+        if (session) { 
+            s.u = session.user.email; 
+            
+            // KIOSK MODE LOGIC
+            if(s.u === KIOSK_USER) {
+                s.kioskMode = true;
+                s.bid = ""; // Force manual entry
+                s.uiLarge = true; // FORCE LARGE IN KIOSK
+                document.body.classList.add('ui-large');
+                $id('u-disp').innerText = "KIOSK-MODUS";
+            } else {
+                s.kioskMode = false;
+                s.bid = s.u.split('@')[0].toUpperCase(); 
+                $id('u-disp').innerText = "Bruker: " + s.bid;
+
+                // VIKTIG: Vi legger OneSignal i en timeout for å IKKE blokkere UI-oppdateringen
+                setTimeout(() => {
+                    window.OneSignalDeferred.push(function(OneSignal) {
+                        if (OneSignal.User.PushSubscription.id) {
+                             OneSignal.login(s.bid);
+                        }
+                    });
+                }, 2000); // Vent 2 sekunder til appen har lastet ferdig
+            }
+
+            // Bytt visning umiddelbart
+            $id('auth').classList.add('hidden'); 
+            $id('app').classList.remove('hidden'); 
+            tab('cars'); 
+            load(); 
+        } else { 
+            $id('auth').classList.remove('hidden'); 
+            $id('app').classList.add('hidden'); 
+            s.u = null; 
+            s.bid = null; 
+            s.kioskMode = false;
+            
             window.OneSignalDeferred.push(function(OneSignal) {
-                // Sjekk om vi allerede har en aktiv subscription ID
-                if (OneSignal.User.PushSubscription.id) {
-                     OneSignal.login(s.bid);
-                } else {
-                    console.log("Venter med OneSignal login til bruker aktiverer push.");
-                }
+                OneSignal.logout();
             });
         }
-
-        $id('auth').classList.add('hidden'); 
-        $id('app').classList.remove('hidden'); 
-        tab('cars'); 
-        load(); 
-    } else { 
-        $id('auth').classList.remove('hidden'); 
-        $id('app').classList.add('hidden'); 
-        s.u = null; 
-        s.bid = null; 
-        s.kioskMode = false;
-        
-        // Logg ut av OneSignal når bruker logger ut
-        window.OneSignalDeferred.push(function(OneSignal) {
-            OneSignal.logout();
-        });
+    } catch(e) {
+        console.error("Kritisk feil i onAuthStateChange:", e);
+        // Fallback hvis noe krasjer: Prøv å vise appen likevel hvis vi tror vi er logget inn
+        if(session) {
+             $id('auth').classList.add('hidden'); 
+             $id('app').classList.remove('hidden'); 
+        }
     }
 });
 
@@ -1535,7 +1544,7 @@ function findC() {
         const pB = catOrder[b.kategori] || 4;
         if (pA !== pB) return pA - pB;
         return a.bil.localeCompare(b.bil);
-    };
+    });
 
     available.sort(sorter);
     busy.sort(sorter);
@@ -1599,8 +1608,6 @@ async function subRet(id, c) {
     load(); 
     showToast("Levert!", "success");
 }
-
-async function react() { if(confirm(`Vil du gjøre ${s.co.bil} tilgjengelig igjen?\nNåværende status: ${s.co.status}`)) { await _s.from('biler').update({status:'Aktiv',kommentar:null}).eq('id',s.co.id); closeM('m-book'); load(); showToast("Bil aktivert", "success"); } }
 
 function rAdm(c) {
     let html = `<div class="flex flex-wrap gap-2 mb-4 bg-slate-800 p-3 rounded-xl border border-slate-700">`;
@@ -1789,6 +1796,10 @@ function rSet(c) {
         <button onclick="togglePush()" class="w-full bg-amber-900/30 text-amber-400 p-3 rounded-xl font-bold border border-amber-800 flex items-center justify-center gap-2 mb-4 hover:bg-amber-900/50 transition-colors">
             <span class="material-icons-round text-sm">notifications_active</span> Aktiver Push-varsler på denne enheten
         </button>
+        
+        <div class="mb-4 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 text-[10px] font-mono" id="os-status-debug">
+           Sjekker status...
+        </div>
 
         <div class="flex items-center justify-between mb-4">
             <span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span>
@@ -1839,6 +1850,7 @@ function rSet(c) {
     `;
     renderAdminEmails();
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
+    updateOneSignalStatusDisplay();
 }
 function renderAdminEmails() {
     const list = $id('admin-email-list'); if(!list) return; list.innerHTML = "";
