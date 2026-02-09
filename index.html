@@ -633,8 +633,6 @@ let touchStartY = 0;
 if(s.uiLarge) document.body.classList.add('ui-large');
 
 // --- SERVICE WORKER & PWA INSTALL ---
-// VIKTIG: Vi fjerner manuell registrering her for å la OneSignal håndtere det via init.
-// Dette unngår konflikt mellom to registreringer.
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); });
 async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); const { outcome } = await s.deferredPrompt.userChoice; if (outcome === 'accepted') { s.deferredPrompt = null; $id('install-icon').classList.add('hidden'); $id('pwa-settings-btn').classList.add('hidden'); } } }
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
@@ -652,7 +650,7 @@ window.OneSignalDeferred.push(function(OneSignal) {
         safari_web_id: "web.onesignal.auto.637b3b3a-5302-4f30-802d-7d34559c76b7",
         notifyButton: { enable: false }, // Vi bruker vår egen knapp
         allowLocalhostAsSecureOrigin: true,
-        // La OneSignal registrere SW for oss for å unngå konflikter
+        // Sørg for at path er helt korrekt
         serviceWorkerPath: 'sw.js',
         serviceWorkerParam: { scope: '/' }
     });
@@ -660,52 +658,65 @@ window.OneSignalDeferred.push(function(OneSignal) {
     // Lytt til endringer i abonnementet for å oppdatere UI hvis nødvendig
     OneSignal.User.PushSubscription.addEventListener("change", (event) => {
         console.log("Push subscription changed:", event);
+        if(event.current.id) {
+            // Hvis vi har en ID, sørg for at den er koblet til brukeren
+            if(s.bid) OneSignal.login(s.bid);
+        }
     });
 });
 
 async function togglePush() {
-    // Sjekk status først
+    // 1. Sjekk om varsler er blokkert
     if (Notification.permission === 'denied') {
         alert("Du har blokkert varsler for denne nettsiden.\n\nDu må endre dette i telefonens innstillinger under Varsler -> Safari/Chrome.");
         return;
     }
 
-    // ANDROID HACK: Prøv å be om tillatelse direkte hvis den er default (ikke spurt ennå)
-    // Noen ganger feiler OneSignal sin overlegg på Android PWA
-    if (Notification.permission === 'default') {
-        try {
-            const result = await Notification.requestPermission();
-            if (result === 'granted') {
-                 // Hvis nettleseren sier OK, fortell OneSignal at vi vil opt-in
-                 window.OneSignalDeferred.push(function(OneSignal) {
-                     OneSignal.User.PushSubscription.optIn();
-                 });
-                 return; // La OneSignal håndtere resten av flyten
-            }
-        } catch (e) {
-            console.error("Native requestPermission failed", e);
-        }
-    }
+    showToast("Forsøker å aktivere...", "info");
 
     window.OneSignalDeferred.push(async function(OneSignal) {
         try {
-            console.log("Forsøker å aktivere push...");
-            // Dette er den kritiske metoden for iOS som krever brukerhandling
-            await OneSignal.User.PushSubscription.optIn();
+            // 2. Be om tilgang (Native Prompt)
+            // Vi bruker en timeout race fordi iOS noen ganger henger hvis SW ikke er klar
+            const optInPromise = OneSignal.User.PushSubscription.optIn();
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Tidsavbrudd")), 10000));
+
+            await Promise.race([optInPromise, timeoutPromise]);
             
-            // Sjekk om vi fikk det til
-            const isPushEnabled = OneSignal.User.PushSubscription.optedIn;
-            if(isPushEnabled) {
-                // Sørg for at brukeren er logget inn med riktig ID
-                if(s.bid) await OneSignal.login(s.bid);
-                showToast("Varsler er aktivert!", "success");
-            } else {
-                // Hvis brukeren avbrøt dialogen eller noe annet skjedde
-                console.log("Bruker opt-in fullført, men status er ikke aktiv.");
-            }
+            // 3. Vent litt for å la OneSignal oppdatere state
+            setTimeout(async () => {
+                const isOptedIn = OneSignal.User.PushSubscription.optedIn;
+                const pushId = OneSignal.User.PushSubscription.id;
+                
+                if(isOptedIn && pushId) {
+                    // 4. Suksess! Logg inn bruker
+                    if(s.bid) await OneSignal.login(s.bid);
+                    showToast("Varsler er aktivert!", "success");
+                    console.log("Push ID:", pushId);
+                } else {
+                    // 5. Noe gikk galt, men ingen feilmelding
+                    console.log("Opt-in fullført, men ingen ID. Status:", Notification.permission);
+                    if (Notification.permission === 'granted') {
+                        showToast("Varsler godkjent, men venter på nettverk...", "info");
+                        // Prøv en gang til
+                        if(s.bid) OneSignal.login(s.bid);
+                    } else {
+                        // Fallback: Prøv manuell Slidedown hvis native feilet
+                         OneSignal.Slidedown.promptPush();
+                    }
+                }
+            }, 1000);
+
         } catch (e) {
             console.error("Feil under aktivering av push:", e);
-            showToast("Kunne ikke aktivere: " + e.message, "error");
+            showToast("Feil: " + e.message, "error");
+            
+            // Debug: Tving SW registrering hvis den mangler
+            if(navigator.serviceWorker && !navigator.serviceWorker.controller) {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                     console.log("Tvang SW registrering", reg);
+                });
+            }
         }
     });
 }
@@ -726,9 +737,15 @@ _s.auth.onAuthStateChange((event, session) => {
             s.bid = s.u.split('@')[0].toUpperCase(); 
             $id('u-disp').innerText = "Bruker: " + s.bid;
 
-            // Logg inn i OneSignal når bruker logger inn i appen
+            // VIKTIG ENDRING: Ikke logg inn i OneSignal før vi vet om de har push
+            // Dette forhindrer "User created but not subscribed"
             window.OneSignalDeferred.push(function(OneSignal) {
-                OneSignal.login(s.bid);
+                // Sjekk om vi allerede har en aktiv subscription ID
+                if (OneSignal.User.PushSubscription.id) {
+                     OneSignal.login(s.bid);
+                } else {
+                    console.log("Venter med OneSignal login til bruker aktiverer push.");
+                }
             });
         }
 
