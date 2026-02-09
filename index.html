@@ -22,9 +22,12 @@
   window.OneSignalDeferred.push(function(OneSignal) {
     OneSignal.init({
       appId: "dd7175bc-fd00-4043-a7d4-11de95137faf",
-      safari_web_id: "web.onesignal.auto.xxxxx", // Valgfritt
-      notifyButton: { enable: false }, // Vi styrer dette via "Innstillinger"
-      allowLocalhostAsSecureOrigin: true,
+      safari_web_id: "web.onesignal.auto.xxxxx", 
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true, // Viktig for testing
+      // VIKTIG: Fortell OneSignal at den skal bruke vår sw.js
+      serviceWorkerPath: "sw.js", 
+      serviceWorkerParam: { scope: "/" } 
     });
   });
 </script>
@@ -458,10 +461,9 @@ _s.auth.onAuthStateChange((event, session) => {
         } else {
             s.kioskMode = false; s.bid = s.u.split('@')[0].toUpperCase(); $id('u-disp').innerText = "Bruker: " + s.bid;
             
-            // --- ONESIGNAL LOGIN (VIKTIG) ---
+            // --- ONESIGNAL LOGIN ---
             if (window.OneSignalDeferred) {
                 window.OneSignalDeferred.push(function(OneSignal) {
-                    // Vi registrerer BID som External User ID
                     OneSignal.login(s.bid);
                     console.log("OneSignal Login:", s.bid);
                 });
@@ -471,7 +473,6 @@ _s.auth.onAuthStateChange((event, session) => {
     } else { 
         $id('auth').classList.remove('hidden'); $id('app').classList.add('hidden'); s.u = null; s.bid = null; s.kioskMode = false;
         
-        // --- ONESIGNAL LOGOUT ---
         if (window.OneSignalDeferred) {
             window.OneSignalDeferred.push(function(OneSignal) {
                 OneSignal.logout();
@@ -644,8 +645,7 @@ function rCars(c) {
         const actA = s.r.some(r => r.bil === a.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
         const actB = s.r.some(r => r.bil === b.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
         if (actA && !actB) return -1; if (!actA && actB) return 1;
-        const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 };
-        const pA = catOrder[a.kategori] || 4; const pB = catOrder[b.kategori] || 4;
+        const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 }; const pA = catOrder[a.kategori] || 4; const pB = catOrder[b.kategori] || 4;
         if (pA !== pB) return pA - pB;
         return a.bil.localeCompare(b.bil);
     });
@@ -1063,6 +1063,7 @@ function rSet(c) {
     </div>
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-amber-500">notifications</span> Varsling</div>
+        <button onclick="OneSignalDeferred.push(function(OneSignal){ OneSignal.Slidedown.promptPush() })" class="w-full bg-amber-900/30 text-amber-400 p-3 rounded-xl font-bold border border-amber-800 flex items-center justify-center gap-2 mb-4 hover:bg-amber-900/50 transition-colors"><span class="material-icons-round text-sm">notifications_active</span> AKTIVER VARSLING (PUSH)</button>
         <div class="flex items-center justify-between mb-4"><span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span><input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-6 h-6 accent-amber-600 rounded cursor-pointer"></div>
         <div class="flex gap-2"><input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white focus:border-amber-500 outline-none transition-colors"><button onclick="updEm()" class="bg-amber-600 hover:bg-amber-500 px-4 rounded-xl text-white font-bold text-xs shadow-lg transition-transform active:scale-95">LAGRE</button></div>
         <p class="text-[10px] text-slate-500 mt-2">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p>
