@@ -650,8 +650,8 @@ window.OneSignalDeferred.push(function(OneSignal) {
         safari_web_id: "web.onesignal.auto.637b3b3a-5302-4f30-802d-7d34559c76b7",
         notifyButton: { enable: false }, // Vi bruker vår egen knapp
         allowLocalhostAsSecureOrigin: true,
-        // Sørg for at path er helt korrekt
-        serviceWorkerPath: 'sw.js',
+        // Sørg for at path er absolutt og peker på roten
+        serviceWorkerPath: '/sw.js',
         serviceWorkerParam: { scope: '/' }
     });
     
@@ -677,46 +677,47 @@ async function togglePush() {
     window.OneSignalDeferred.push(async function(OneSignal) {
         try {
             // 2. Be om tilgang (Native Prompt)
-            // Vi bruker en timeout race fordi iOS noen ganger henger hvis SW ikke er klar
+            // Vi bruker en race condition, men med lengre timeout og polling
             const optInPromise = OneSignal.User.PushSubscription.optIn();
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Tidsavbrudd")), 10000));
-
-            await Promise.race([optInPromise, timeoutPromise]);
             
-            // 3. Vent litt for å la OneSignal oppdatere state
-            setTimeout(async () => {
+            // Start polling etter ID
+            let attempts = 0;
+            const checkInterval = setInterval(async () => {
+                attempts++;
                 const isOptedIn = OneSignal.User.PushSubscription.optedIn;
                 const pushId = OneSignal.User.PushSubscription.id;
                 
-                if(isOptedIn && pushId) {
-                    // 4. Suksess! Logg inn bruker
+                if (isOptedIn && pushId) {
+                    clearInterval(checkInterval);
                     if(s.bid) await OneSignal.login(s.bid);
                     showToast("Varsler er aktivert!", "success");
-                    console.log("Push ID:", pushId);
-                } else {
-                    // 5. Noe gikk galt, men ingen feilmelding
-                    console.log("Opt-in fullført, men ingen ID. Status:", Notification.permission);
+                    console.log("Push ID mottatt:", pushId);
+                } else if (attempts >= 10) { // 5 sekunder (10 * 500ms)
+                    clearInterval(checkInterval);
+                    console.log("Tidsavbrudd: Fikk ingen Push ID fra nettverket.");
+                    
                     if (Notification.permission === 'granted') {
-                        showToast("Varsler godkjent, men venter på nettverk...", "info");
-                        // Prøv en gang til
-                        if(s.bid) OneSignal.login(s.bid);
+                        // Hvis vi har lov, men ingen ID, prøv en hard SW-registrering
+                        showToast("Venter på nettverk... prøver på nytt.", "info");
+                        if(navigator.serviceWorker) {
+                            navigator.serviceWorker.register('/sw.js').then(() => {
+                                console.log("Tvang ny SW-registrering.");
+                                // Prøv optIn en gang til
+                                OneSignal.User.PushSubscription.optIn();
+                            });
+                        }
                     } else {
                         // Fallback: Prøv manuell Slidedown hvis native feilet
                          OneSignal.Slidedown.promptPush();
                     }
                 }
-            }, 1000);
+            }, 500); // Sjekk hvert halve sekund
+
+            await optInPromise;
 
         } catch (e) {
             console.error("Feil under aktivering av push:", e);
             showToast("Feil: " + e.message, "error");
-            
-            // Debug: Tving SW registrering hvis den mangler
-            if(navigator.serviceWorker && !navigator.serviceWorker.controller) {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                     console.log("Tvang SW registrering", reg);
-                });
-            }
         }
     });
 }
