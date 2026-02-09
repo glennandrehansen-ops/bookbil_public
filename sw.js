@@ -1,7 +1,6 @@
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-// OneSignal håndterer mye av logikken selv via importen over.
-// Vi legger til standard PWA-livssyklus for å sikre at oppdateringer trer i kraft raskt.
+// Vi beholder standard PWA-livssyklus, men lar OneSignal styre push-hendelsene.
 
 self.addEventListener('install', (event) => {
     // Tvinger den nye service workeren til å bli aktiv umiddelbart
@@ -9,13 +8,12 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-    // Lar service workeren ta kontroll over alle åpne klienter (faner/app-vinduer) med en gang
+    // Lar service workeren ta kontroll over alle åpne klienter med en gang
     event.waitUntil(self.clients.claim());
-    console.log('Service Worker Active (BookBil)');
+    console.log('Service Worker Active (BookBil + OneSignal)');
 });
 
-// En enkel fetch-lytter er nødvendig for at PWA skal installeres på enkelte Android-versjoner,
-// men vi trenger ikke cache noe spesifikt da dette er en online-first app.
+// En enkel fetch-lytter er nødvendig for at PWA skal installeres korrekt
 self.addEventListener('fetch', (event) => {
-    // Pass-through: gjør ingenting, bare lar nettverket virke som normalt.
+    // Vi gjør ingenting her, lar nettverket fungere som normalt (Network Only strategy)
 });
