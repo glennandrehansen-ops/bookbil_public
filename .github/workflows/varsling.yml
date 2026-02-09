@@ -171,22 +171,23 @@ jobs:
             }
           }
 
-          // 2. RETUR-VARSEL (30 min før slutt)
+          // 2. RETUR-VARSEL (30 min før slutt) - OPPDATERT LOGIKK
           async function checkReturns() {
             const now = new Date();
-            const fromTime = new Date(now.getTime() + 25 * 60000).toISOString();
-            const toTime = new Date(now.getTime() + 30 * 60000).toISOString();
+            const in30mins = new Date(now.getTime() + 30 * 60000).toISOString();
             
+            // Sjekker nå etter bookings som slutter de neste 30 min, som IKKE er varslet om retur enda
             const { data: bookings } = await supabase
               .from("bookinger")
               .select("*")
-              .gt("slutt_tid", fromTime)
-              .lt("slutt_tid", toTime);
+              .gt("slutt_tid", now.toISOString())
+              .lt("slutt_tid", in30mins)
+              .eq("varslet_slutt", false); // Krever at kolonnen varslet_slutt finnes i DB
 
             if (!bookings || bookings.length === 0) return;
 
             for (const b of bookings) {
-               // OPPDATERT PUSH TEKST MED INSTRUKSJONER
+               // A) Prøv Push
                await sendPush(
                    b.bid, 
                    "Snart levering", 
@@ -194,6 +195,7 @@ jobs:
                    process.env.APP_LINK
                );
 
+               // B) Prøv E-post
                const email = await getUserEmail(b.bid);
                if (email) {
                   const startDate = new Date(b.start_tid);
@@ -228,6 +230,9 @@ jobs:
                       });
                   } catch (e) { console.error("Feil ved sending:", e); }
                }
+
+               // MARKER SOM VARSLET I DB
+               await supabase.from("bookinger").update({ varslet_slutt: true }).eq("id", b.id);
             }
           }
 
