@@ -660,7 +660,6 @@ window.OneSignalDeferred.push(function(OneSignal) {
         safari_web_id: "web.onesignal.auto.637b3b3a-5302-4f30-802d-7d34559c76b7",
         notifyButton: { enable: false },
         allowLocalhostAsSecureOrigin: true,
-        // Vi peker fortsatt på sw.js her, men den manuelle registreringen over sikrer at den er klar.
         serviceWorkerPath: 'sw.js',
         serviceWorkerParam: { scope: '/' }
     });
@@ -672,27 +671,31 @@ window.OneSignalDeferred.push(function(OneSignal) {
 });
 
 async function togglePush() {
+    // 1. Sjekk manuell blokkering
     if (Notification.permission === 'denied') {
         alert("Du har blokkert varsler. Gå til innstillinger for nettstedet i nettleseren for å oppheve blokkeringen.");
         return;
     }
 
+    // 2. Be om tillatelse (Native prompt)
     if (Notification.permission === 'default') {
         try {
             const result = await Notification.requestPermission();
             if (result !== 'granted') {
-                return;
+                return; // Bruker avslo
             }
         } catch (e) {
-            console.error("Kunne ikke be om native tillatelse:", e);
+            console.error("Native permission error:", e);
         }
     }
 
+    // 3. Aktiver OneSignal
     window.OneSignalDeferred.push(async function(OneSignal) {
         try {
             console.log("Aktiverer OneSignal...");
             await OneSignal.User.PushSubscription.optIn();
             
+            // Vent litt på at ID skal settes
             setTimeout(async () => {
                 const id = OneSignal.User.PushSubscription.id;
                 if(id) {
@@ -700,17 +703,18 @@ async function togglePush() {
                     showToast("Varsler er aktivert!", "success");
                     if(typeof updateDebugInfo === 'function') updateDebugInfo();
                 } else {
+                    // Hvis vi har tillatelse men ingen ID, prøv reload
                     if (Notification.permission === 'granted') {
-                        showToast("Tillatelse gitt. Oppdaterer...", "info");
+                        showToast("Oppdaterer system...", "info");
                         setTimeout(() => location.reload(), 1500); 
                     } else {
-                        showToast("Kunne ikke aktivere varsler.", "error");
+                        showToast("Kunne ikke aktivere.", "error");
                     }
                 }
             }, 1000);
             
         } catch (e) {
-            console.error("Feil ved OneSignal opt-in:", e);
+            console.error("OneSignal Error:", e);
             showToast("Feil: " + e.message, "error");
         }
     });
@@ -734,10 +738,10 @@ function updateDebugInfo() {
                 idEl.innerText = `ID OK: ${id.substring(0, 8)}...`;
                 idEl.style.color = "#4ade80"; 
             } else if (token) {
-                idEl.innerText = "Har Token, mangler ID (Sync feil)";
+                idEl.innerText = "Mangler ID (Slett logg/Reset)";
                 idEl.style.color = "#facc15"; 
             } else {
-                idEl.innerText = "Mangler Token (Sjekk Manifest/SW)";
+                idEl.innerText = "Mangler Token (Sjekk Manifest!)";
                 idEl.style.color = "#ef4444"; 
             }
         }
@@ -756,16 +760,18 @@ function testLocalNotif() {
 }
 
 async function forceResetOneSignal() {
-    if(!confirm("Dette nullstiller ALT og sletter lokal database. Er du sikker?")) return;
+    if(!confirm("Dette sletter all lokal data for å fikse varsler. Fortsette?")) return;
     
-    showToast("Nullstiller... vent...", "info");
+    showToast("Nullstiller...", "info");
 
-    const dbs = await window.indexedDB.databases();
-    for (const db of dbs) {
-        if (db.name && db.name.includes("OneSignal")) {
-            window.indexedDB.deleteDatabase(db.name);
+    try {
+        const dbs = await window.indexedDB.databases();
+        for (const db of dbs) {
+            if (db.name && db.name.includes("OneSignal")) {
+                window.indexedDB.deleteDatabase(db.name);
+            }
         }
-    }
+    } catch(e) { console.log("Kunne ikke slette DB", e); }
 
     localStorage.clear();
     sessionStorage.clear();
@@ -775,24 +781,10 @@ async function forceResetOneSignal() {
         await registration.unregister();
     }
 
-    alert("Appen er totalt nullstilt. Den laster nå på nytt.");
+    alert("Appen er nullstilt. Last siden på nytt.");
     window.location.reload(true);
 }
-
-// --- AUTENTISERING ---
-async function sendOtp() {
-    const e = $id('l-email').value.trim().toLowerCase();
-    const bidPattern = /^[a-zæøå]{3}\d{3}@politiet\.no$/;
-    if (e !== KIOSK_USER && !e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
-    if (e !== KIOSK_USER && !bidPattern.test(e)) return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
-    const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } });
-    if (error) showToast(error.message, 'error'); 
-    else { $id('f-email').classList.add('hidden'); $id('f-otp').classList.remove('hidden'); $id('l-otp').focus(); }
-}
-async function verifyOtp() { const e = $id('l-email').value.trim().toLowerCase(), t = $id('l-otp').value.trim(); const { error } = await _s.auth.verifyOtp({ email: e, token: t, type: 'email' }); if (error) showToast("Feil kode.", 'error'); }
-function resetAuth() { $id('f-email').classList.remove('hidden'); $id('f-otp').classList.add('hidden'); $id('l-otp').value = ""; }
-async function logout() { if (confirm("Logg ut?")) { await _s.auth.signOut(); location.reload(); } }
-
+    
 _s.auth.onAuthStateChange((event, session) => { 
     if (session) { 
         s.u = session.user.email; 
