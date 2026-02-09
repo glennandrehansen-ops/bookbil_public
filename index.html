@@ -11,9 +11,23 @@
 
 <!-- Manifest -->
 <link rel="manifest" href="manifest.json">
-<!-- Oppdatert ikon (Car Rental) -->
+<!-- Ikon -->
 <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/7840/7840958.png">
 <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7840/7840958.png">
+
+<!-- OneSignal SDK -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(function(OneSignal) {
+    OneSignal.init({
+      appId: "dd7175bc-fd00-4043-a7d4-11de95137faf",
+      safari_web_id: "web.onesignal.auto.xxxxx", // Valgfritt
+      notifyButton: { enable: false }, // Vi styrer dette via "Innstillinger"
+      allowLocalhostAsSecureOrigin: true,
+    });
+  });
+</script>
 
 <!-- Biblioteker -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -43,7 +57,6 @@ body.ui-large { font-size: 17px; }
 .ui-large input, .ui-large select { height: 54px !important; font-size: 16px !important; }
 .ui-large .material-icons-round { transform: scale(1.2); } 
 .ui-large .time-label { font-size: 11px; } 
-/* FIX: Keep tab font size manageable on mobile even in large mode, but bold it */
 .ui-large .seg-tab { padding: 12px 4px; font-size: 11px; font-weight: 900; }
 
 /* Fleet Row (Liste-element) */
@@ -64,73 +77,30 @@ body.ui-large { font-size: 17px; }
 .fleet-row:active { background-color: #334155; }
 
 /* Status Indicators */
-.status-stripe {
-    width: 4px;
-    height: 40px;
-    border-radius: 2px;
-    margin-right: 12px;
-    flex-shrink: 0;
-}
-.c-green { background-color: #10b981; } /* Ledig > 4t */
-.c-yellow { background-color: #f59e0b; } /* Ledig 2-4t */
-.c-orange { background-color: #f97316; } /* Ledig < 2t */
-.c-red { background-color: #ef4444; }   /* Opptatt */
-.c-blue { background-color: #3b82f6; }  /* Min bil */
-.c-purple { background-color: #a855f7; } /* Verksted/EU */
-.c-gray { background-color: #64748b; }   /* Ute av drift */
+.status-stripe { width: 4px; height: 40px; border-radius: 2px; margin-right: 12px; flex-shrink: 0; }
+.c-green { background-color: #10b981; }
+.c-yellow { background-color: #f59e0b; }
+.c-orange { background-color: #f97316; }
+.c-red { background-color: #ef4444; }
+.c-blue { background-color: #3b82f6; }
+.c-purple { background-color: #a855f7; }
+.c-gray { background-color: #64748b; }
 
 /* Knapper i liste */
 .btn-action {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 8px 16px;
-    border-radius: 6px;
-    background-color: #334155; /* Slate 700 */
-    color: white;
-    border: 1px solid #475569;
-    transition: all 0.2s;
-    white-space: nowrap;
-    position: relative;
-    z-index: 5; /* Ensure clickable */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
+    font-size: 11px; font-weight: 700; padding: 8px 16px; border-radius: 6px;
+    background-color: #334155; color: white; border: 1px solid #475569;
+    transition: all 0.2s; white-space: nowrap; position: relative; z-index: 5;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
 }
 .btn-primary { background-color: #3b82f6; border-color: #2563eb; box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3); }
 .btn-green { background-color: #059669; border-color: #047857; box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3); }
 .btn-amber { background-color: #d97706; border-color: #b45309; box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3); }
 
-/* Updated Box Tabs (Fixed: Proportional Widths) */
-.seg-tab-container { 
-    background-color: transparent; 
-    padding: 4px; 
-    display: flex; 
-    gap: 8px; 
-    width: 100%;
-}
-.seg-tab { 
-    flex: 1 1 auto; /* Allow grow/shrink based on content */
-    text-align: center; 
-    padding: 8px 4px; 
-    font-size: 11px; 
-    font-weight: 700; 
-    color: #94a3b8; 
-    border-radius: 8px; 
-    transition: all 0.2s; 
-    border: 1px solid #334155;
-    background-color: #1e293b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0; /* Important for flex items to shrink properly */
-}
-.seg-tab.active { 
-    background-color: #3b82f6; 
-    color: white; 
-    border-color: #2563eb;
-    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.4); 
-}
+/* Updated Box Tabs */
+.seg-tab-container { background-color: transparent; padding: 4px; display: flex; gap: 8px; width: 100%; }
+.seg-tab { flex: 1 1 auto; text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 700; color: #94a3b8; border-radius: 8px; transition: all 0.2s; border: 1px solid #334155; background-color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.seg-tab.active { background-color: #3b82f6; color: white; border-color: #2563eb; box-shadow: 0 2px 5px rgba(59, 130, 246, 0.4); }
 
 /* Bottom Nav */
 .bottom-nav { background: #0f172a; border-top: 1px solid #1e293b; height: 80px; padding-bottom: env(safe-area-inset-bottom); }
@@ -146,7 +116,7 @@ body.ui-large { font-size: 17px; }
 /* Input Styles */
 input, select, textarea { background-color: #1e293b !important; border-color: #334155 !important; color: white !important; border-radius: 8px !important; }
 
-/* Range Slider (Compact) */
+/* Range Slider */
 input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: 40px; position: relative; z-index: 20; touch-action: none; }
 input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 44px; width: 44px; border-radius: 50%; background: #3b82f6; cursor: pointer; margin-top: -14px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 4px solid #fff; transition: transform 0.1s; }
 input[type=range]:active::-webkit-slider-thumb { transform: scale(1.1); background: #2563eb; }
@@ -159,17 +129,8 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 .bar{width:40px;height:5px;background:#4b5563;border-radius:99px}
 
 /* Tidslinje */
-.timeline-scroll { 
-    overflow-x: auto; 
-    padding-bottom: 25px; 
-    padding-top: 10px; 
-    display: flex; 
-    margin-bottom: 5px; 
-    -webkit-overflow-scrolling: touch; 
-    scrollbar-width: none; 
-    cursor: grab; /* Shows hand cursor for dragging */
-}
-.timeline-scroll.active { cursor: grabbing; } /* Closed hand when dragging */
+.timeline-scroll { overflow-x: auto; padding-bottom: 25px; padding-top: 10px; display: flex; margin-bottom: 5px; -webkit-overflow-scrolling: touch; scrollbar-width: none; cursor: grab; }
+.timeline-scroll.active { cursor: grabbing; }
 .timeline-scroll::-webkit-scrollbar { display: none; }
 .time-grid { display: inline-flex; gap: 2px; height: 50px; padding: 0 4px; position: relative; }
 .time-block { width: 42px; height: 100%; background-color: #1e293b; border-radius: 6px; position: relative; flex-shrink: 0; cursor: pointer; border: 1px solid #334155; display: flex; justify-content: center; align-items: center; user-select: none; }
@@ -204,40 +165,9 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 .settings-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
 .settings-header { font-size: 14px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
-/* TOAST - FLOATING PILL FIXED */
-#toast-container { 
-    position: fixed; 
-    bottom: 90px; /* Over bottom nav */
-    left: 50%; 
-    transform: translateX(-50%); 
-    z-index: 200; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    pointer-events: none;
-    width: auto;
-    max-width: 90%;
-}
-.toast { 
-    background: rgba(30, 41, 59, 0.95); 
-    backdrop-filter: blur(8px);
-    color: white; 
-    padding: 12px 24px; 
-    border-radius: 999px; 
-    margin-top: 8px; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
-    opacity: 0; 
-    transform: translateY(20px); 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    border: 1px solid rgba(255,255,255,0.1); 
-    font-size: 14px; 
-    font-weight: 600; 
-    pointer-events: auto; 
-    white-space: nowrap;
-}
+/* TOAST */
+#toast-container { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; align-items: center; pointer-events: none; width: auto; max-width: 90%; }
+.toast { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(8px); color: white; padding: 12px 24px; border-radius: 999px; margin-top: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); opacity: 0; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,0.1); font-size: 14px; font-weight: 600; pointer-events: auto; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateY(0); }
 .toast-success { border-bottom: 3px solid #10b981; }
 .toast-error { border-bottom: 3px solid #ef4444; }
@@ -281,7 +211,6 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
             </div>
             <p id="u-disp" class="text-xs text-slate-500 font-medium">Laster bruker...</p>
         </div>
-        <!-- Quick Stats Container (Hidden on subpages) -->
         <div id="head-stats" class="flex gap-3">
             <div class="text-right">
                 <span id="stat-free" class="block text-2xl font-bold text-emerald-400 leading-none">-</span>
@@ -294,8 +223,6 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
             </div>
         </div>
     </div>
-
-    <!-- Segmented Control Tabs (Updated 1 of 3 UI - Size to text) -->
     <div id="head-tabs" class="seg-tab-container pb-1">
         <button id="tab-ov" onclick="tab('cars')" class="seg-tab active">OVERSIKT</button>
         <button id="tab-res" onclick="tab('res')" class="seg-tab">RESERVASJONER</button>
@@ -303,31 +230,23 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
     </div>
  </header>
 
- <!-- PULL TO REFRESH INDIKATOR -->
  <div id="ptr" class="w-full text-center py-2 -mt-10 transition-all duration-300 absolute z-20 pointer-events-none"><span id="ptr-icon" class="material-icons-round text-slate-500">arrow_downward</span></div>
  
- <!-- MAIN CONTENT LIST -->
  <main id="main" class="flex-1 overflow-y-auto px-4 pb-32 pt-4 w-full" 
        ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event)">
     <div class="text-center mt-20 text-slate-500">Laster...</div>
  </main>
  
- <!-- BOTTOM NAVIGATION -->
  <nav class="bottom-nav fixed bottom-0 w-full flex justify-between items-center px-8 z-40">
-    <!-- Biler -->
     <button onclick="tab('cars')" class="flex flex-col items-center justify-center w-16 text-blue-500 transition-colors" id="nav-btn-cars">
         <span class="material-icons-round text-2xl mb-1">directions_car</span>
         <span class="text-[9px] font-bold uppercase tracking-wider">Biler</span>
     </button>
-
-    <!-- Main Action (Center) -->
     <div class="relative -top-6 z-50">
         <button onclick="openActionMenu()" class="big-fab text-white active:scale-95 transition-transform">
             <span class="material-icons-round text-4xl">add</span>
         </button>
     </div>
-
-    <!-- Mer -->
     <button onclick="togMenu()" class="flex flex-col items-center justify-center w-16 text-slate-500 hover:text-slate-300 transition-colors" id="nav-btn-more">
         <span class="material-icons-round text-2xl mb-1">menu</span>
         <span class="text-[9px] font-bold uppercase tracking-wider">Mer</span>
@@ -337,8 +256,6 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 <!-- END OF APP -->
 
 <!-- MENU & MODALS -->
-
-<!-- HAMBURGER MENU -->
 <div id="menu-bg" class="fixed inset-0 z-[45]" onclick="togMenu()"></div>
 <div id="more-menu" class="fixed bottom-0 w-full bg-[#1e1e1e] z-[50] rounded-t-3xl shadow-2xl flex flex-col pb-8 safe-b transform translate-y-full">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'more-menu')"><div class="bar"></div></div>
@@ -351,7 +268,6 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
   </div>
 </div>
 
-<!-- ACTIONS MODAL -->
 <div id="m-action" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-action')">
  <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl space-y-3" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-action',1)"><div class="bar"></div></div>
@@ -361,7 +277,6 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
  </div>
 </div>
 
-<!-- EKSPRESS LISTE -->
 <div id="m-express-list" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-express-list')">
     <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl" onclick="event.stopPropagation()">
         <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-express-list',1)"><div class="bar"></div></div>
@@ -369,76 +284,36 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
             <h3 class="text-white font-bold text-lg">Ekspress</h3>
             <span class="text-xs text-slate-500 font-mono" id="exp-time-range"></span>
         </div>
-        
-        <!-- INTEGRATED INFO AND SLIDER BOX -->
         <div class="bg-slate-800 border border-blue-500/30 rounded-2xl p-3 mb-4 text-center shadow-xl relative overflow-visible">
-            
-            <!-- Info Text Content (UPDATED SIZES) -->
             <div class="mb-2">
                 <span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest block mb-0.5">Du reserverer i</span>
-                <div class="flex items-baseline justify-center gap-2 mb-1">
-                    <span id="exp-slider-val" class="text-xl font-black text-white tracking-tight">1 time</span>
-                </div>
-                <div class="text-blue-300 text-lg font-bold bg-blue-900/40 inline-block px-3 py-1 rounded-full border border-blue-500/20 mt-1">
-                    Ferdig kl <span id="exp-end-time" class="font-mono text-white">--:--</span>
-                </div>
+                <div class="flex items-baseline justify-center gap-2 mb-1"><span id="exp-slider-val" class="text-xl font-black text-white tracking-tight">1 time</span></div>
+                <div class="text-blue-300 text-lg font-bold bg-blue-900/40 inline-block px-3 py-1 rounded-full border border-blue-500/20 mt-1">Ferdig kl <span id="exp-end-time" class="font-mono text-white">--:--</span></div>
             </div>
-
-            <!-- Integrated Slider -->
             <div class="relative w-full h-10 flex items-center justify-center">
-                 <!-- TICKS (Hvite prikker) -->
                 <div class="flex justify-between px-[12px] w-full absolute z-0 pointer-events-none">
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
+                    <div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div><div class="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
                 </div>
-                
-                <input type="range" id="exp-slider" min="1" max="12" value="1" step="1"
-                       class="w-full h-full bg-transparent appearance-none cursor-pointer relative z-20 focus:outline-none"
-                       oninput="handleExpSlider(this.value)"
-                       ontouchstart="event.stopPropagation()"
-                       ontouchmove="event.stopPropagation()">
+                <input type="range" id="exp-slider" min="1" max="12" value="1" step="1" class="w-full h-full bg-transparent appearance-none cursor-pointer relative z-20 focus:outline-none" oninput="handleExpSlider(this.value)" ontouchstart="event.stopPropagation()" ontouchmove="event.stopPropagation()">
             </div>
-            
-             <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-0 px-1">
-                <span>1t</span>
-                <span>12t</span>
-            </div>
+             <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-0 px-1"><span>1t</span><span>12t</span></div>
         </div>
-
         <div id="express-options" class="space-y-2 overflow-y-auto pb-4 max-h-[40vh]"></div>
     </div>
 </div>
 
-<!-- EKSPRESS BEKREFTELSE (NY) -->
 <div id="m-express-conf" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[65]" onclick="closeM('m-express-conf')">
  <div class="bg-[#0f172a] modal-content-bottom p-6 border-t border-slate-700 shadow-2xl" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-express-conf',1)"><div class="bar"></div></div>
   <h2 class="text-white font-black text-xl uppercase mb-1">Bekreft Ekspress</h2>
   <p id="exp-conf-txt" class="text-slate-400 text-xs mb-6"></p>
-  
-  <div class="mb-6">
-      <label class="text-[10px] font-bold text-slate-500 block mb-1">FORMÅL</label>
-      <input id="exp-conf-form" placeholder="F.eks. Møte" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white text-sm">
-  </div>
-
+  <div class="mb-6"><label class="text-[10px] font-bold text-slate-500 block mb-1">FORMÅL</label><input id="exp-conf-form" placeholder="F.eks. Møte" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white text-sm"></div>
   <button onclick="confirmExpress()" class="w-full bg-blue-600 py-4 rounded-xl font-black text-white text-lg shadow-lg">BEKREFT</button>
   <button onclick="closeM('m-express-conf')" class="w-full text-slate-500 font-bold py-4 mt-2">AVBRYT</button>
  </div>
 </div>
 
-<!-- SØK (Finn Ledig) - Added Touch Listeners here -->
-<div id="m-search" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-search')"
-     ontouchstart="handleTouchStart(event)" ontouchend="modalTouchEnd(event, 'm-search')">
+<div id="m-search" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-search')" ontouchstart="handleTouchStart(event)" ontouchend="modalTouchEnd(event, 'm-search')">
  <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl relative" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-search',1)"><div class="bar"></div></div>
   <button onclick="closeM('m-search')" class="absolute top-4 right-4 text-slate-500 p-2"><span class="material-icons-round">close</span></button>
@@ -447,13 +322,10 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
       <div class="legend-box"><div class="legend-item"><div class="dot free"></div> Ledig</div><div class="legend-item"><div class="dot selected"></div> Valgt</div><div class="legend-item"><div class="dot busy"></div> Opptatt</div></div>
   </div>
   <div class="mb-4">
-    <!-- Updated Dynamic Date Display -->
     <div id="s-tl-date-disp" class="text-center text-sm font-black text-blue-100 uppercase tracking-widest mb-2 bg-blue-900/40 border border-blue-800 p-2 rounded shadow-sm">I DAG</div>
     <div class="timeline-scroll" id="ts-search" onscroll="handleTimelineScroll('search')"><div class="time-grid" id="timeline-search"></div></div>
   </div>
   <p id="s-instr" class="text-center text-xs text-slate-500 font-bold mb-1 uppercase">Trykk starttid (A)</p>
-  
-  <!-- REVISED DATE LAYOUT FOR SEARCH (MATCHING BOOKING) -->
   <div id="v-s-e" class="flex flex-col gap-3 mb-6 bg-slate-800 p-4 rounded-xl border border-slate-700">
     <div class="flex items-center gap-2">
         <div class="w-12 text-[10px] font-bold text-slate-500 uppercase pt-2">Fra</div>
@@ -466,43 +338,28 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
         <input type="time" id="s-t-en" class="bg-slate-900 text-blue-400 text-sm font-black h-10 px-2 rounded w-24 text-center border border-slate-600" onchange="synS()">
     </div>
   </div>
-  
   <div id="s-res" class="space-y-2 mb-4 hidden border-t border-slate-800 pt-4 overflow-y-auto max-h-[30vh]"></div>
   <button onclick="findC()" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm mb-4">SØK ETTER BIL</button>
  </div>
 </div>
 
-<!-- BOOKING MODAL -->
 <div id="m-book" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-book')">
  <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl relative" id="m-book-content" onclick="event.stopPropagation()">
   <button onclick="closeM('m-book')" class="absolute top-4 right-4 text-slate-500 p-2"><span class="material-icons-round">close</span></button>
   <div class="flex items-center gap-4 mb-2 overflow-hidden w-full pr-10">
       <h2 id="b-title" class="text-xl font-black text-white uppercase flex items-center overflow-hidden w-full">RESERVER</h2>
-      <!-- Legend removed from header to make space for chips -->
   </div>
-  
-  <!-- NEW SUBTITLE with Details (Moved here from JS injection) -->
-  <h3 id="b-sub" class="text-sm text-slate-300 mb-2 font-bold flex flex-col">
-      <span>Ny reservasjon</span>
-  </h3>
-  
-  <!-- New Warning Box for Foreign Booking -->
+  <h3 id="b-sub" class="text-sm text-slate-300 mb-2 font-bold flex flex-col"><span>Ny reservasjon</span></h3>
   <div id="b-owner-warn" class="hidden mb-4 bg-orange-900/30 border border-orange-500/50 p-4 rounded-xl flex items-center gap-3">
     <span class="material-icons-round text-orange-500 text-2xl">warning</span>
-    <div>
-        <h3 class="text-orange-400 font-bold text-xs uppercase">Advarsel</h3>
-        <p class="text-orange-200 text-xs">Du redigerer en reservasjon som tilhører <span id="b-owner-name" class="font-black text-white"></span>.</p>
-    </div>
+    <div><h3 class="text-orange-400 font-bold text-xs uppercase">Advarsel</h3><p class="text-orange-200 text-xs">Du redigerer en reservasjon som tilhører <span id="b-owner-name" class="font-black text-white"></span>.</p></div>
   </div>
-
   <p id="b-info" class="text-xs text-yellow-500 mb-3 bg-yellow-900/20 p-2 rounded border border-yellow-700/50 hidden"></p>
   <div class="mb-4">
-    <!-- Updated Dynamic Date Display -->
     <div id="b-tl-date-disp" class="text-center text-sm font-black text-blue-100 uppercase tracking-widest mb-2 bg-blue-900/40 border border-blue-800 p-2 rounded shadow-sm">I DAG</div>
     <div class="timeline-scroll" id="ts-book" onscroll="handleTimelineScroll('book')"><div class="time-grid" id="timeline"></div></div>
   </div>
   <p id="b-instr" class="text-center text-xs text-slate-500 font-bold mb-1 uppercase">Trykk starttid (A)</p>
-  
   <div class="flex flex-col gap-3 mb-4 bg-slate-800 p-4 rounded-xl border border-slate-700" id="b-date-inputs">
     <div class="flex items-center gap-2">
         <div class="w-12 text-[10px] font-bold text-slate-500 uppercase pt-2">Fra</div>
@@ -515,44 +372,26 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
         <input type="time" id="b-t-en" class="bg-slate-900 text-blue-400 text-sm font-black h-10 px-2 rounded w-24 text-center border border-slate-600" onchange="check()">
     </div>
   </div>
-
   <div class="mb-3"><details class="group"><summary class="text-blue-400 text-xs font-bold cursor-pointer list-none flex items-center gap-1 mb-2"><span class="material-icons-round text-sm">add_circle_outline</span> Legg til flere biler</summary><div id="b-multi" class="flex flex-wrap gap-2 p-2 bg-slate-800 rounded-lg border border-slate-700"></div></details></div>
   <div id="b-alert" class="hidden mb-4 bg-slate-800 border border-slate-600 p-4 rounded-xl"><p id="al-t" class="text-red-400 font-bold text-sm flex gap-2"><span class="material-icons-round">error</span> UTILGJENGELIG</p><p id="b-reason" class="text-white text-sm mb-3"></p><button id="btn-react" onclick="react()" class="w-full py-2 bg-green-700 text-white rounded font-bold text-xs hidden">GJØR AKTIV</button></div>
-  
   <div class="mb-4 space-y-3" id="b-form-container">
     <div class="flex gap-2" id="b-form-standard">
        <div id="d-bid" class="w-1/3"><label class="text-[10px] font-bold text-slate-500">BID</label><input id="b-bid" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-600 font-bold text-white text-sm"></div>
        <div class="flex-1">
          <label class="text-[10px] font-bold text-slate-500">TYPE OPPDRAG</label>
          <select id="b-form" onchange="handleFormChange()" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-600 text-white text-sm h-12">
-           <option value="" disabled selected>Velg...</option>
-           <option value="Møte">Møte</option>
-           <option value="IP">IP</option>
-           <option value="Oppdrag">Oppdrag</option>
-           <option value="Annet">Annet</option>
-           <option value="Verksted">Verksted</option>
+           <option value="" disabled selected>Velg...</option><option value="Møte">Møte</option><option value="IP">IP</option><option value="Oppdrag">Oppdrag</option><option value="Annet">Annet</option><option value="Verksted">Verksted</option>
          </select>
        </div>
     </div>
-    
-    <!-- New Extra Info Field -->
-    <div id="d-extra" class="hidden">
-        <label id="l-extra" class="text-[10px] font-bold text-slate-500">TILLEGGSINFO</label>
-        <input id="b-extra" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-600 text-white text-sm">
-    </div>
-
+    <div id="d-extra" class="hidden"><label id="l-extra" class="text-[10px] font-bold text-slate-500">TILLEGGSINFO</label><input id="b-extra" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-600 text-white text-sm"></div>
     <div class="hidden flex-col gap-2 bg-purple-900/20 p-3 rounded-xl border border-purple-500" id="b-form-verksted">
-       <div class="flex justify-between items-center">
-           <span class="text-purple-400 font-bold text-xs uppercase"><span class="material-icons-round text-sm align-text-bottom">build</span> Verksted / Service</span>
-           <button onclick="handleFormChange(true)" class="text-slate-400 hover:text-white"><span class="material-icons-round">close</span></button>
-       </div>
-       <label class="text-[10px] font-bold text-slate-500">HVA SKAL GJØRES?</label>
-       <input id="b-verksted-desc" class="w-full bg-slate-900 p-3 rounded-xl border border-purple-500/50 text-white text-sm font-bold" placeholder="F.eks. Service, Dekk, EU-kontroll...">
+       <div class="flex justify-between items-center"><span class="text-purple-400 font-bold text-xs uppercase"><span class="material-icons-round text-sm align-text-bottom">build</span> Verksted / Service</span><button onclick="handleFormChange(true)" class="text-slate-400 hover:text-white"><span class="material-icons-round">close</span></button></div>
+       <label class="text-[10px] font-bold text-slate-500">HVA SKAL GJØRES?</label><input id="b-verksted-desc" class="w-full bg-slate-900 p-3 rounded-xl border border-purple-500/50 text-white text-sm font-bold" placeholder="F.eks. Service, Dekk, EU-kontroll...">
     </div>
     <div class="mt-2 text-xs"><div id="warn" class="hidden mt-2 p-2 bg-red-900/40 border border-red-500 text-red-200 font-bold rounded text-center">⚠ OPPTATT I TIDSROMMET</div></div>
     <div class="flex gap-2 pt-2"><button id="btn-del" onclick="delB()" class="hidden py-4 px-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900 flex items-center justify-center"><span class="material-icons-round">delete</span></button><button id="btn-ok" onclick="confB()" class="flex-1 py-4 rounded-xl bg-blue-600 font-bold text-white text-lg shadow-lg disabled:opacity-50 disabled:bg-gray-600">BEKREFT</button></div>
   </div>
-
   <div class="border-t border-slate-800 pt-4 mt-4 pb-10">
       <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-3">Kommende turer (Trykk for å endre)</h4>
       <div id="fut-l" class="space-y-2"></div>
@@ -560,48 +399,27 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
  </div>
 </div>
 
-<!-- LEVERING MODAL -->
 <div id="m-ret" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-ret')">
  <div class="bg-[#0f172a] modal-content-bottom p-6 border-t border-slate-700 shadow-2xl" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-ret',1)"><div class="bar"></div></div>
   <h2 class="text-white font-black text-2xl uppercase mb-1">Levering</h2><p id="r-name" class="text-blue-400 font-bold uppercase mb-6 text-sm"></p>
-  <div class="bg-blue-900/20 border border-blue-800 p-4 rounded-xl mb-6">
-      <h3 class="text-blue-400 font-bold text-sm mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">info</span> Informasjon</h3>
-      <p class="text-xs text-slate-300">Kommentar du skriver her blir synlig på bilkortet for neste bruker. I tillegg sendes det automatisk en e-post til bilansvarlig.</p>
-  </div>
+  <div class="bg-blue-900/20 border border-blue-800 p-4 rounded-xl mb-6"><h3 class="text-blue-400 font-bold text-sm mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">info</span> Informasjon</h3><p class="text-xs text-slate-300">Kommentar du skriver her blir synlig på bilkortet for neste bruker. I tillegg sendes det automatisk en e-post til bilansvarlig.</p></div>
   <div class="bg-yellow-900/30 border border-yellow-600/50 p-4 rounded-xl mb-6 flex items-center gap-4"><div class="bg-yellow-600/20 p-3 rounded-full"><span class="material-icons-round text-yellow-500 text-3xl">vpn_key</span></div><div><h3 class="text-yellow-500 font-black text-sm">HUSK NØKLER!</h3><p class="text-yellow-200/80 text-xs">Legg tilbake i skapet.</p></div></div>
   <input id="r-comm" placeholder="Kommentar (Sendes til bilansvarlig + notat på bil)" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white mb-4 text-sm">
   <button onclick="subRet()" class="w-full bg-green-600 py-4 rounded-xl font-black text-white text-lg shadow-lg">BEKREFT</button><button onclick="closeM('m-ret')" class="w-full text-slate-500 font-bold py-4 mt-2">AVBRYT</button>
  </div>
 </div>
 
-<!-- ADMIN REDIGER MODAL -->
 <div id="m-admin-edit" class="fixed inset-0 bg-black/90 hidden modal-bottom pb-6 z-[60]" onclick="closeM('m-admin-edit')">
  <div class="bg-[#0f172a] modal-content-bottom p-5 border-t border-slate-700 shadow-2xl relative" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-admin-edit',1)"><div class="bar"></div></div>
   <h2 class="text-xl font-black text-white mb-4" id="adm-title">Rediger Bil</h2>
   <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4">
       <div class="grid grid-cols-2 gap-4">
-          <div>
-              <label class="text-[10px] font-bold text-slate-500">NAVN/REGNR</label>
-              <input type="text" id="adm-name" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm font-bold uppercase">
-          </div>
-          <div>
-              <label class="text-[10px] font-bold text-slate-500">ANSVARLIG</label>
-              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Olsen">
-          </div>
+          <div><label class="text-[10px] font-bold text-slate-500">NAVN/REGNR</label><input type="text" id="adm-name" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm font-bold uppercase"></div>
+          <div><label class="text-[10px] font-bold text-slate-500">ANSVARLIG</label><input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Olsen"></div>
       </div>
-      
-      <!-- NYTT FELT: KATEGORI -->
-      <div>
-          <label class="text-[10px] font-bold text-slate-500">KATEGORI (Bilsymbol)</label>
-          <select id="adm-cat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm">
-            <option value="Uniformert">Uniformert</option>
-            <option value="Sivil">Sivil</option>
-            <option value="Admin">Admin</option>
-          </select>
-      </div>
-
+      <div><label class="text-[10px] font-bold text-slate-500">KATEGORI (Bilsymbol)</label><select id="adm-cat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm"><option value="Uniformert">Uniformert</option><option value="Sivil">Sivil</option><option value="Admin">Admin</option></select></div>
       <div><label class="text-[10px] font-bold text-slate-500">STATUS</label><select id="adm-stat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm"><option value="Aktiv">Aktiv</option><option value="Verksted">Verksted</option><option value="Skade">Skade</option><option value="EU-kontroll">EU-kontroll</option><option value="Annet">Annet</option></select></div>
       <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR (SYNLIG)</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Skriv beskjed..."></div>
       <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater kun for admin..."></textarea></div>
@@ -612,7 +430,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 
 <script>
 const JOB_DOMAIN = "@politiet.no"; 
-const KIOSK_USER = "skjermbook@politiet.no"; // KIOSK MODE EMAIL
+const KIOSK_USER = "skjermbook@politiet.no"; 
 const S_URL = "https://huxyflpzmfajrvluhxaw.supabase.co";
 const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1eHlmbHB6bWZhanJ2bHVoeGF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1ODk1NDYsImV4cCI6MjA4NDE2NTU0Nn0.7obBykQfPmfxxzHf348iDO9aHWldQPqibnRKlrMDHAI";
 
@@ -623,7 +441,6 @@ let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:n
 let touchStartX = 0;
 let touchStartY = 0; 
 
-// Initialiser UI Size ved oppstart
 if(s.uiLarge) document.body.classList.add('ui-large');
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
@@ -632,33 +449,34 @@ async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); 
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
 window.addEventListener('online', () => $id('offline-msg').classList.add('hidden'));
 window.addEventListener('offline', () => $id('offline-msg').classList.remove('hidden'));
+
 _s.auth.onAuthStateChange((event, session) => { 
     if (session) { 
         s.u = session.user.email; 
-        
-        // KIOSK MODE LOGIC
         if(s.u === KIOSK_USER) {
-            s.kioskMode = true;
-            s.bid = ""; // Force manual entry
-            s.uiLarge = true; // FORCE LARGE IN KIOSK
-            document.body.classList.add('ui-large');
-            $id('u-disp').innerText = "KIOSK-MODUS";
+            s.kioskMode = true; s.bid = ""; s.uiLarge = true; document.body.classList.add('ui-large'); $id('u-disp').innerText = "KIOSK-MODUS";
         } else {
-            s.kioskMode = false;
-            s.bid = s.u.split('@')[0].toUpperCase(); 
-            $id('u-disp').innerText = "Bruker: " + s.bid;
+            s.kioskMode = false; s.bid = s.u.split('@')[0].toUpperCase(); $id('u-disp').innerText = "Bruker: " + s.bid;
+            
+            // --- ONESIGNAL LOGIN (VIKTIG) ---
+            if (window.OneSignalDeferred) {
+                window.OneSignalDeferred.push(function(OneSignal) {
+                    // Vi registrerer BID som External User ID
+                    OneSignal.login(s.bid);
+                    console.log("OneSignal Login:", s.bid);
+                });
+            }
         }
-
-        $id('auth').classList.add('hidden'); 
-        $id('app').classList.remove('hidden'); 
-        tab('cars'); 
-        load(); 
+        $id('auth').classList.add('hidden'); $id('app').classList.remove('hidden'); tab('cars'); load(); 
     } else { 
-        $id('auth').classList.remove('hidden'); 
-        $id('app').classList.add('hidden'); 
-        s.u = null; 
-        s.bid = null; 
-        s.kioskMode = false;
+        $id('auth').classList.remove('hidden'); $id('app').classList.add('hidden'); s.u = null; s.bid = null; s.kioskMode = false;
+        
+        // --- ONESIGNAL LOGOUT ---
+        if (window.OneSignalDeferred) {
+            window.OneSignalDeferred.push(function(OneSignal) {
+                OneSignal.logout();
+            });
+        }
     }
 });
 
@@ -668,10 +486,7 @@ function openM(id) { if (s.activeModal === id) return; $id(id).classList.remove(
 function closeM(id, back=true) { $id(id).classList.add('hidden'); s.activeModal = null; if(back) history.back(); }
 
 function tab(v) { 
-    s.v=v; 
-    render(); 
-    updNav(v); 
-    // Force load on any main tab switch to ensure data is fresh
+    s.v=v; render(); updNav(v); 
     if(['cars', 'res', 'mine'].includes(v)) load(); 
     if(v === 'logg') loadFullHistory(); 
 }
@@ -681,11 +496,7 @@ function updNav(v) {
     if(['cars','res','mine'].includes(v)) tc.className = "flex flex-col items-center justify-center w-16 text-blue-500 transition-colors"; else tm.className = "flex flex-col items-center justify-center w-16 text-blue-500 transition-colors";
 }
 
-function handleTouchStart(e) { 
-    touchStartX = e.changedTouches[0].screenX; 
-    touchStartY = e.changedTouches[0].screenY;
-}
-
+function handleTouchStart(e) { touchStartX = e.changedTouches[0].screenX; touchStartY = e.changedTouches[0].screenY; }
 function handleTouchEnd(e) {
     if(!['cars','res','mine'].includes(s.v)) return;
     const diff = touchStartX - e.changedTouches[0].screenX;
@@ -694,14 +505,11 @@ function handleTouchEnd(e) {
         else { if(s.v === 'mine') tab('res'); else if(s.v === 'res') tab('cars'); }
     }
 }
-
 let modalTouchX = 0; let modalTouchY = 0;
 function modalTouchEnd(e, id) {
-    const diffX = e.changedTouches[0].screenX - touchStartX; 
-    const diffY = e.changedTouches[0].screenY - touchStartY;
+    const diffX = e.changedTouches[0].screenX - touchStartX; const diffY = e.changedTouches[0].screenY - touchStartY;
     if (diffX > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-        const tl = e.target.closest('.timeline-scroll');
-        if (tl && tl.scrollLeft > 0) return; 
+        const tl = e.target.closest('.timeline-scroll'); if (tl && tl.scrollLeft > 0) return; 
         closeM(id);
     }
 }
@@ -710,12 +518,9 @@ function togMenu() { $id('more-menu').classList.toggle('open'); $id('menu-bg').c
 function openActionMenu() { openM('m-action'); }
 async function sendOtp() {
     const e = $id('l-email').value.trim().toLowerCase();
-    
-    // ALLOW KIOSK USER OR STANDARD PATTERN
     const bidPattern = /^[a-zæøå]{3}\d{3}@politiet\.no$/;
     if (e !== KIOSK_USER && !e.endsWith(JOB_DOMAIN)) return showToast(`Kun ${JOB_DOMAIN}`, 'error');
     if (e !== KIOSK_USER && !bidPattern.test(e)) return showToast("Feil format! Bruk BID (3 bokstaver + 3 tall)", "error");
-    
     const { error } = await _s.auth.signInWithOtp({ email: e, options: { emailRedirectTo: window.location.origin } });
     if (error) showToast(error.message, 'error'); 
     else { $id('f-email').classList.add('hidden'); $id('f-otp').classList.remove('hidden'); $id('l-otp').focus(); }
@@ -728,34 +533,23 @@ function swipe(e,id,m=0) { e.preventDefault(); const start=e.clientY; const fn=(
 async function load() {
     if(!s.u || (document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName))) return;
     try {
-        // Henter data separat for å unngå at feil i én spørring stopper alt
         const c = await _s.from('biler').select('*').order('bil');
-        const r = await _s.from('bookinger').select('*'); // Henter alt for å være sikker
+        const r = await _s.from('bookinger').select('*'); 
         const u = await _s.from('brukere').select('epost, varsel').eq('brukernavn', s.bid).maybeSingle();
         const conf = await _s.from('konfigurasjon').select('*').eq('nokkel', 'bilansvarlig_epost').maybeSingle();
 
         if (c.error) console.error("Feil ved henting av biler:", c.error);
         if (r.error) console.error("Feil ved henting av bookinger:", r.error);
 
-        s.c = c.data || [];
-        s.r = r.data || [];
-        
+        s.c = c.data || []; s.r = r.data || [];
         if(u.data) { s.savedEmail = u.data.epost; s.varsel = u.data.varsel; }
         if(conf.data) { s.bilansvarlig = conf.data.verdi; }
         
-        // Oppdatert header-visning
         const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
-        if (!s.kioskMode) {
-             $id('u-disp').innerHTML = `Bruker: ${s.bid} <span class="opacity-50 mx-1">•</span> <span class="material-icons-round text-xs align-middle opacity-50">refresh</span> <span class="font-normal opacity-75">${time}</span>`;
-        } else {
-             $id('u-disp').innerHTML = `KIOSK-MODUS <span class="opacity-50 mx-1">•</span> <span class="font-normal opacity-75">${time}</span>`;
-        }
-        
+        if (!s.kioskMode) $id('u-disp').innerHTML = `Bruker: ${s.bid} <span class="opacity-50 mx-1">•</span> <span class="material-icons-round text-xs align-middle opacity-50">refresh</span> <span class="font-normal opacity-75">${time}</span>`;
+        else $id('u-disp').innerHTML = `KIOSK-MODUS <span class="opacity-50 mx-1">•</span> <span class="font-normal opacity-75">${time}</span>`;
         render();
-    } catch(e) { 
-        console.error("Kritisk feil i load():", e); 
-        showToast("Feil ved lasting av data", "error");
-    }
+    } catch(e) { console.error("Kritisk feil i load():", e); showToast("Feil ved lasting av data", "error"); }
 }
 
 async function loadFullHistory() {
@@ -768,29 +562,17 @@ async function loadFullHistory() {
 function render() {
     if (document.activeElement.tagName === "INPUT" && s.v === 'set') return;
     const c=$id('main'); c.innerHTML=""; 
-    const stats = $id('head-stats'); const title = $id('pg-t');
-    const tabsContainer = $id('head-tabs');
+    const stats = $id('head-stats'); const title = $id('pg-t'); const tabsContainer = $id('head-tabs');
+    if(stats) stats.classList.remove('hidden'); if(tabsContainer) tabsContainer.classList.remove('hidden'); if(title) title.innerText = "BookBil Jæren";
     
-    if(stats) stats.classList.remove('hidden'); 
-    if(tabsContainer) tabsContainer.classList.remove('hidden'); 
-    if(title) title.innerText = "BookBil Jæren";
-    
-    // KIOSK MODE: Hide "Mine" tab logic inside render to ensure dynamic update
-    if (s.kioskMode) {
-        $id('tab-mine').style.display = 'none'; // Force hide
-        if(s.v === 'mine') tab('cars'); // Reset if active
-    } else {
-        $id('tab-mine').style.display = 'block'; // Ensure visible
-    }
+    if (s.kioskMode) { $id('tab-mine').style.display = 'none'; if(s.v === 'mine') tab('cars'); } else { $id('tab-mine').style.display = 'block'; }
 
-    // Update segmented control tabs
     ['ov','res','mine'].forEach(x => { const el = $id('tab-'+x); if(el) el.className = "seg-tab"; });
     if(s.v==='cars') { $id('tab-ov').className = "seg-tab active"; rCars(c); }
     else if(s.v==='res') { $id('tab-res').className = "seg-tab active"; rRes(c, false); }
     else if(s.v==='mine') { $id('tab-mine').className = "seg-tab active"; rRes(c, true); }
     else {
-        if(stats) stats.classList.add('hidden'); 
-        if(tabsContainer) tabsContainer.classList.add('hidden');
+        if(stats) stats.classList.add('hidden'); if(tabsContainer) tabsContainer.classList.add('hidden');
         if(s.v==='admin') { if(title) title.innerText = "Billager"; rAdm(c); }
         else if(s.v==='logg') { if(title) title.innerText = "Logg"; rLog(c); }
         else if(s.v==='set') { if(title) title.innerText = "Innstillinger"; rSet(c); }
@@ -808,41 +590,27 @@ function calcStats() {
             if(!isBusy) free++;
         }
     });
-    
-    const statFree = $id('stat-free');
-    const statTotal = $id('stat-total');
-    
-    statFree.innerText = free; 
-    statTotal.innerText = total;
-
-    // Gradvis fargeendring basert på tilgjengelighet
-    statFree.className = "block text-2xl font-bold leading-none"; // Reset classes
-    if (free === 0) {
-        statFree.classList.add("text-red-500");
-    } else if (free <= 3) {
-        statFree.classList.add("text-orange-500");
-    } else {
-        statFree.classList.add("text-emerald-400");
-    }
+    const statFree = $id('stat-free'); const statTotal = $id('stat-total');
+    statFree.innerText = free; statTotal.innerText = total;
+    statFree.className = "block text-2xl font-bold leading-none";
+    if (free === 0) statFree.classList.add("text-red-500"); else if (free <= 3) statFree.classList.add("text-orange-500"); else statFree.classList.add("text-emerald-400");
 }
 
 function getBadgesHtml(b, large=false, showResp=true, showType=true) {
     if(!b) return '';
     let html = '';
-    const size = large ? "text-[10px] px-2 py-1" : "text-[9px] px-1.5 py-0.5";
-    const iconSize = large ? "text-xs" : "text-[10px]";
+    const size = large ? "text-[10px] px-2 py-1" : "text-[9px] px-1.5 py-0.5"; const iconSize = large ? "text-xs" : "text-[10px]";
     if(showType) {
-        if(b.kategori === 'Uniformert') { html += `<span class="${size} bg-blue-600 text-white rounded border border-blue-500 font-bold uppercase whitespace-nowrap">${b.kategori.toUpperCase()}</span>`; } 
-        else if(b.kategori === 'Sivil') { html += `<span class="${size} bg-blue-900/40 text-blue-300 rounded border border-blue-800 font-bold uppercase whitespace-nowrap">${b.kategori.toUpperCase()}</span>`; } 
-        else if(b.kategori === 'Admin') { html += `<span class="${size} bg-gray-800 text-gray-500 rounded border border-gray-700 font-bold uppercase whitespace-nowrap">ADMIN</span>`; }
+        if(b.kategori === 'Uniformert') html += `<span class="${size} bg-blue-600 text-white rounded border border-blue-500 font-bold uppercase whitespace-nowrap">${b.kategori.toUpperCase()}</span>`; 
+        else if(b.kategori === 'Sivil') html += `<span class="${size} bg-blue-900/40 text-blue-300 rounded border border-blue-800 font-bold uppercase whitespace-nowrap">${b.kategori.toUpperCase()}</span>`; 
+        else if(b.kategori === 'Admin') html += `<span class="${size} bg-gray-800 text-gray-500 rounded border border-gray-700 font-bold uppercase whitespace-nowrap">ADMIN</span>`; 
     }
-    if(showResp && b.ansvarlig) { html += `<span class="${size} bg-slate-700 text-slate-300 rounded border border-slate-600 font-bold uppercase whitespace-nowrap flex items-center gap-1"><span class="material-icons-round ${iconSize}">person</span> ${b.ansvarlig}</span>`; }
+    if(showResp && b.ansvarlig) html += `<span class="${size} bg-slate-700 text-slate-300 rounded border border-slate-600 font-bold uppercase whitespace-nowrap flex items-center gap-1"><span class="material-icons-round ${iconSize}">person</span> ${b.ansvarlig}</span>`; 
     return html;
 }
 
 function rCars(c) {
-    const now = new Date();
-    const twoHours = 2 * 60 * 60 * 1000;
+    const now = new Date(); const twoHours = 2 * 60 * 60 * 1000;
     let myNextTrip = s.r.find(r => r.bid === s.bid && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now);
     let tripStatus = "active";
     if (!myNextTrip) {
@@ -851,9 +619,7 @@ function rCars(c) {
     }
 
     if (myNextTrip) {
-        const tripCar = myNextTrip.bil;
-        const st = new Date(myNextTrip.start_tid);
-        const en = new Date(myNextTrip.slutt_tid);
+        const tripCar = myNextTrip.bil; const st = new Date(myNextTrip.start_tid); const en = new Date(myNextTrip.slutt_tid);
         const card = document.createElement('div');
         card.className = "bg-blue-900/40 border border-blue-500/50 p-4 rounded-xl mb-6 shadow-lg relative overflow-hidden cursor-pointer active:scale-95 transition-transform";
         card.onclick = () => book(tripCar, myNextTrip.id);
@@ -883,7 +649,6 @@ function rCars(c) {
         if (pA !== pB) return pA - pB;
         return a.bil.localeCompare(b.bil);
     });
-
     const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1); tomorrow.setHours(0,0,0,0);
 
     sortedCars.forEach(b => {
@@ -894,27 +659,9 @@ function rCars(c) {
         let actionBtn = `<button onclick="event.stopPropagation();book('${b.bil}')" class="btn-action btn-green">RESERVER</button>`;
 
         if(b.status!=='Aktiv') { 
-            // Default setup for unavailable cars (Gray)
-            stripeClass="c-gray"; 
-            titleColor="text-slate-500"; 
-            subColor="text-slate-500"; 
-            rowOp="opacity-75"; 
-            subText = b.kommentar ? b.kommentar : "Ute av drift";
-
-            // Specific overrides for color
-            if(b.status === 'Verksted') { 
-                stripeClass="c-purple"; 
-                titleColor="text-slate-400"; 
-                subColor="text-purple-400"; 
-                subText = "På verksted" + (b.kommentar ? ": " + b.kommentar : "");
-            } 
-            else if(b.status === 'EU-kontroll') { 
-                stripeClass="c-purple"; 
-                titleColor="text-slate-400"; 
-                subColor="text-purple-400"; 
-                subText = "EU-kontroll" + (b.kommentar ? ": " + b.kommentar : "");
-            }
-            
+            stripeClass="c-gray"; titleColor="text-slate-500"; subColor="text-slate-500"; rowOp="opacity-75"; subText = b.kommentar ? b.kommentar : "Ute av drift";
+            if(b.status === 'Verksted') { stripeClass="c-purple"; titleColor="text-slate-400"; subColor="text-purple-400"; subText = "På verksted" + (b.kommentar ? ": " + b.kommentar : ""); } 
+            else if(b.status === 'EU-kontroll') { stripeClass="c-purple"; titleColor="text-slate-400"; subColor="text-purple-400"; subText = "EU-kontroll" + (b.kommentar ? ": " + b.kommentar : ""); }
             actionBtn = `<button onclick="event.stopPropagation();stat(${b.id},'Aktiv','${b.bil}')" class="btn-action btn-green">KLAR</button>`;
         }
         else if(act) { 
@@ -922,15 +669,9 @@ function rCars(c) {
             subText = `Opptatt av ${act.bid} til ${fmtT(act.slutt_tid)}`;
             if(act.formal && (act.formal.includes('Verksted') || act.formal.includes('Service'))) {
                  stripeClass="c-purple"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-70";
-                 // Check if I am the one who booked it or if kiosk mode
-                 if (act.bid === s.bid || s.kioskMode) {
-                     actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
-                 } else {
-                     actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Opptatt</span></div>`;
-                 }
-            } else {
-                 actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Ledig</span><span class="block text-xs font-bold text-slate-300 font-mono">${fmtT(act.slutt_tid)}</span></div>`;
-            }
+                 if (act.bid === s.bid || s.kioskMode) actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
+                 else actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Opptatt</span></div>`;
+            } else { actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Ledig</span><span class="block text-xs font-bold text-slate-300 font-mono">${fmtT(act.slutt_tid)}</span></div>`; }
         }
         else if(nxt) { 
             const nxtStart = new Date(nxt.start_tid);
@@ -949,8 +690,6 @@ function rCars(c) {
     c.appendChild(wrapper);
 }
 
-// ... (Other functions remain largely the same, updated modal handling for new fields) ...
-
 function rRes(c, mineOnly) {
     const now=new Date(); let html = `<div class="space-y-3">`;
     let list = s.r.filter(r => new Date(r.slutt_tid) > now).sort((a,b) => new Date(a.start_tid) - new Date(b.start_tid));
@@ -958,7 +697,7 @@ function rRes(c, mineOnly) {
     if(list.length === 0) { c.innerHTML = "<div class='text-center text-slate-500 mt-10'>Ingen reservasjoner funnet.</div>"; return; }
     list.forEach(r => {
         const active = new Date(r.start_tid) <= now;
-        const formalText = r.formal || "Ingen beskrivelse"; // Fallback text for safety
+        const formalText = r.formal || "Ingen beskrivelse"; 
         const isVerksted = formalText.includes("Verksted") || formalText.includes("Service");
         let borderCol = active ? (isVerksted ? "border-purple-500" : "border-red-500") : "border-yellow-500";
         let bgCol = active ? (isVerksted ? "bg-purple-900/10" : "bg-red-900/10") : "bg-yellow-900/10";
@@ -966,20 +705,10 @@ function rRes(c, mineOnly) {
         let icon = active ? "play_circle" : "schedule";
         let actionBtns = "";
         
-        // Buttons logic
-        if(isVerksted) { 
-            borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; 
-        }
-        
+        if(isVerksted) { borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; }
         if (!isVerksted) {
-            // Kiosk mode: No delete/edit unless owning session (which kiosk rarely does for persistent bookings)
-            // But if it's active, allow return
-            if (active && (mineOnly || r.bid === s.bid || s.kioskMode)) {
-                 actionBtns = `<button onclick="event.stopPropagation();subRet(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
-            }
-            else if (!active && (mineOnly || r.bid === s.bid) && !s.kioskMode) {
-                 actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
-            }
+            if (active && (mineOnly || r.bid === s.bid || s.kioskMode)) actionBtns = `<button onclick="event.stopPropagation();subRet(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
+            else if (!active && (mineOnly || r.bid === s.bid) && !s.kioskMode) actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
         }
         html += `<div onclick="book('${r.bil}',${r.id})" class="${bgCol} border-l-4 ${borderCol} p-4 rounded-r-xl border-y border-r border-slate-700/50 cursor-pointer relative flex justify-between items-center"><div><div class="flex items-center gap-2 mb-1"><span class="text-xs font-black ${active ? 'text-white' : 'text-slate-300'}">${r.bil}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${statusTxt}</span></div><div class="text-sm font-bold text-white mb-0.5">${formalText}</div><div class="text-xs text-slate-400 font-mono">${fmtDD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</div>${!mineOnly ? `<div class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${r.bid}</div>` : ''}</div><div class="flex flex-col items-end gap-2"><span class="material-icons-round text-slate-600 mb-1">${icon}</span>${actionBtns}</div></div>`;
     });
@@ -987,29 +716,15 @@ function rRes(c, mineOnly) {
 }
 
 function expressBook() { closeM('m-action', false); setExpDur(1); $id('exp-conf-form').value = ""; openM('m-express-list'); }
-function setExpDur(hours) { 
-    s.expDur = hours; 
-    $id('exp-slider').value = hours;
-    $id('exp-slider-val').innerText = `${hours} time${hours > 1 ? 'r' : ''}`;
-    handleExpSlider(hours);
-    renderExpressList(); 
-}
-
+function setExpDur(hours) { s.expDur = hours; $id('exp-slider').value = hours; $id('exp-slider-val').innerText = `${hours} time${hours > 1 ? 'r' : ''}`; handleExpSlider(hours); renderExpressList(); }
 function handleExpSlider(val) {
-    const hours = parseInt(val);
-    s.expDur = hours;
-    $id('exp-slider-val').innerText = `${hours} time${hours > 1 ? 'r' : ''}`;
-    const baseTime = new Date();
-    baseTime.setSeconds(0,0);
-    const endTime = new Date(baseTime.getTime() + hours * 3600000);
-    $id('exp-end-time').innerText = fmtT(endTime);
-    renderExpressList();
+    const hours = parseInt(val); s.expDur = hours; $id('exp-slider-val').innerText = `${hours} time${hours > 1 ? 'r' : ''}`;
+    const baseTime = new Date(); baseTime.setSeconds(0,0); const endTime = new Date(baseTime.getTime() + hours * 3600000); $id('exp-end-time').innerText = fmtT(endTime); renderExpressList();
 }
 
 function renderExpressList() {
     const list = $id('express-options'); list.innerHTML = "<div class='text-center text-slate-500 mt-4'>Laster...</div>";
-    const now = new Date(); now.setSeconds(0, 0); 
-    let endTime;
+    const now = new Date(); now.setSeconds(0, 0); let endTime;
     if(s.expDur === 0) { endTime = new Date(now); endTime.setHours(16, 0, 0, 0); if (endTime <= now) endTime.setHours(23, 59, 0, 0); } 
     else endTime = new Date(now.getTime() + s.expDur * 3600000);
     
@@ -1017,10 +732,8 @@ function renderExpressList() {
         if(b.status !== 'Aktiv' || s.h.includes(b.bil)) return false;
         return !s.r.some(r => { const rStart = new Date(r.start_tid); const rEnd = new Date(r.slutt_tid); return r.bil === b.bil && now < rEnd && endTime > rStart; });
     }).sort((a,b) => {
-        const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 };
-        const pA = catOrder[a.kategori] || 4; const pB = catOrder[b.kategori] || 4;
-        if (pA !== pB) return pA - pB;
-        return a.bil.localeCompare(b.bil);
+        const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 }; const pA = catOrder[a.kategori] || 4; const pB = catOrder[b.kategori] || 4;
+        if (pA !== pB) return pA - pB; return a.bil.localeCompare(b.bil);
     });
     list.innerHTML = "";
     if(availableCars.length === 0) { list.innerHTML = "<div class='text-center text-red-400 py-4 font-bold'>Ingen ledige biler.</div>"; return; }
@@ -1035,77 +748,47 @@ function renderExpressList() {
 
 function initExpressConfirm(car, start, end) {
     s.expCar = car; s.expStart = start; s.expEnd = end;
-    const b = s.c.find(x => x.bil === car);
-    let extra = "";
+    const b = s.c.find(x => x.bil === car); let extra = "";
     if(b) extra = `<br><span class="text-slate-500 font-normal text-[10px]">${b.kategori||''} ${b.ansvarlig ? '• '+b.ansvarlig : ''}</span>`;
     $id('exp-conf-txt').innerHTML = `Du velger ${car} ${extra}<br>for perioden NÅ - ${fmtT(end)}`;
-    $id('m-express-list').classList.add('hidden');
-    openM('m-express-conf');
+    $id('m-express-list').classList.add('hidden'); openM('m-express-conf');
 }
 
 async function confirmExpress() {
-    const formal = $id('exp-conf-form').value;
-    if(!formal) return showToast("Skriv formål", "error");
+    const formal = $id('exp-conf-form').value; if(!formal) return showToast("Skriv formål", "error");
     s.bid = s.u.split('@')[0].toUpperCase();
     const d = { bid: s.bid, formal: formal, start_tid: s.expStart.toISOString(), slutt_tid: s.expEnd.toISOString(), bil: s.expCar };
     const { error } = await _s.from('bookinger').insert([d]);
-    if(error) showToast("Feil: " + error.message, "error");
-    else { showToast("Bestilt!", "success"); closeM('m-express-conf'); load(); }
+    if(error) showToast("Feil: " + error.message, "error"); else { showToast("Bestilt!", "success"); closeM('m-express-conf'); load(); }
 }
 
 function book(car, id=null, st=null, en=null) { 
-    s.sel=[car]; 
-    s.editId=id; 
-    s.co=s.c.find(x=>x.bil===car); 
-    s.workshopMode = false;
-    const now = new Date(); now.setHours(0,0,0,0);
-    s.tlDay = 0; 
-    
-    // Clear fields
-    $id('b-bid').value = s.kioskMode ? "" : s.bid;
-    $id('b-form').value = "";
-    $id('b-extra').value = "";
-    
-    // Populate if editing
+    s.sel=[car]; s.editId=id; s.co=s.c.find(x=>x.bil===car); s.workshopMode = false;
+    const now = new Date(); now.setHours(0,0,0,0); s.tlDay = 0; 
+    $id('b-bid').value = s.kioskMode ? "" : s.bid; $id('b-form').value = ""; $id('b-extra').value = "";
     if(id) {
-        const r = s.r.find(x=>x.id===id); 
-        $id('b-bid').value=r.bid; 
-        
-        if(r.formal && r.formal.startsWith('Verksted: ')) { 
-            handleFormChange(true); // Toggle verksted mode
-            $id('b-verksted-desc').value = r.formal.substring(10); 
-        } else {
-            handleFormChange(false); // Ensure standard mode
-            // Attempt to split category and extra info
-            const knownCats = ["Møte", "IP", "Oppdrag"];
-            let found = false;
+        const r = s.r.find(x=>x.id===id); $id('b-bid').value=r.bid; 
+        if(r.formal && r.formal.startsWith('Verksted: ')) { handleFormChange(true); $id('b-verksted-desc').value = r.formal.substring(10); } 
+        else {
+            handleFormChange(false);
+            const knownCats = ["Møte", "IP", "Oppdrag"]; let found = false;
             if(r.formal) {
                 for(let cat of knownCats) {
                     if(r.formal === cat || r.formal.startsWith(cat + ": ")) {
-                        $id('b-form').value = cat;
-                        if(r.formal.length > cat.length + 2) {
-                            $id('b-extra').value = r.formal.substring(cat.length + 2);
-                        }
-                        found = true;
-                        break;
+                        $id('b-form').value = cat; if(r.formal.length > cat.length + 2) $id('b-extra').value = r.formal.substring(cat.length + 2);
+                        found = true; break;
                     }
                 }
             }
-            if(!found) {
-                $id('b-form').value = "Annet";
-                $id('b-extra').value = r.formal || "";
-            }
-            handleFormChange(); // Refresh UI for extra field
+            if(!found) { $id('b-form').value = "Annet"; $id('b-extra').value = r.formal || ""; }
+            handleFormChange();
         }
-
         const stD = new Date(r.start_tid); const enD = new Date(r.slutt_tid);
         setVal('b', 'st', stD); setVal('b', 'en', enD);
         const stDateOnly = new Date(stD); stDateOnly.setHours(0,0,0,0);
         s.tlDay = Math.round((stDateOnly - now) / 86400000); s.tlClick = 2; setupModal(car, 'Rediger');
     } else {
-        // New booking
-        handleFormChange(false);
-        $id('b-form').value = ""; 
+        handleFormChange(false); $id('b-form').value = ""; 
         if(st && en) {
             const stD = new Date(st); setVal('b', 'st', stD); setVal('b', 'en', new Date(en)); s.tlClick = 2;
             const stDateOnly = new Date(stD); stDateOnly.setHours(0,0,0,0);
@@ -1116,47 +799,25 @@ function book(car, id=null, st=null, en=null) {
 }
 
 function handleFormChange(forceVerksted = false) {
-    const verk = $id('b-form-verksted');
-    const extra = $id('d-extra');
-    const bForm = $id('b-form');
-    
+    const verk = $id('b-form-verksted'); const extra = $id('d-extra'); const bForm = $id('b-form');
     if (forceVerksted || bForm.value === 'Verksted') {
-        s.workshopMode = true;
-        bForm.value = 'Verksted'; // Ensure select is updated if called via toggle
-        verk.classList.remove('hidden'); verk.classList.add('flex');
-        extra.classList.add('hidden');
+        s.workshopMode = true; bForm.value = 'Verksted'; verk.classList.remove('hidden'); verk.classList.add('flex'); extra.classList.add('hidden');
     } else {
-        s.workshopMode = false;
-        verk.classList.add('hidden'); verk.classList.remove('flex');
-        
-        // Show Extra Input based on selection
+        s.workshopMode = false; verk.classList.add('hidden'); verk.classList.remove('flex');
         if(bForm.value) {
-            extra.classList.remove('hidden');
-            const lbl = $id('l-extra');
-            const inp = $id('b-extra');
-            if(bForm.value === 'Annet') {
-                lbl.innerText = "BESKRIVELSE (PÅKREVD)";
-                inp.placeholder = "Hva gjelder det?";
-            } else {
-                lbl.innerText = "TILLEGGSINFO (VALGFRITT)";
-                inp.placeholder = "F.eks. Sted, sak nr...";
-            }
-        } else {
-            extra.classList.add('hidden');
-        }
+            extra.classList.remove('hidden'); const lbl = $id('l-extra'); const inp = $id('b-extra');
+            if(bForm.value === 'Annet') { lbl.innerText = "BESKRIVELSE (PÅKREVD)"; inp.placeholder = "Hva gjelder det?"; } 
+            else { lbl.innerText = "TILLEGGSINFO (VALGFRITT)"; inp.placeholder = "F.eks. Sted, sak nr..."; }
+        } else extra.classList.add('hidden');
         $id('b-verksted-desc').value = "";
     }
 }
-
-// Removed old toggleVerkstedMode function as it is replaced by handleFormChange
 
 function setupModal(title, sub="Ny reservasjon") {
     const carObj = s.c.find(x => x.bil === title);
     let html = `<span class="truncate">${title}</span>`; 
     if (carObj) { html += `<div class="flex items-center gap-1 ml-2 flex-shrink-0">` + getBadgesHtml(carObj) + `</div>`; }
-    $id('b-title').innerHTML = html;
-    const subEl = $id('b-sub'); if(subEl) subEl.innerText=sub;
-    const act=s.r.find(r=>r.bil===title && new Date(r.start_tid)<=new Date() && new Date(r.slutt_tid)>=new Date());
+    $id('b-title').innerHTML = html; $id('b-sub').innerText=sub;
     $id('b-alert').classList.add('hidden'); $id('b-info').classList.add('hidden'); $id('btn-react').classList.add('hidden');
     const btnOk = $id('btn-ok'); btnOk.disabled = false; btnOk.classList.remove('opacity-50', 'cursor-not-allowed'); btnOk.innerText = "BEKREFT";
     const dateInputs = document.querySelector('#m-book .flex-col.gap-3.mb-4.bg-slate-800');
@@ -1169,77 +830,47 @@ function setupModal(title, sub="Ny reservasjon") {
         if(dateInputs) dateInputs.classList.add('hidden');
     }
     
-    // Warn if not my booking
     $id('b-owner-warn').classList.add('hidden');
     if(s.editId) {
         const booking = s.r.find(r => r.id === s.editId);
-        if(booking && booking.bid !== s.bid) {
-            $id('b-owner-warn').classList.remove('hidden');
-            $id('b-owner-name').innerText = booking.bid;
-        }
+        if(booking && booking.bid !== s.bid) { $id('b-owner-warn').classList.remove('hidden'); $id('b-owner-name').innerText = booking.bid; }
     }
     
-    // Kiosk Mode: Hide delete logic
-    const delBtn = $id('btn-del');
-    if(!s.editId || s.kioskMode) { 
-        delBtn.classList.add('hidden'); 
-    } else { 
-        delBtn.classList.remove('hidden'); 
-    }
+    const delBtn = $id('btn-del'); if(!s.editId || s.kioskMode) delBtn.classList.add('hidden'); else delBtn.classList.remove('hidden');
     
-    // Multi-car logic
     if(!s.editId) {
         const mc = $id('b-multi'); mc.innerHTML = "";
         s.c.forEach(b => { if(b.bil === title || b.status !== 'Aktiv' || s.h.includes(b.bil)) return; mc.innerHTML += `<button onclick="togMulti(this,'${b.bil}')" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-900">${b.bil}</button>`; });
-    } else {
-        $id('b-multi').innerHTML=""; 
-    }
+    } else $id('b-multi').innerHTML=""; 
 
-    openM('m-book'); 
-    renderTimeline(title, 'book'); 
-    setTimeout(() => scrollToView('book'), 50); 
-    check(); 
-    rFut(title); 
+    openM('m-book'); renderTimeline(title, 'book'); setTimeout(() => scrollToView('book'), 50); check(); rFut(title); 
     const instr = $id('b-instr'); if(instr) { if(s.tlClick === 0) instr.innerText = "Trykk starttid (A)"; else if(s.tlClick === 1) instr.innerText = "Velg SLUTTID (B)"; else instr.innerText = ""; }
 }
 
 function scrollToView(mode) {
     const el = $id(mode === 'search' ? 'ts-search' : 'ts-book'); if(!el) return;
     let slotIndex = 0; 
-    if (s.tlDay === 0) {
-        const now = new Date();
-        const currentSlot = now.getHours() * 2 + (now.getMinutes() >= 30 ? 1 : 0);
-        slotIndex = Math.max(0, currentSlot - 1);
-    } else {
-        slotIndex = (s.tlDay * 48) + 12;
-    }
-    const firstBlock = el.querySelector('.time-block'); 
-    if(firstBlock) { const width = firstBlock.offsetWidth + 2; el.scrollLeft = slotIndex * width; }
+    if (s.tlDay === 0) { const now = new Date(); const currentSlot = now.getHours() * 2 + (now.getMinutes() >= 30 ? 1 : 0); slotIndex = Math.max(0, currentSlot - 1); } 
+    else slotIndex = (s.tlDay * 48) + 12;
+    const firstBlock = el.querySelector('.time-block'); if(firstBlock) { const width = firstBlock.offsetWidth + 2; el.scrollLeft = slotIndex * width; }
 }
 
 function handleTimelineScroll(mode) {
-    const el = $id(mode === 'search' ? 'ts-search' : 'ts-book');
-    const disp = $id(mode === 'search' ? 's-tl-date-disp' : 'b-tl-date-disp');
+    const el = $id(mode === 'search' ? 'ts-search' : 'ts-book'); const disp = $id(mode === 'search' ? 's-tl-date-disp' : 'b-tl-date-disp');
     if(!el || !disp) return;
     const dayWidth = 44 * 48; const scrollX = el.scrollLeft; const dayIndex = Math.floor((scrollX + 100) / dayWidth); 
     const d = new Date(); d.setDate(d.getDate() + dayIndex);
     const today = new Date(); let text = fmtDD(d);
-    if(d.toDateString() === today.toDateString()) text = "I DAG";
-    else { const tom = new Date(); tom.setDate(today.getDate() + 1); if(d.toDateString() === tom.toDateString()) text = "I MORGEN"; }
+    if(d.toDateString() === today.toDateString()) text = "I DAG"; else { const tom = new Date(); tom.setDate(today.getDate() + 1); if(d.toDateString() === tom.toDateString()) text = "I MORGEN"; }
     disp.innerText = text;
 }
 
 function togMulti(el, c) { el.classList.toggle('selected'); if(s.sel.includes(c)) s.sel = s.sel.filter(x => x !== c); else s.sel.push(c); check(); }
 
 function renderTimeline(car, mode) {
-    const prefix = mode === 'search' ? 's' : 'b'; 
-    const el = $id(mode === 'search' ? 'timeline-search' : 'timeline'); 
-    if(!el) return;
-    el.innerHTML = "";
-    
-    const now = new Date(); const daysToRender = 14; const totalSlots = daysToRender * 48;
-    const startOfAll = new Date(); startOfAll.setHours(0,0,0,0);
-    const selSt = getVal(prefix, 'st'); const selEn = getVal(prefix, 'en');
+    const prefix = mode === 'search' ? 's' : 'b'; const el = $id(mode === 'search' ? 'timeline-search' : 'timeline'); if(!el) return;
+    el.innerHTML = ""; const now = new Date(); const daysToRender = 14; const totalSlots = daysToRender * 48;
+    const startOfAll = new Date(); startOfAll.setHours(0,0,0,0); const selSt = getVal(prefix, 'st'); const selEn = getVal(prefix, 'en');
     for (let i = 0; i < totalSlots; i++) { 
         const slot = document.createElement('div'); slot.className = 'time-block';
         const slotTime = new Date(startOfAll.getTime() + i * 1800000); const h = slotTime.getHours();
@@ -1248,41 +879,23 @@ function renderTimeline(car, mode) {
         let busy = false;
         if(mode === 'book' && car) { s.r.forEach(r => { if(r.bil === car && r.id != s.editId) { const rSt = new Date(r.start_tid); const rEn = new Date(r.slutt_tid); const slotEnd = new Date(slotTime.getTime() + 1800000); if (rSt < slotEnd && rEn > slotTime) busy = true; } }); }
         const slotEnd = new Date(slotTime.getTime() + 1800000);
-        if (slotEnd < now) slot.classList.add('past');
-        if (busy) slot.classList.add('busy');
+        if (slotEnd < now) slot.classList.add('past'); if (busy) slot.classList.add('busy');
         if (selSt && selEn && selSt < selEn) { if (Math.abs(selSt - slotTime) < 1000) slot.classList.add('start'); else if (Math.abs(selEn - slotEnd) < 1000) slot.classList.add('end'); else if (slotTime > selSt && slotEnd < selEn) slot.classList.add('range'); } 
         else if (selSt && Math.abs(selSt - slotTime) < 1000) slot.classList.add('start'); 
-        slot.onclick = (e) => { e.stopPropagation(); handleBlockClick(slotTime, mode); };
-        el.appendChild(slot);
+        slot.onclick = (e) => { e.stopPropagation(); handleBlockClick(slotTime, mode); }; el.appendChild(slot);
     }
-
-    // Add current time indicator line (AFTER blocks to be on top)
     const diffMs = now - startOfAll;
     if(diffMs >= 0 && diffMs < (daysToRender * 24 * 60 * 60 * 1000)) {
-        const diffMins = diffMs / 60000;
-        const slots = Math.floor(diffMins / 30);
-        const rem = diffMins % 30;
-        // 4px padding + slots * (42+2) + fraction of 42
+        const diffMins = diffMs / 60000; const slots = Math.floor(diffMins / 30); const rem = diffMins % 30;
         const left = 4 + (slots * 44) + ((rem/30)*42);
-        const line = document.createElement('div');
-        line.className = 'time-now-line';
-        line.style.left = `${left}px`;
-        el.appendChild(line);
+        const line = document.createElement('div'); line.className = 'time-now-line'; line.style.left = `${left}px`; el.appendChild(line);
     }
 }
 
 function handleBlockClick(time, mode) {
     const prefix = mode === 'search' ? 's' : 'b'; const now = new Date(); 
-    
-    // Logic update: Allow current slot
-    const currentSlotStart = new Date(now);
-    currentSlotStart.setSeconds(0,0);
-    currentSlotStart.setMinutes(Math.floor(currentSlotStart.getMinutes()/30)*30);
-
-    if(time < currentSlotStart) { 
-        time = currentSlotStart; 
-    }
-
+    const currentSlotStart = new Date(now); currentSlotStart.setSeconds(0,0); currentSlotStart.setMinutes(Math.floor(currentSlotStart.getMinutes()/30)*30);
+    if(time < currentSlotStart) time = currentSlotStart; 
     if (s.tlClick === 2) s.tlClick = 0;
     if (s.tlClick === 0) { setVal(prefix, 'st', time); setVal(prefix, 'en', time); s.tlClick = 1; } 
     else { const stTime = getVal(prefix, 'st'); if (time <= stTime) { setVal(prefix, 'st', time); setVal(prefix, 'en', time); } else { const endTime = new Date(time.getTime() + 1800000); setVal(prefix, 'en', endTime); s.tlClick = 2; } }
@@ -1322,68 +935,38 @@ async function logMsg(type, innhold, bil) { const { error } = await _s.from('mel
 async function confB() {
     if(s.co && s.co.status !== 'Aktiv') return showToast("Bilen er utilgjengelig", "error");
     const b=$id('b-bid').value.trim().toUpperCase();
-    
     let f="";
-    if(s.workshopMode) {
-        const desc = $id('b-verksted-desc').value.trim();
-        if(!desc) return showToast("Skriv hva som skal gjøres", "error");
-        f = "Verksted: " + desc;
-    } else {
-        const cat = $id('b-form').value;
-        const extra = $id('b-extra').value.trim();
-        
+    if(s.workshopMode) { const desc = $id('b-verksted-desc').value.trim(); if(!desc) return showToast("Skriv hva som skal gjøres", "error"); f = "Verksted: " + desc; } 
+    else {
+        const cat = $id('b-form').value; const extra = $id('b-extra').value.trim();
         if(!cat) return showToast("Velg oppdragstype", "error");
         if(cat === 'Annet' && !extra) return showToast("Skriv beskrivelse", "error");
-        
         f = cat + (extra ? ": " + extra : "");
     }
-
-    const st = getVal('b', 'st');
-    const en = getVal('b', 'en');
-
-    if(!b) return showToast("Mangler BID", "error"); 
-    if(!f) return showToast("Mangler formål", "error"); 
-    if(!s.sel.length) return showToast("Velg bil", "error"); 
-    if(!st || !en) return showToast("Velg tid", "error");
-    if(en <= st) return showToast("Ugyldig tid", "error");
-    
-    if(s.workshopMode) logMsg('Planlagt verksted', f, s.sel[0]);
-    else localStorage.setItem('lastFormal', f);
-
+    const st = getVal('b', 'st'); const en = getVal('b', 'en');
+    if(!b) return showToast("Mangler BID", "error"); if(!f) return showToast("Mangler formål", "error"); if(!s.sel.length) return showToast("Velg bil", "error"); if(!st || !en) return showToast("Velg tid", "error"); if(en <= st) return showToast("Ugyldig tid", "error");
+    if(s.workshopMode) logMsg('Planlagt verksted', f, s.sel[0]); else localStorage.setItem('lastFormal', f);
     const d = { bid:b, formal:f, start_tid:st.toISOString(), slutt_tid:en.toISOString() };
     let error;
     if(s.editId) { const { error: err } = await _s.from('bookinger').update(d).eq('id',s.editId); error = err; } 
     else { const { error: err } = await _s.from('bookinger').insert(s.sel.map(c=>({...d,bil:c}))); error = err; }
-
-    if(error) showToast("Feil: " + error.message, "error");
-    else { showToast("Lagret!", "success"); closeM('m-book'); load(); }
+    if(error) showToast("Feil: " + error.message, "error"); else { showToast("Lagret!", "success"); closeM('m-book'); load(); }
 }
 
 async function delB(id) { 
-    const delId = id || s.editId;
-    const r = s.r.find(x => x.id === delId);
-    if(!r) return;
+    const delId = id || s.editId; const r = s.r.find(x => x.id === delId); if(!r) return;
     const txt = `Vil du slette reservasjon for ${r.bil}?\n\nTid: ${fmtDD(r.start_tid)} kl. ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}\nFormål: ${r.formal}`;
     if(confirm(txt)) { await _s.from('bookinger').delete().eq('id', delId); if(s.editId && s.activeModal === 'm-book') closeM('m-book'); load(); showToast("Slettet", "info"); } 
 }
 
 function rFut(c) {
-    const l=$id('fut-l'); l.innerHTML="";
-    const now=new Date();
+    const l=$id('fut-l'); l.innerHTML=""; const now=new Date();
     const f=s.r.filter(r=>r.bil===c && new Date(r.start_tid)>now).sort((a,b)=>new Date(a.start_tid)-new Date(b.start_tid));
     if(!f.length) l.innerHTML="<div class='text-slate-500 italic text-center'>Ingen kommende turer.</div>";
     f.forEach(r => {
         const div = document.createElement('div');
         div.className = "bg-slate-800 p-3 rounded-lg border border-slate-700 flex justify-between items-center cursor-pointer mb-2 hover:bg-slate-700 transition-colors";
-        div.innerHTML = `
-            <div class="flex flex-col">
-                <span class="text-xs text-white font-bold">${fmtDD(r.start_tid)}</span>
-                <span class="text-[10px] text-slate-400 font-mono">${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</span>
-                <span class="text-[10px] text-slate-500 italic mt-1">${r.formal} (${r.bid})</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="material-icons-round text-blue-400 text-sm bg-blue-900/30 p-1 rounded-full">edit</span>
-            </div>`;
+        div.innerHTML = `<div class="flex flex-col"><span class="text-xs text-white font-bold">${fmtDD(r.start_tid)}</span><span class="text-[10px] text-slate-400 font-mono">${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</span><span class="text-[10px] text-slate-500 italic mt-1">${r.formal} (${r.bid})</span></div><div class="flex items-center gap-3"><span class="material-icons-round text-blue-400 text-sm bg-blue-900/30 p-1 rounded-full">edit</span></div>`;
         div.onclick = (e) => { e.stopPropagation(); s.workshopMode = (r.formal || "").startsWith('Verksted: '); book(r.bil, r.id); };
         l.appendChild(div);
     });
@@ -1391,340 +974,112 @@ function rFut(c) {
 
 function sMode() { 
     s.tlClick = 0; s.tlDay = 0; const now = new Date(); if(now.getHours() >= 22) s.tlDay = 1;
-    closeM('m-action', false);
-    openM('m-search'); 
-    setVal('s', 'st', null);
-    setVal('s', 'en', null);
-    renderTimeline(null, 'search');
-    setTimeout(() => scrollToView('search'), 50); 
+    closeM('m-action', false); openM('m-search'); setVal('s', 'st', null); setVal('s', 'en', null); renderTimeline(null, 'search'); setTimeout(() => scrollToView('search'), 50); 
 }
 
 function findC() {
-    const st = getVal('s', 'st');
-    const en = getVal('s', 'en');
-    if(!st || !en) return showToast("Velg tidsrom", "error");
-    const l=$id('s-res'); l.innerHTML=""; l.classList.remove('hidden');
-    if(st >= en) return showToast("Velg slutt-tid", "error");
-
+    const st = getVal('s', 'st'); const en = getVal('s', 'en'); if(!st || !en) return showToast("Velg tidsrom", "error");
+    const l=$id('s-res'); l.innerHTML=""; l.classList.remove('hidden'); if(st >= en) return showToast("Velg slutt-tid", "error");
     const cars = s.c.filter(b => b.status==='Aktiv' && !s.h.includes(b.bil));
-    
-    const available = [];
-    const busy = [];
+    const available = []; const busy = [];
+    cars.forEach(b => { const collision = s.r.find(r => r.bil === b.bil && st < new Date(r.slutt_tid) && en > new Date(r.start_tid)); if (collision) { b.collision = collision; busy.push(b); } else available.push(b); });
+    const sorter = (a,b) => { const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 }; const pA = catOrder[a.kategori] || 4; const pB = catOrder[b.kategori] || 4; if (pA !== pB) return pA - pB; return a.bil.localeCompare(b.bil); };
+    available.sort(sorter); busy.sort(sorter);
 
-    cars.forEach(b => {
-        // Find collision
-        const collision = s.r.find(r => r.bil === b.bil && st < new Date(r.slutt_tid) && en > new Date(r.start_tid));
-        if (collision) {
-            b.collision = collision; // Store for display
-            busy.push(b);
-        } else {
-            available.push(b);
-        }
-    });
-
-    // Sort functions (reuse existing sort logic)
-    const sorter = (a,b) => {
-        const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 };
-        const pA = catOrder[a.kategori] || 4;
-        const pB = catOrder[b.kategori] || 4;
-        if (pA !== pB) return pA - pB;
-        return a.bil.localeCompare(b.bil);
-    };
-
-    available.sort(sorter);
-    busy.sort(sorter);
-
-    if(available.length === 0 && busy.length === 0) { 
-        l.innerHTML="<div class='text-center text-red-400'>Ingen biler funnet.</div>"; 
-        return; 
-    }
-
-    // Render Available
+    if(available.length === 0 && busy.length === 0) { l.innerHTML="<div class='text-center text-red-400'>Ingen biler funnet.</div>"; return; }
     available.forEach(b => {
-        l.innerHTML += `
-        <button onclick="found('${b.bil}')" class="w-full bg-slate-800 p-3 rounded-xl flex justify-between border border-emerald-900/50 text-white font-bold mb-2 items-center overflow-hidden shadow-lg">
-            <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
-                <span class="block flex-shrink-0 text-lg">${b.bil}</span>
-                <div class="flex items-center gap-1 overflow-hidden">${getBadgesHtml(b, true, true, true)}</div>
-            </div>
-            <span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded flex-shrink-0 ml-2 border border-emerald-900/50">LEDIG</span>
-        </button>`;
+        l.innerHTML += `<button onclick="found('${b.bil}')" class="w-full bg-slate-800 p-3 rounded-xl flex justify-between border border-emerald-900/50 text-white font-bold mb-2 items-center overflow-hidden shadow-lg"><div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0"><span class="block flex-shrink-0 text-lg">${b.bil}</span><div class="flex items-center gap-1 overflow-hidden">${getBadgesHtml(b, true, true, true)}</div></div><span class="text-emerald-400 text-xs bg-emerald-900/30 px-2 py-1 rounded flex-shrink-0 ml-2 border border-emerald-900/50">LEDIG</span></button>`;
     });
-
-    // Render Busy (if any)
     if (busy.length > 0) {
         if (available.length > 0) l.innerHTML += `<div class="text-center text-xs text-slate-500 font-bold uppercase my-3 tracking-widest">- Opptatt i tidsrommet -</div>`;
-        
-        busy.forEach(b => {
-            const r = b.collision;
-            const timeTxt = `${fmtT(r.start_tid)}-${fmtT(r.slutt_tid)}`;
-            l.innerHTML += `
-            <button onclick="found('${b.bil}')" class="w-full bg-slate-800/40 p-3 rounded-xl flex justify-between border border-red-900/30 text-slate-300 font-bold mb-2 items-center overflow-hidden opacity-80">
-                <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0">
-                    <span class="block flex-shrink-0 text-lg decoration-slate-500 line-through decoration-2">${b.bil}</span>
-                    <div class="flex items-center gap-1 overflow-hidden opacity-50">${getBadgesHtml(b, true, true, true)}</div>
-                </div>
-                <div class="flex flex-col items-end">
-                    <span class="text-red-400 text-[10px] bg-red-900/20 px-2 py-0.5 rounded border border-red-900/30 mb-0.5">OPPTATT</span>
-                    <span class="text-[10px] font-mono text-slate-400">${timeTxt}</span>
-                </div>
-            </button>`;
-        });
+        busy.forEach(b => { const r = b.collision; const timeTxt = `${fmtT(r.start_tid)}-${fmtT(r.slutt_tid)}`; l.innerHTML += `<button onclick="found('${b.bil}')" class="w-full bg-slate-800/40 p-3 rounded-xl flex justify-between border border-red-900/30 text-slate-300 font-bold mb-2 items-center overflow-hidden opacity-80"><div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0"><span class="block flex-shrink-0 text-lg decoration-slate-500 line-through decoration-2">${b.bil}</span><div class="flex items-center gap-1 overflow-hidden opacity-50">${getBadgesHtml(b, true, true, true)}</div></div><div class="flex flex-col items-end"><span class="text-red-400 text-[10px] bg-red-900/20 px-2 py-0.5 rounded border border-red-900/30 mb-0.5">OPPTATT</span><span class="text-[10px] font-mono text-slate-400">${timeTxt}</span></div></button>`; });
     }
 }
 
-function found(c) { 
-    const st = getVal('s', 'st');
-    const en = getVal('s', 'en');
-    closeM('m-search', false); 
-    book(c, null, st, en); 
-}
-
+function found(c) { const st = getVal('s', 'st'); const en = getVal('s', 'en'); closeM('m-search', false); book(c, null, st, en); }
 function ret(id, c, type='standard') { s.rid=id; s.rc=c; s.rtype=type; $id('r-name').innerText=c; $id('r-comm').value=""; openM('m-ret'); }
-
-async function subRet(id, c) {
-    if(id && c) { s.rid = id; s.rc = c; }
-    const cm=$id('r-comm').value || ""; 
-    const d={slutt_tid:new Date().toISOString()}; 
-    if(cm) d.kommentar=cm;
-    await _s.from('bookinger').update(d).eq('id',s.rid);
-    if(cm) { await _s.from('biler').update({kommentar:cm}).eq('bil',s.rc); logMsg('Avvik ved levering', cm, s.rc); }
-    closeM('m-ret'); 
-    load(); 
-    showToast("Levert!", "success");
-}
-
+async function subRet(id, c) { if(id && c) { s.rid = id; s.rc = c; } const cm=$id('r-comm').value || ""; const d={slutt_tid:new Date().toISOString()}; if(cm) d.kommentar=cm; await _s.from('bookinger').update(d).eq('id',s.rid); if(cm) { await _s.from('biler').update({kommentar:cm}).eq('bil',s.rc); logMsg('Avvik ved levering', cm, s.rc); } closeM('m-ret'); load(); showToast("Levert!", "success"); }
 async function react() { if(confirm(`Vil du gjøre ${s.co.bil} tilgjengelig igjen?\nNåværende status: ${s.co.status}`)) { await _s.from('biler').update({status:'Aktiv',kommentar:null}).eq('id',s.co.id); closeM('m-book'); load(); showToast("Bil aktivert", "success"); } }
 
 function rAdm(c) {
     let html = `<div class="flex flex-wrap gap-2 mb-4 bg-slate-800 p-3 rounded-xl border border-slate-700">`;
-    s.c.forEach(b => {
-       let colorClass = 'pill-gray'; if (b.status === 'Aktiv') { if (b.kommentar) colorClass = 'pill-yellow'; else colorClass = 'pill-green'; }
-       const carJson = JSON.stringify(b).replace(/"/g, '&quot;');
-       // FIX: Use ID instead of JSON object to prevent onclick issues
-       html += `<button onclick="openAdmEdit({id: '${b.id}'})" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold">${b.bil}</button>`;
-    });
-    
-    // SJEKK: Er bruker admin?
+    s.c.forEach(b => { let colorClass = 'pill-gray'; if (b.status === 'Aktiv') { if (b.kommentar) colorClass = 'pill-yellow'; else colorClass = 'pill-green'; } html += `<button onclick="openAdmEdit({id: '${b.id}'})" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold">${b.bil}</button>`; });
     const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase());
-    
-    if(isAdm) {
-        html += `<button onclick="addC()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-blue-900 text-blue-200 border-blue-700">+ NY</button>`;
-    } else {
-        html += `<button disabled class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-600 border-slate-700 opacity-50 cursor-not-allowed">+ NY</button>`;
-    }
-    
-    html += `<button onclick="showAdmHelp()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300 border-slate-500">?</button></div>`;
-    html += `<div class="text-center text-slate-500 italic mt-10">Trykk på en bil for å endre</div>`;
-    c.innerHTML = html;
+    if(isAdm) html += `<button onclick="addC()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-blue-900 text-blue-200 border-blue-700">+ NY</button>`; else html += `<button disabled class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-600 border-slate-700 opacity-50 cursor-not-allowed">+ NY</button>`;
+    html += `<button onclick="showAdmHelp()" class="car-pill px-3 py-1 rounded-full text-xs font-bold bg-slate-700 text-slate-300 border-slate-500">?</button></div><div class="text-center text-slate-500 italic mt-10">Trykk på en bil for å endre</div>`; c.innerHTML = html;
 }
 
 function openAdmEdit(params) {
-    let b = null;
-    
-    if(params && params.id) {
-        // Find car by ID from the global state s.c
-        b = s.c.find(car => car.id == params.id);
-    }
-    
-    s.admCar = b ? b.bil : null;
-    s.admId = b ? b.id : null; // If null, it's a new car
-    
-    // Reset or fill form
-    $id('adm-title').innerText = b ? "Rediger Bil" : "Ny Bil";
-    $id('adm-name').value = b ? b.bil : "";
-    $id('adm-resp').value = b && b.ansvarlig ? b.ansvarlig : "";
-    $id('adm-cat').value = b && b.kategori ? b.kategori : "Uniformert";
-    $id('adm-stat').value = b ? b.status : "Aktiv";
-    $id('adm-comm').value = b && b.kommentar ? b.kommentar : "";
-    $id('adm-info').value = b && b.intern_info ? b.intern_info : "";
-
-    // Visibility logic for delete button
-    const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase());
-    const delBtn = $id('btn-adm-del');
-    
-    if(isAdm && s.admId) { // Only show delete if user is admin AND it's an existing car
-        delBtn.classList.remove('hidden');
-    } else {
-        delBtn.classList.add('hidden');
-    }
-    
-    // Store old car name for rename logic
-    s.oldAdmCarName = s.admCar;
-
-    openM('m-admin-edit');
+    let b = null; if(params && params.id) b = s.c.find(car => car.id == params.id);
+    s.admCar = b ? b.bil : null; s.admId = b ? b.id : null; 
+    $id('adm-title').innerText = b ? "Rediger Bil" : "Ny Bil"; $id('adm-name').value = b ? b.bil : ""; $id('adm-resp').value = b && b.ansvarlig ? b.ansvarlig : ""; $id('adm-cat').value = b && b.kategori ? b.kategori : "Uniformert"; $id('adm-stat').value = b ? b.status : "Aktiv"; $id('adm-comm').value = b && b.kommentar ? b.kommentar : ""; $id('adm-info').value = b && b.intern_info ? b.intern_info : "";
+    const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase()); const delBtn = $id('btn-adm-del'); if(isAdm && s.admId) delBtn.classList.remove('hidden'); else delBtn.classList.add('hidden'); s.oldAdmCarName = s.admCar; openM('m-admin-edit');
 }
 
 async function saveAdmCar() {
-    const name = $id('adm-name').value.toUpperCase();
-    const resp = $id('adm-resp').value; 
-    const cat = $id('adm-cat').value;
-    const stat = $id('adm-stat').value;
-    const comm = $id('adm-comm').value;
-    const info = $id('adm-info').value;
-    
+    const name = $id('adm-name').value.toUpperCase(); const resp = $id('adm-resp').value; const cat = $id('adm-cat').value; const stat = $id('adm-stat').value; const comm = $id('adm-comm').value; const info = $id('adm-info').value;
     if(!name) return showToast("Mangler navn", "error");
-
     const data = { bil: name, ansvarlig: resp, kategori: cat, status: stat, kommentar: comm, intern_info: info };
-
     let error;
     if (s.admId) {
-        // UPDATE existing - FIRST update bookings, THEN car
-        if (s.oldAdmCarName && s.oldAdmCarName !== name) {
-             const { error: bookingErr } = await _s.from('bookinger').update({ bil: name }).eq('bil', s.oldAdmCarName);
-             if (bookingErr) console.error("Feil ved oppdatering av bookinger:", bookingErr);
-             else console.log(`Oppdaterte bookinger fra ${s.oldAdmCarName} til ${name}`);
-        }
-
-        const { error: err } = await _s.from('biler').update(data).eq('id', s.admId);
-        error = err;
-        
-        if(!err) {
-             if(stat !== 'Aktiv') logMsg('Statusendring', `Ny status: ${stat}`, name);
-             if(comm) logMsg('Ny kommentar', comm, name);
-        }
-    } else {
-        // INSERT new
-        const { error: err } = await _s.from('biler').insert([data]);
-        error = err;
-        if(!err) logMsg('Ny bil opprettet', 'Lagt til i systemet', name);
-    }
-    
-    if(error) {
-        showToast("Feil: " + error.message, "error");
-    } else {
-        showToast("Lagret!", "success");
-        closeM('m-admin-edit');
-        load(); // Reload full list to show new car
-    }
+        if (s.oldAdmCarName && s.oldAdmCarName !== name) { const { error: bookingErr } = await _s.from('bookinger').update({ bil: name }).eq('bil', s.oldAdmCarName); if (bookingErr) console.error("Feil ved oppdatering av bookinger:", bookingErr); }
+        const { error: err } = await _s.from('biler').update(data).eq('id', s.admId); error = err;
+        if(!err) { if(stat !== 'Aktiv') logMsg('Statusendring', `Ny status: ${stat}`, name); if(comm) logMsg('Ny kommentar', comm, name); }
+    } else { const { error: err } = await _s.from('biler').insert([data]); error = err; if(!err) logMsg('Ny bil opprettet', 'Lagt til i systemet', name); }
+    if(error) showToast("Feil: " + error.message, "error"); else { showToast("Lagret!", "success"); closeM('m-admin-edit'); load(); }
 }
 
 async function updateInternalNote(id, val) { const { error } = await _s.from('biler').update({ intern_info: val }).eq('id', id); if(error) showToast("Feil ved lagring", "error"); else showToast("Intern info lagret", "success"); }
 function showAdmHelp() { showToast("Grønn: OK. Gul: Har kommentar. Grå: Ute av drift.", "info"); }
-function addC() { openAdmEdit(null); } // Modified to use modal
+function addC() { openAdmEdit(null); } 
 async function delC(id,n) { if(confirm("Slette?")) { await _s.from('bookinger').delete().eq('bil',n); await _s.from('biler').delete().eq('id',id); s.admCar=null; closeM('m-admin-edit'); load(); showToast("Slettet", "info"); } }
 
 function rLog(c) {
-    if(!s.fullLog) {
-        c.innerHTML = "<div class='text-center text-slate-500 mt-10'>Henter historikk...</div>";
-        return;
-    }
-    const l = s.fullLog; 
-    c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV (HISTORIKK)</button><div class="space-y-3">` + l.map(h => {
+    if(!s.fullLog) { c.innerHTML = "<div class='text-center text-slate-500 mt-10'>Henter historikk...</div>"; return; }
+    const l = s.fullLog; c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV (HISTORIKK)</button><div class="space-y-3">` + l.map(h => {
         const dateOpt = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }; const dateStr = new Date(h.start_tid).toLocaleDateString('no-NO', dateOpt);
         return `<div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-sm"><div class="flex justify-between font-bold text-white mb-1"><span>${h.bil}</span><span class="text-slate-400">${h.bid}</span></div><div class="text-slate-400 text-xs mb-1 capitalize">${dateStr} | ${fmtT(h.start_tid)}-${fmtT(h.slutt_tid)}</div><div class="text-slate-300 italic">"${h.formal}"</div>${h.kommentar?`<div class="mt-1 text-amber-400 bg-amber-900/20 px-2 py-1 rounded inline-block text-xs">${h.kommentar}</div>`:''}</div>`;
     }).join('') + `</div>`;
 }
 
 async function csv() { 
-    if(!s.fullLog) {
-        showToast("Laster data...", "info");
-        await loadFullHistory();
-    }
+    if(!s.fullLog) { showToast("Laster data...", "info"); await loadFullHistory(); }
     const t = "Bil,Bruker,Start,Slutt,Formål,Merknad\n" + s.fullLog.map(x => `${x.bil},${x.bid},${fmtD(x.start_tid)} ${fmtT(x.start_tid)},${fmtD(x.slutt_tid)} ${fmtT(x.slutt_tid)},"${x.formal}",${x.kommentar||''}`).join('\n'); 
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv;charset=utf-8;' })); a.download = "logg.csv"; a.click(); 
 }
 
 function rSet(c) {
     let p = s.c.map(b => `<button onclick="tVis('${b.bil}')" class="px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${s.h.includes(b.bil)?'bg-slate-800 text-slate-500 border-slate-700 opacity-50':'bg-blue-600 text-white border-blue-500 shadow-md'}">${b.bil}</button>`).join('');
-    
     c.innerHTML = `
-    <!-- Card 1: Min Profil -->
-    <div class="settings-card">
-        <div class="settings-header"><span class="material-icons-round text-blue-500">person</span> Min Profil</div>
-        <div class="flex flex-col gap-1">
-             <label class="text-[10px] text-slate-500 font-bold uppercase">Innlogget som</label>
-             <p class="text-xl font-black text-white tracking-tight">${s.bid}</p>
-             <p class="text-xs text-slate-500 font-mono">${s.u}</p>
-        </div>
-    </div>
-
-    <!-- Card 2: Visning -->
+    <div class="settings-card"><div class="settings-header"><span class="material-icons-round text-blue-500">person</span> Min Profil</div><div class="flex flex-col gap-1"><label class="text-[10px] text-slate-500 font-bold uppercase">Innlogget som</label><p class="text-xl font-black text-white tracking-tight">${s.bid}</p><p class="text-xs text-slate-500 font-mono">${s.u}</p></div></div>
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-purple-500">visibility</span> Visningsvalg</div>
-        
         <div class="space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
-                <div class="flex flex-col">
-                    <span class="text-sm text-slate-200 font-medium">Større tekst og knapper</span>
-                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Øker størrelsen på elementer for bedre lesbarhet på mobil.</p>
-                </div>
-                <input type="checkbox" onchange="togUiSize(this.checked)" ${s.uiLarge?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
-            </div>
-             <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
-                <div class="flex flex-col">
-                    <span class="text-sm text-slate-200 font-medium">Vis biltyper (Piller)</span>
-                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Viser type bil (Uniformert/Sivil) som merker i oversikten.</p>
-                </div>
-                <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
-            </div>
-             <div class="flex items-center justify-between">
-                <div class="flex flex-col">
-                    <span class="text-sm text-slate-200 font-medium">Vis bilansvarlig</span>
-                    <p class="text-[10px] text-slate-500 mt-1 leading-tight">Viser hvem som er ansvarlig for hver bil i listen.</p>
-                </div>
-                <input type="checkbox" onchange="togVis('visResp', this.checked)" ${s.visResp?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
-            </div>
-            
-            <div class="pt-2">
-                <p class="text-[10px] text-slate-500 font-bold uppercase mb-3">Velg biler som skal vises</p>
-                <div class="flex flex-wrap gap-2">
-                    ${p}
-                </div>
-            </div>
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3"><div class="flex flex-col"><span class="text-sm text-slate-200 font-medium">Større tekst og knapper</span><p class="text-[10px] text-slate-500 mt-1 leading-tight">Øker størrelsen på elementer for bedre lesbarhet på mobil.</p></div><input type="checkbox" onchange="togUiSize(this.checked)" ${s.uiLarge?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0"></div>
+             <div class="flex items-center justify-between border-b border-slate-700/50 pb-3"><div class="flex flex-col"><span class="text-sm text-slate-200 font-medium">Vis biltyper (Piller)</span><p class="text-[10px] text-slate-500 mt-1 leading-tight">Viser type bil (Uniformert/Sivil) som merker i oversikten.</p></div><input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0"></div>
+             <div class="flex items-center justify-between"><div class="flex flex-col"><span class="text-sm text-slate-200 font-medium">Vis bilansvarlig</span><p class="text-[10px] text-slate-500 mt-1 leading-tight">Viser hvem som er ansvarlig for hver bil i listen.</p></div><input type="checkbox" onchange="togVis('visResp', this.checked)" ${s.visResp?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0"></div>
+            <div class="pt-2"><p class="text-[10px] text-slate-500 font-bold uppercase mb-3">Velg biler som skal vises</p><div class="flex flex-wrap gap-2">${p}</div></div>
         </div>
     </div>
-
-    <!-- Card 3: Varsling -->
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-amber-500">notifications</span> Varsling</div>
-        <div class="flex items-center justify-between mb-4">
-            <span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span>
-            <input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-6 h-6 accent-amber-600 rounded cursor-pointer">
-        </div>
-        <div class="flex gap-2">
-            <input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white focus:border-amber-500 outline-none transition-colors">
-            <button onclick="updEm()" class="bg-amber-600 hover:bg-amber-500 px-4 rounded-xl text-white font-bold text-xs shadow-lg transition-transform active:scale-95">LAGRE</button>
-        </div>
+        <div class="flex items-center justify-between mb-4"><span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span><input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-6 h-6 accent-amber-600 rounded cursor-pointer"></div>
+        <div class="flex gap-2"><input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white focus:border-amber-500 outline-none transition-colors"><button onclick="updEm()" class="bg-amber-600 hover:bg-amber-500 px-4 rounded-xl text-white font-bold text-xs shadow-lg transition-transform active:scale-95">LAGRE</button></div>
         <p class="text-[10px] text-slate-500 mt-2">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p>
     </div>
-
-    <!-- Card 4: Info -->
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-emerald-500">info</span> Hjelp & Info</div>
         <div class="space-y-2">
-            <button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-slate-700/50 p-3 rounded-xl font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors">
-                <span class="material-icons-round text-sm">auto_stories</span> Åpne Brukermanual
-            </button>
-            <button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-xl font-bold border border-blue-800 flex items-center justify-center gap-2">
-                <span class="material-icons-round text-sm">download</span> Installer som App
-            </button>
-            <a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-slate-700/50 p-3 rounded-xl font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors text-sm no-underline">
-                <span class="material-icons-round text-sm">mail</span> Melde feil
-            </a>
+            <button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-slate-700/50 p-3 rounded-xl font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors"><span class="material-icons-round text-sm">auto_stories</span> Åpne Brukermanual</button>
+            <button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-xl font-bold border border-blue-800 flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> Installer som App</button>
+            <a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-slate-700/50 p-3 rounded-xl font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors text-sm no-underline"><span class="material-icons-round text-sm">mail</span> Melde feil</a>
         </div>
     </div>
-    
-    <!-- Admin Section -->
     <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800">
         <h2 class="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2"><span class="material-icons-round text-slate-500">admin_panel_settings</span> Administrasjon</h2>
-        <div class="mb-6">
-            <p class="text-[10px] text-slate-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p>
-            <div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div>
-            <div class="flex gap-2">
-                <input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white outline-none focus:border-blue-500">
-                <button onclick="addAdminEmail()" class="bg-slate-700 border border-slate-600 px-4 rounded-xl text-white font-bold text-xs hover:bg-slate-600">LEGG TIL</button>
-            </div>
-        </div>
-        <details>
-            <summary class="text-xs font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors p-2 rounded hover:bg-slate-800">Avansert: Slett data <span class="material-icons-round text-sm">expand_more</span></summary>
-            <div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30">
-                <p class="text-[10px] text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p>
-                <button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-xl font-bold hover:bg-red-800 border border-red-700 shadow-lg text-xs">SLETT ALLE DATA</button>
-            </div>
-        </details>
-    </div>
-    `;
+        <div class="mb-6"><p class="text-[10px] text-slate-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p><div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div><div class="flex gap-2"><input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white outline-none focus:border-blue-500"><button onclick="addAdminEmail()" class="bg-slate-700 border border-slate-600 px-4 rounded-xl text-white font-bold text-xs hover:bg-slate-600">LEGG TIL</button></div></div>
+        <details><summary class="text-xs font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors p-2 rounded hover:bg-slate-800">Avansert: Slett data <span class="material-icons-round text-sm">expand_more</span></summary><div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30"><p class="text-[10px] text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p><button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-xl font-bold hover:bg-red-800 border border-red-700 shadow-lg text-xs">SLETT ALLE DATA</button></div></details>
+    </div>`;
     renderAdminEmails();
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
 }
@@ -1746,50 +1101,18 @@ async function nuke() { if(prompt("Skriv NULLSTILL for å slette alle data")==="
 function fmtT(d) { return new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function fmtD(d) { return new Date(d).toLocaleDateString([],{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 function fmtDD(dStr) { 
-    const d = new Date(dStr);
-    const day = d.toLocaleDateString([], {weekday: 'short'}).replace('.','');
-    const date = d.toLocaleDateString([], {day:'2-digit', month:'2-digit'});
-    return `${day} ${date}`;
+    const d = new Date(dStr); const day = d.toLocaleDateString([], {weekday: 'short'}).replace('.',''); const date = d.toLocaleDateString([], {day:'2-digit', month:'2-digit'}); return `${day} ${date}`;
 }
 
-// Function to enable drag scrolling
+document.addEventListener('DOMContentLoaded', () => { enableDragScroll('ts-book'); enableDragScroll('ts-search'); });
 function enableDragScroll(id) {
-    const ele = document.getElementById(id);
-    if(!ele) return;
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-
-    ele.addEventListener('mousedown', (e) => {
-        isDown = true;
-        ele.classList.add('active'); // CSS class for grabbing cursor
-        startX = e.pageX - ele.offsetLeft;
-        scrollLeft = ele.scrollLeft;
-    });
+    const ele = document.getElementById(id); if(!ele) return;
+    let isDown = false; let startX; let scrollLeft;
+    ele.addEventListener('mousedown', (e) => { isDown = true; ele.classList.add('active'); startX = e.pageX - ele.offsetLeft; scrollLeft = ele.scrollLeft; });
     ele.addEventListener('mouseleave', () => { isDown = false; ele.classList.remove('active'); });
     ele.addEventListener('mouseup', () => { isDown = false; ele.classList.remove('active'); });
-    ele.addEventListener('mousemove', (e) => {
-        if(!isDown) return;
-        e.preventDefault(); // Stop text selection while dragging
-        const x = e.pageX - ele.offsetLeft;
-        const walk = (x - startX) * 2; // Scroll-fast multiplier
-        ele.scrollLeft = scrollLeft - walk;
-    });
+    ele.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - ele.offsetLeft; const walk = (x - startX) * 2; ele.scrollLeft = scrollLeft - walk; });
 }
-
-// Initialize drag scroll on load (safe for mobile too as it uses mouse events)
-document.addEventListener('DOMContentLoaded', () => {
-    // Add drag scroll to both possible timelines
-    // Note: The elements might be hidden initially but exist in DOM
-    // For dynamically shown modals, we might want to re-init or just rely on DOM existence
-    // Since index.html structure is static, we can attach listeners once.
-    // However, setupModal() might re-render innerHTML of timeline container? 
-    // No, renderTimeline() clears innerHTML but the container #ts-book / #ts-search remains.
-    
-    // We can call this, but the elements need to exist. They do in the static HTML.
-    enableDragScroll('ts-book');
-    enableDragScroll('ts-search');
-});
 
 setInterval(load,10000);
 </script>
