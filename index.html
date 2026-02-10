@@ -269,8 +269,20 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 <!-- HOVEDAPP -->
 <div id="app" class="hidden h-full flex flex-col relative w-full">
  
+ <!-- VARSLING BANNER (Nytt) -->
+ <div id="push-msg" class="hidden w-full bg-blue-600/90 backdrop-blur text-white p-4 z-[40] shadow-xl border-b border-blue-400/30">
+   <div class="flex justify-between items-start max-w-xl mx-auto">
+     <div class="flex-1">
+       <p class="font-bold text-sm mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">notifications_active</span> Ønsker du varsler?</p>
+       <p class="text-xs text-blue-100 leading-relaxed mb-3">Du kan aktivere varsler knyttet til dine reservasjoner. Varsler kan slås av og på i innstillingene.</p>
+       <button onclick="enablePushFromBanner()" class="bg-white text-blue-600 px-4 py-2 rounded-lg text-xs font-black shadow-sm active:scale-95 transition-transform">AKTIVER VARSLER</button>
+     </div>
+     <button onclick="dismissPushMsg()" class="text-blue-200 hover:text-white p-2 -mr-2"><span class="material-icons-round text-xl">close</span></button>
+   </div>
+ </div>
+
  <!-- DASHBOARD HEADER -->
- <header class="flex-none pt-6 pb-2 px-4 bg-[#0f172a] z-30 border-b border-slate-800 shadow-sm">
+ <header class="flex-none pt-4 pb-2 px-4 bg-[#0f172a] z-30 border-b border-slate-800 shadow-sm">
     <div class="flex justify-between items-end mb-4">
         <div>
             <div class="flex items-center gap-2">
@@ -633,10 +645,10 @@ if(s.uiLarge) document.body.classList.add('ui-large');
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js')
   .then(function(reg) {
-     // Sjekk om vi allerede har push-abonnement
      if(reg.pushManager) {
         reg.pushManager.getSubscription().then(function(sub) {
            if(sub) s.pushEnabled = true;
+           checkPushPrompt(); // Sjekk om vi skal vise banner
         });
      }
   });
@@ -996,7 +1008,19 @@ function rRes(c, mineOnly) {
                  actionBtns = `<button onclick="event.stopPropagation();book('${r.bil}',${r.id})" class="btn-action btn-amber py-2 px-4 rounded shadow-lg text-xs">ENDRE</button>`;
             }
         }
-        html += `<div onclick="book('${r.bil}',${r.id})" class="${bgCol} border-l-4 ${borderCol} p-4 rounded-r-xl border-y border-r border-slate-700/50 cursor-pointer relative flex justify-between items-center"><div><div class="flex items-center gap-2 mb-1"><span class="text-xs font-black ${active ? 'text-white' : 'text-slate-300'}">${r.bil}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${statusTxt}</span></div><div class="text-sm font-bold text-white mb-0.5">${formalText}</div><div class="text-xs text-slate-400 font-mono">${fmtDD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}</div>${!mineOnly ? `<div class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${r.bid}</div>` : ''}</div><div class="flex flex-col items-end gap-2"><span class="material-icons-round text-slate-600 mb-1">${icon}</span>${actionBtns}</div></div>`;
+
+        // --- NEW TIME FORMATTING LOGIC ---
+        const st = new Date(r.start_tid);
+        const en = new Date(r.slutt_tid);
+        let timeStr;
+        if(st.toDateString() === en.toDateString()) {
+            timeStr = `${fmtDD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}`;
+        } else {
+            timeStr = `${fmtDD(r.start_tid)} ${fmtT(r.start_tid)} - ${fmtDD(r.slutt_tid)} ${fmtT(r.slutt_tid)}`;
+        }
+        // ---------------------------------
+
+        html += `<div onclick="book('${r.bil}',${r.id})" class="${bgCol} border-l-4 ${borderCol} p-4 rounded-r-xl border-y border-r border-slate-700/50 cursor-pointer relative flex justify-between items-center"><div><div class="flex items-center gap-2 mb-1"><span class="text-xs font-black ${active ? 'text-white' : 'text-slate-300'}">${r.bil}</span><span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${statusTxt}</span></div><div class="text-sm font-bold text-white mb-0.5">${formalText}</div><div class="text-xs text-slate-400 font-mono">${timeStr}</div>${!mineOnly ? `<div class="text-[10px] text-slate-500 mt-1 uppercase font-bold">${r.bid}</div>` : ''}</div><div class="flex flex-col items-end gap-2"><span class="material-icons-round text-slate-600 mb-1">${icon}</span>${actionBtns}</div></div>`;
     });
     html += `</div>`; c.innerHTML = html;
 }
@@ -1509,8 +1533,6 @@ async function subRet(id, c) {
     showToast("Levert!", "success");
 }
 
-async function react() { if(confirm(`Vil du gjøre ${s.co.bil} tilgjengelig igjen?\nNåværende status: ${s.co.status}`)) { await _s.from('biler').update({status:'Aktiv',kommentar:null}).eq('id',s.co.id); closeM('m-book'); load(); showToast("Bil aktivert", "success"); } }
-
 function rAdm(c) {
     let html = `<div class="flex flex-wrap gap-2 mb-4 bg-slate-800 p-3 rounded-xl border border-slate-700">`;
     s.c.forEach(b => {
@@ -1700,19 +1722,8 @@ function rSet(c) {
                 <span class="text-sm text-blue-200 font-black uppercase">Push-varsel på denne enheten</span>
                 <input type="checkbox" onchange="togPush(this.checked)" ${s.pushEnabled ? 'checked' : ''} class="w-6 h-6 accent-blue-500 rounded cursor-pointer">
             </div>
-            <p class="text-[10px] text-slate-400">Dette aktiverer varsling direkte på mobilen/PC-en du bruker nå (uten e-post).</p>
+            <p class="text-[10px] text-slate-400">Motta varsler direkte på mobilen/PC-en. <span class="text-amber-500 font-bold">Fungerer det ikke ved aktivering? Prøv å slette og installere appen på nytt.</span></p>
         </div>
-
-        <!-- EMAIL SECTION -->
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-sm text-slate-200 font-medium">Aktiver e-postvarsel</span>
-            <input type="checkbox" onchange="togVar(this.checked)" ${s.varsel ? 'checked' : ''} class="w-6 h-6 accent-amber-600 rounded cursor-pointer">
-        </div>
-        <div class="flex gap-2">
-            <input id="s-em" placeholder="din.epost@gmail.com" value="${s.savedEmail || ''}" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white focus:border-amber-500 outline-none transition-colors">
-            <button onclick="updEm()" class="bg-amber-600 hover:bg-amber-500 px-4 rounded-xl text-white font-bold text-xs shadow-lg transition-transform active:scale-95">LAGRE</button>
-        </div>
-        <p class="text-[10px] text-slate-500 mt-2">Motta varsel ca. 30 min før frist. Bruk gjerne privat e-post.</p>
     </div>
 
     <!-- Card 4: Info -->
@@ -1819,6 +1830,8 @@ async function subscribeUserToPush() {
     
     s.pushEnabled = true;
     showToast("Push aktivert!", "success");
+    // Skjul banneret hvis det var åpent
+    $id('push-msg').classList.add('hidden');
     render();
 
   } catch (e) {
@@ -1827,6 +1840,30 @@ async function subscribeUserToPush() {
     s.pushEnabled = false; render();
   }
 }
+
+// LOGIKK FOR PUSH BANNER
+function checkPushPrompt() {
+    if(!('serviceWorker' in navigator)) return; // Ingen støtte
+    if(Notification.permission === 'denied') return; // Blokkert av bruker
+    if(s.pushEnabled) return; // Allerede aktivert
+    if(localStorage.getItem('dismissedPushPrompt') === 'true') return; // Lukket av bruker
+    
+    // Vis banner
+    const banner = $id('push-msg');
+    if(banner) banner.classList.remove('hidden');
+}
+
+function dismissPushMsg() {
+    localStorage.setItem('dismissedPushPrompt', 'true');
+    $id('push-msg').classList.add('hidden');
+}
+
+function enablePushFromBanner() {
+    togPush(true);
+    // Skjules automatisk i togPush hvis suksess, men vi kan skjule den med en gang for feedback
+    $id('push-msg').classList.add('hidden');
+}
+
 
 // Konverter nøkkel-format
 function urlBase64ToUint8Array(base64String) {
