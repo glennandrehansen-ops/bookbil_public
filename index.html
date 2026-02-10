@@ -269,15 +269,15 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 <!-- HOVEDAPP -->
 <div id="app" class="hidden h-full flex flex-col relative w-full">
  
- <!-- VARSLING BANNER (Nytt) -->
- <div id="push-msg" class="hidden w-full bg-blue-600/90 backdrop-blur text-white p-4 z-[40] shadow-xl border-b border-blue-400/30">
-   <div class="flex justify-between items-start max-w-xl mx-auto">
+ <!-- VARSLING BANNER (Nytt & Smalere) -->
+ <div id="push-msg" class="hidden w-full bg-blue-600/90 backdrop-blur text-white p-3 z-[40] shadow-xl border-b border-blue-400/30">
+   <div class="flex justify-between items-start max-w-xl mx-auto gap-3">
      <div class="flex-1">
-       <p class="font-bold text-sm mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">notifications_active</span> Ønsker du varsler?</p>
-       <p class="text-xs text-blue-100 leading-relaxed mb-3">Du kan aktivere varsler knyttet til dine reservasjoner. Varsler kan slås av og på i innstillingene.</p>
-       <button onclick="enablePushFromBanner()" class="bg-white text-blue-600 px-4 py-2 rounded-lg text-xs font-black shadow-sm active:scale-95 transition-transform">AKTIVER VARSLER</button>
+       <p class="font-bold text-xs mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">notifications_active</span> Ønsker du varsler?</p>
+       <p class="text-[10px] text-blue-100 leading-snug mb-2">Du kan aktivere varsler for dine reservasjoner. Hvis det ikke fungerer, prøv å reinstallere appen.</p>
+       <button onclick="enablePushFromBanner()" class="bg-white text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-black shadow-sm active:scale-95 transition-transform">AKTIVER VARSLER</button>
      </div>
-     <button onclick="dismissPushMsg()" class="text-blue-200 hover:text-white p-2 -mr-2"><span class="material-icons-round text-xl">close</span></button>
+     <button onclick="dismissPushMsg()" class="text-blue-200 hover:text-white p-1"><span class="material-icons-round text-lg">close</span></button>
    </div>
  </div>
 
@@ -778,6 +778,7 @@ async function load() {
              $id('u-disp').innerHTML = `KIOSK-MODUS <span class="opacity-50 mx-1">•</span> <span class="font-normal opacity-75">${time}</span>`;
         }
         
+        checkPushPrompt(); // Sjekk banner hver gang vi laster
         render();
     } catch(e) { 
         console.error("Kritisk feil i load():", e); 
@@ -1646,7 +1647,15 @@ function rLog(c) {
         c.innerHTML = "<div class='text-center text-slate-500 mt-10'>Henter historikk...</div>";
         return;
     }
-    const l = s.fullLog; 
+    const now = new Date();
+    // Filter out reservations that haven't ended yet
+    const l = s.fullLog.filter(h => new Date(h.slutt_tid) < now); 
+    
+    if(l.length === 0) {
+         c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV (HISTORIKK)</button><div class='text-center text-slate-500 mt-10'>Ingen historikk funnet.</div>`;
+         return;
+    }
+
     c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV (HISTORIKK)</button><div class="space-y-3">` + l.map(h => {
         const dateOpt = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }; const dateStr = new Date(h.start_tid).toLocaleDateString('no-NO', dateOpt);
         return `<div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-sm"><div class="flex justify-between font-bold text-white mb-1"><span>${h.bil}</span><span class="text-slate-400">${h.bid}</span></div><div class="text-slate-400 text-xs mb-1 capitalize">${dateStr} | ${fmtT(h.start_tid)}-${fmtT(h.slutt_tid)}</div><div class="text-slate-300 italic">"${h.formal}"</div>${h.kommentar?`<div class="mt-1 text-amber-400 bg-amber-900/20 px-2 py-1 rounded inline-block text-xs">${h.kommentar}</div>`:''}</div>`;
@@ -1658,7 +1667,11 @@ async function csv() {
         showToast("Laster data...", "info");
         await loadFullHistory();
     }
-    const t = "Bil,Bruker,Start,Slutt,Formål,Merknad\n" + s.fullLog.map(x => `${x.bil},${x.bid},${fmtD(x.start_tid)} ${fmtT(x.start_tid)},${fmtD(x.slutt_tid)} ${fmtT(x.slutt_tid)},"${x.formal}",${x.kommentar||''}`).join('\n'); 
+    const now = new Date();
+    // Filter finished trips only for CSV as well
+    const l = s.fullLog.filter(h => new Date(h.slutt_tid) < now);
+    
+    const t = "Bil,Bruker,Start,Slutt,Formål,Merknad\n" + l.map(x => `${x.bil},${x.bid},${fmtD(x.start_tid)} ${fmtT(x.start_tid)},${fmtD(x.slutt_tid)} ${fmtT(x.slutt_tid)},"${x.formal}",${x.kommentar||''}`).join('\n'); 
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv;charset=utf-8;' })); a.download = "logg.csv"; a.click(); 
 }
 
@@ -1722,7 +1735,10 @@ function rSet(c) {
                 <span class="text-sm text-blue-200 font-black uppercase">Push-varsel på denne enheten</span>
                 <input type="checkbox" onchange="togPush(this.checked)" ${s.pushEnabled ? 'checked' : ''} class="w-6 h-6 accent-blue-500 rounded cursor-pointer">
             </div>
-            <p class="text-[10px] text-slate-400">Motta varsler direkte på mobilen/PC-en. <span class="text-amber-500 font-bold">Fungerer det ikke ved aktivering? Prøv å slette og installere appen på nytt.</span></p>
+            <p class="text-[10px] text-slate-400 mt-2">
+                <strong>Viktig:</strong> For å motta varsler stabilt må du installere BookBil som app på mobilen.
+                <a href="https://bbmanual.pages.dev/" target="_blank" class="text-blue-400 underline">Se oppskrift i brukermanualen.</a>
+            </p>
         </div>
     </div>
 
@@ -1843,18 +1859,33 @@ async function subscribeUserToPush() {
 
 // LOGIKK FOR PUSH BANNER
 function checkPushPrompt() {
-    if(!('serviceWorker' in navigator)) return; // Ingen støtte
-    if(Notification.permission === 'denied') return; // Blokkert av bruker
-    if(s.pushEnabled) return; // Allerede aktivert
-    if(localStorage.getItem('dismissedPushPrompt') === 'true') return; // Lukket av bruker
-    
-    // Vis banner
     const banner = $id('push-msg');
-    if(banner) banner.classList.remove('hidden');
+    if(!banner) return;
+    
+    // Sjekk om nettleser støtter det og om det er blokkert
+    if(!('serviceWorker' in navigator) || Notification.permission === 'denied' || s.pushEnabled) {
+        banner.classList.add('hidden');
+        return;
+    }
+
+    // Sjekk "mute"-tid (14 dager)
+    const dismissedTS = localStorage.getItem('dismissedPushPrompt_v3'); // Ny nøkkel v3
+    if (dismissedTS) {
+        const diff = Date.now() - parseInt(dismissedTS);
+        const days = diff / (1000 * 60 * 60 * 24);
+        if (days < 14) { // Skjul hvis det er mindre enn 14 dager siden sist
+            banner.classList.add('hidden');
+            return;
+        }
+    }
+    
+    // Vis
+    banner.classList.remove('hidden');
 }
 
 function dismissPushMsg() {
-    localStorage.setItem('dismissedPushPrompt', 'true');
+    // Lagre tidsstempel for når den ble lukket
+    localStorage.setItem('dismissedPushPrompt_v3', Date.now().toString());
     $id('push-msg').classList.add('hidden');
 }
 
