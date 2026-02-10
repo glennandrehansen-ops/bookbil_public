@@ -242,52 +242,12 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 .toast-success { border-bottom: 3px solid #10b981; }
 .toast-error { border-bottom: 3px solid #ef4444; }
 .toast-info { border-bottom: 3px solid #3b82f6; }
-
-/* --- PUSH NAG UI --- */
-.push-nag {
-    position: fixed; 
-    bottom: 90px; /* Above nav */
-    left: 16px;
-    right: 16px;
-    background: rgba(30, 41, 59, 0.95);
-    backdrop-filter: blur(8px);
-    border: 1px solid #3b82f6; 
-    padding: 16px;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    transform: translateY(150%);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 150; /* Over everything */
-    display: flex; /* Ensure flex layout */
-    align-items: flex-start;
-    gap: 12px;
-}
-.push-nag.show { transform: translateY(0); }
-.push-nag.warn { border-color: #f59e0b; }
-.push-nag.info { border-color: #3b82f6; }
 </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
 
 <div id="offline-msg" class="hidden fixed top-0 w-full bg-red-600 text-white text-xs font-bold text-center py-1 z-[100]">INGEN INTERNETTFORBINDELSE</div>
 <div id="toast-container"></div>
-
-<!-- PUSH NAG ELEMENT (Hidden by default) -->
-<div id="push-nag-ui" class="push-nag hidden">
-    <div id="nag-icon-bg" class="bg-blue-500/20 p-2 rounded-full text-blue-400 flex-shrink-0">
-        <span id="nag-icon" class="material-icons-round text-xl">notifications_active</span>
-    </div>
-    <div class="flex-1">
-        <h3 id="nag-title" class="text-white font-bold text-sm">Tittel</h3>
-        <p id="nag-text" class="text-xs text-slate-300 mt-1 leading-relaxed">Beskrivelse...</p>
-        <p id="nag-hint" class="text-[10px] text-slate-500 mt-2 italic hidden">Hint...</p>
-        <div class="flex gap-3 mt-3">
-            <button id="nag-btn-primary" class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-lg" onclick="handleNagAction()">KNAPP</button>
-            <button onclick="closeNag()" class="text-slate-500 text-xs font-bold py-2">LUKK</button>
-        </div>
-    </div>
-    <button onclick="closeNag()" class="text-slate-500 hover:text-white"><span class="material-icons-round text-sm">close</span></button>
-</div>
 
 <!-- AUTENTISERING -->
 <div id="auth" class="flex flex-col items-center justify-center h-screen p-6 text-center fixed inset-0 z-[60] bg-[#0f172a]">
@@ -681,105 +641,6 @@ if ('serviceWorker' in navigator) {
      }
   });
 }
-
-// --- PUSH NAG LOGIKK (NY) ---
-let currentNagType = null;
-
-function checkPushStatus() {
-    // Ikke vis hvis vi nylig har vist (vent 7 dager hvis avvist)
-    const dismissed = localStorage.getItem('push_nag_dismissed');
-    if (dismissed && (Date.now() - parseInt(dismissed) < 7 * 24 * 60 * 60 * 1000)) return;
-
-    // Sjekk for iPhone + Nettleser
-    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isStandalone = window.navigator.standalone || (window.matchMedia('(display-mode: standalone)').matches);
-
-    if (isIos && !isStandalone) {
-        showNag('ios');
-        return;
-    }
-
-    // Sjekk om push er aktivert
-    if ('Notification' in window && Notification.permission === 'default' && !s.pushEnabled) {
-        showNag('enable');
-    }
-}
-
-function showNag(type) {
-    currentNagType = type;
-    const nag = document.getElementById('push-nag-ui');
-    const title = document.getElementById('nag-title');
-    const text = document.getElementById('nag-text');
-    const hint = document.getElementById('nag-hint');
-    const btn = document.getElementById('nag-btn-primary');
-    const icon = document.getElementById('nag-icon');
-    const iconBg = document.getElementById('nag-icon-bg');
-    
-    // Reset classes
-    nag.className = "push-nag";
-    hint.classList.remove('hidden');
-
-    if (type === 'enable') {
-        title.innerText = "Vil du ha varsling?";
-        text.innerText = "Få beskjed før reservasjonen starter og når du må levere nøkler. Enkelt å huske!";
-        hint.innerText = "Du kan også skru dette på under Innstillinger.";
-        btn.innerText = "AKTIVER NÅ";
-        btn.onclick = handleNagAction;
-        btn.className = "bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-lg";
-        icon.innerText = "notifications_active";
-        iconBg.className = "bg-blue-500/20 p-2 rounded-full text-blue-400 flex-shrink-0";
-        nag.classList.add('info');
-    } 
-    else if (type === 'ios') {
-        title.innerText = "Varsler på iPhone";
-        text.innerHTML = "For å få påminnelser må appen legges til på Hjem-skjerm.<br>Trykk <strong>Del</strong> -> <strong>Legg til på Hjem-skjerm</strong>.";
-        hint.innerText = "Dette kreves av iPhone for at varsler skal virke.";
-        btn.innerText = "OK";
-        btn.onclick = closeNag;
-        btn.className = "bg-slate-700 text-white text-xs font-bold px-4 py-2 rounded-lg border border-slate-600";
-        icon.innerText = "ios_share";
-        iconBg.className = "bg-slate-700 p-2 rounded-full text-white flex-shrink-0";
-        nag.classList.add('info'); 
-    }
-    else if (type === 'fix') {
-        title.innerText = "Mottar du ikke varsler?";
-        text.innerText = "Hvis du har en gammel versjon av appen på telefonen, kan det hende varsler ikke virker. Prøv å slette appen og legg til på nytt.";
-        hint.innerText = "Dette oppdaterer systemet i bakgrunnen.";
-        btn.innerText = "OPPFATTET";
-        btn.onclick = closeNag;
-        btn.className = "bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-lg";
-        icon.innerText = "update";
-        iconBg.className = "bg-amber-500/20 p-2 rounded-full text-amber-400 flex-shrink-0";
-        nag.classList.add('warn'); 
-    }
-
-    // Vis med animasjon
-    nag.classList.remove('hidden');
-    setTimeout(() => nag.classList.add('show'), 100);
-}
-
-function closeNag() {
-    const nag = document.getElementById('push-nag-ui');
-    nag.classList.remove('show');
-    setTimeout(() => nag.classList.add('hidden'), 400);
-    
-    // Hvis det var "enable", lagre at bruker avslo midlertidig
-    if (currentNagType === 'enable') {
-        localStorage.setItem('push_nag_dismissed', Date.now().toString());
-    }
-}
-
-async function handleNagAction() {
-    if (currentNagType === 'enable') {
-        await togPush(true);
-    }
-    closeNag();
-}
-
-// Kjør sjekk ved oppstart (litt forsinket)
-setTimeout(checkPushStatus, 2000);
-
-// --- SLUTT PÅ NY LOGIKK ---
 
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); s.deferredPrompt = e; const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); });
 async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); const { outcome } = await s.deferredPrompt.userChoice; if (outcome === 'accepted') { s.deferredPrompt = null; $id('install-icon').classList.add('hidden'); $id('pwa-settings-btn').classList.add('hidden'); } } }
@@ -1840,7 +1701,6 @@ function rSet(c) {
                 <input type="checkbox" onchange="togPush(this.checked)" ${s.pushEnabled ? 'checked' : ''} class="w-6 h-6 accent-blue-500 rounded cursor-pointer">
             </div>
             <p class="text-[10px] text-slate-400">Dette aktiverer varsling direkte på mobilen/PC-en du bruker nå (uten e-post).</p>
-            <button onclick="showNag('fix')" class="text-[10px] text-amber-500 underline mt-2 bg-transparent border-none p-0 cursor-pointer hover:text-amber-400">Virker ikke varsler?</button>
         </div>
 
         <!-- EMAIL SECTION -->
@@ -1979,103 +1839,6 @@ function urlBase64ToUint8Array(base64String) {
   }
   return outputArray;
 }
-
-// --- PUSH NAG LOGIKK (NY) ---
-let currentNagType = null;
-
-function checkPushStatus() {
-    // Ikke vis hvis vi nylig har vist (vent 7 dager hvis avvist)
-    const dismissed = localStorage.getItem('push_nag_dismissed');
-    if (dismissed && (Date.now() - parseInt(dismissed) < 7 * 24 * 60 * 60 * 1000)) return;
-
-    // Sjekk for iPhone + Nettleser
-    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isStandalone = window.navigator.standalone || (window.matchMedia('(display-mode: standalone)').matches);
-
-    if (isIos && !isStandalone) {
-        showNag('ios');
-        return;
-    }
-
-    // Sjekk om push er aktivert
-    if ('Notification' in window && Notification.permission === 'default' && !s.pushEnabled) {
-        showNag('enable');
-    }
-}
-
-function showNag(type) {
-    currentNagType = type;
-    const nag = document.getElementById('push-nag-ui');
-    const title = document.getElementById('nag-title');
-    const text = document.getElementById('nag-text');
-    const hint = document.getElementById('nag-hint');
-    const btn = document.getElementById('nag-btn-primary');
-    const icon = document.getElementById('nag-icon');
-    const iconBg = document.getElementById('nag-icon-bg');
-    
-    // Reset classes
-    nag.className = "push-nag";
-    hint.classList.remove('hidden');
-
-    if (type === 'enable') {
-        title.innerText = "Vil du ha varsling?";
-        text.innerText = "Få beskjed før reservasjonen starter og når du må levere nøkler. Enkelt å huske!";
-        hint.innerText = "Du kan også skru dette på under Innstillinger.";
-        btn.innerText = "AKTIVER NÅ";
-        btn.onclick = handleNagAction;
-        btn.className = "bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-lg";
-        icon.innerText = "notifications_active";
-        iconBg.className = "bg-blue-500/20 p-2 rounded-full text-blue-400 flex-shrink-0";
-        nag.classList.add('info');
-    } 
-    else if (type === 'ios') {
-        title.innerText = "Varsler på iPhone";
-        text.innerHTML = "For å få påminnelser må appen legges til på Hjem-skjerm.<br>Trykk <strong>Del</strong> -> <strong>Legg til på Hjem-skjerm</strong>.";
-        hint.innerText = "Dette kreves av iPhone for at varsler skal virke.";
-        btn.innerText = "OK";
-        btn.onclick = closeNag;
-        btn.className = "bg-slate-700 text-white text-xs font-bold px-4 py-2 rounded-lg border border-slate-600";
-        icon.innerText = "ios_share";
-        iconBg.className = "bg-slate-700 p-2 rounded-full text-white flex-shrink-0";
-        nag.classList.add('info'); 
-    }
-    else if (type === 'fix') {
-        title.innerText = "Mottar du ikke varsler?";
-        text.innerText = "Hvis du har en gammel versjon av appen på telefonen, kan det hende varsler ikke virker. Prøv å slette appen og legg til på nytt.";
-        hint.innerText = "Dette oppdaterer systemet i bakgrunnen.";
-        btn.innerText = "OPPFATTET";
-        btn.onclick = closeNag;
-        btn.className = "bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-lg";
-        icon.innerText = "update";
-        iconBg.className = "bg-amber-500/20 p-2 rounded-full text-amber-400 flex-shrink-0";
-        nag.classList.add('warn'); 
-    }
-
-    // Vis med animasjon
-    nag.classList.remove('hidden');
-    setTimeout(() => nag.classList.add('show'), 100);
-}
-
-function closeNag() {
-    const nag = document.getElementById('push-nag-ui');
-    nag.classList.remove('show');
-    setTimeout(() => nag.classList.add('hidden'), 400);
-    
-    // Hvis det var "enable", lagre at bruker avslo midlertidig
-    if (currentNagType === 'enable') {
-        localStorage.setItem('push_nag_dismissed', Date.now().toString());
-    }
-}
-
-async function handleNagAction() {
-    if (currentNagType === 'enable') {
-        await togPush(true);
-    }
-    closeNag();
-}
-
-// Kjør sjekk ved oppstart (litt forsinket)
-setTimeout(checkPushStatus, 2000);
 // --------------------------
 
 async function updEm() { const e = $id('s-em').value.trim(); if(!e) return showToast("Skriv e-post", "error"); const { error } = await _s.from('brukere').upsert({ brukernavn: s.bid, epost: e, varsel: s.varsel }, { onConflict: 'brukernavn' }); if(error) showToast("Feil.", "error"); else { s.savedEmail = e; showToast("Lagret.", "success"); } }
