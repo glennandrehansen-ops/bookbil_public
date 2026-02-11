@@ -152,7 +152,7 @@ jobs:
 
                await sendPush(
                    b.bid, 
-                   "Klar for tur?", 
+                   "Klar for tur?🚙", 
                    `Husk ${b.bil} (${formalText}) i dag kl. ${startTime} - ${endTime}. God tur!`, 
                    process.env.APP_LINK
                );
@@ -203,7 +203,7 @@ jobs:
                   hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
                });
 
-               const pushBody = `Reservasjonen avsluttes klokken ${endTime}. Trenger du mer tid? Utvid i appen (hvis ledig). Husk å levere nøkler!`;
+               const pushBody = `Reservasjonen avsluttes klokken ${endTime}. Trenger du mer tid?⏳ Utvid i appen (hvis ledig). 🔑Husk å levere nøkler!🔑`;
 
                await sendPush(
                    b.bid, 
