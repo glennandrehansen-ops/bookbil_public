@@ -53,16 +53,19 @@ jobs:
             },
           });
 
-          const mailHeader = `
+          // Hjelpefunksjon for e-post header
+          function getMailHeader(location) {
+             return `
             <!DOCTYPE html>
             <html>
             <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: sans-serif;">
               <div style="max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                 <div style="background-color: #1e293b; padding: 20px; text-align: center;">
-                    <h1 style="color: white; margin: 0; font-size: 24px;">BookBil Jæren</h1>
+                    <h1 style="color: white; margin: 0; font-size: 24px;">BookBil ${location}</h1>
                 </div>
                 <div style="padding: 30px;">
           `;
+          }
           
           const mailFooter = `
                 </div>
@@ -99,17 +102,10 @@ jobs:
               if (!subs || subs.length === 0) return;
 
               const payload = JSON.stringify({ title, body, url });
-
-              // ENDRING HER: Legger til options med urgency: high
-              const options = {
-                  headers: {
-                      "Urgency": "high" 
-                  }
-              };
+              const options = { headers: { "Urgency": "high" } };
 
               const promises = subs.map(async (subRecord) => {
                   try {
-                      // Legger til options som tredje parameter
                       await webpush.sendNotification(subRecord.subscription, payload, options);
                       console.log(`Push sendt til enhet ${subRecord.id} for ${bid}`);
                   } catch (error) {
@@ -148,12 +144,12 @@ jobs:
                   hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
                });
                
-               const formalText = b.formal || "Tur";
+               const formalText = b.formal ? `📝 ${b.formal}` : '';
 
                await sendPush(
                    b.bid, 
-                   "Klar for tur?🚙", 
-                   `Husk ${b.bil} (${formalText}) i dag kl. ${startTime} - ${endTime}. God tur!`, 
+                   "🚙 Kommende reservasjon", 
+                   `Du har reservert ${b.bil}.\n🕒 ${startTime} – ${endTime}\n${formalText}`, 
                    process.env.APP_LINK
                );
 
@@ -163,7 +159,7 @@ jobs:
                     <h2 style="color: #1e293b; margin-top: 0;">Din reservasjon starter snart</h2>
                     <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
                         <p style="margin: 0; font-size: 18px; font-weight: bold; color: #1e293b;">${b.bil}</p>
-                        <p style="margin: 5px 0 0; font-weight: bold; color: #2563eb;">${formalText}</p>
+                        <p style="margin: 5px 0 0; font-weight: bold; color: #2563eb;">${b.formal || "Tur"}</p>
                         <p style="margin: 5px 0 0; color: #475569;">Kl. ${startTime} - ${endTime}</p>
                     </div>
                     <div style="text-align: center; margin-top: 30px;">
@@ -172,10 +168,10 @@ jobs:
                   `;
                   try {
                       await transporter.sendMail({
-                        from: `"BookBil Jæren" <${process.env.GMAIL_USER}>`,
+                        from: `"BookBil" <${process.env.GMAIL_USER}>`,
                         to: email,
                         subject: `Påminnelse: ${b.bil} kl. ${startTime}`,
-                        html: mailHeader + htmlContent + mailFooter
+                        html: getMailHeader("Varsel") + htmlContent + mailFooter
                       });
                   } catch (e) { console.error("Feil ved sending:", e); }
                }
@@ -203,12 +199,10 @@ jobs:
                   hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
                });
 
-               const pushBody = `Reservasjonen avsluttes klokken ${endTime}. Trenger du mer tid?⏳ Utvid i appen (hvis ledig). 🔑Husk å levere nøkler!🔑`;
-
                await sendPush(
                    b.bid, 
-                   `Snart levering (${b.bil})`, 
-                   pushBody, 
+                   "⏳ Snart levering", 
+                   `Reservasjon for ${b.bil} avsluttes kl. ${endTime}.\n🔑 HUSK: Legg nøkkelen tilbake i skapet!`, 
                    process.env.APP_LINK
                );
 
@@ -229,20 +223,17 @@ jobs:
                         <p style="margin: 2px 0 0; color: #b45309;">Tid: ${startStr} - ${endStr}</p>
                     </div>
                     <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center;">
-                         <p style="margin: 0; font-weight: bold; color: #166534; font-size: 16px;">NB! HUSK NØKLER</p>
+                         <p style="margin: 0; font-weight: bold; color: #166534; font-size: 16px;">🔑 NB! HUSK NØKLER</p>
                          <p style="margin: 5px 0 0; color: #15803d; font-size: 13px;">Lever nøkkelen i skapet. Reservasjonen avsluttes automatisk.</p>
-                    </div>
-                    <div style="text-align: center; margin-top: 30px;">
-                        <a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL APPEN</a>
                     </div>
                   `;
 
                   try {
                       await transporter.sendMail({
-                        from: `"BookBil Jæren" <${process.env.GMAIL_USER}>`,
+                        from: `"BookBil" <${process.env.GMAIL_USER}>`,
                         to: email,
                         subject: `Påminnelse: Levering av ${b.bil}`,
-                        html: mailHeader + htmlContent + mailFooter
+                        html: getMailHeader("Varsel") + htmlContent + mailFooter
                       });
                   } catch (e) { console.error("Feil ved sending:", e); }
                }
@@ -251,55 +242,87 @@ jobs:
             }
           }
 
+          // 3. ADMIN ALERTS - MED LOKASJONSSTØTTE
           async function checkMessages() {
+            // Hent meldinger som ikke er sendt
             const { data: messages, error } = await supabase.from("meldinger").select("*").eq("sendt", false).order("created_at", { ascending: true });
             if (error || !messages || messages.length === 0) return;
-            const { data: config } = await supabase.from("konfigurasjon").select("verdi").eq("nokkel", "bilansvarlig_epost").maybeSingle();
-            const adminEmails = config && config.verdi ? config.verdi.split(",").map(e => e.trim()).filter(e => e) : [];
 
-            if (adminEmails.length === 0) {
-               const ids = messages.map(m => m.id);
-               await supabase.from("meldinger").update({ sendt: true }).in("id", ids);
-               return;
-            }
+            // Hent alle biler for å finne lokasjon
+            const { data: cars } = await supabase.from("biler").select("bil, lokasjon");
+            const carLocMap = {};
+            if(cars) cars.forEach(c => carLocMap[c.bil] = c.lokasjon || 'Jæren');
 
-            let listHtml = "";
+            // Hent all konfigurasjon (eposter)
+            const { data: config } = await supabase.from("konfigurasjon").select("*");
+            const configMap = {};
+            if(config) config.forEach(c => configMap[c.nokkel] = c.verdi);
+
+            // Grupper meldinger per lokasjon
+            const groupedMessages = {};
+            
             messages.forEach(msg => {
-                const timeStr = new Date(msg.created_at).toLocaleTimeString("no-NO", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Oslo"});
-                let icon = "📝"; let color = "#3b82f6";
-                if(msg.type.includes("Skade") || msg.type.includes("Feil")) { icon = "⚠️"; color = "#ef4444"; }
-                else if(msg.type.includes("Verksted")) { icon = "🔧"; color = "#a855f7"; }
-                else if(msg.type.includes("Statusendring")) { icon = "🔄"; color = "#f59e0b"; }
-
-                listHtml += `
-                <div style="border-bottom: 1px solid #e2e8f0; padding: 15px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <strong style="color: #0f172a; font-size: 16px;">${icon} ${msg.bil || "Ukjent bil"}</strong>
-                        <span style="color: #64748b; font-size: 12px;">${timeStr}</span>
-                    </div>
-                    <div style="color: ${color}; font-weight: bold; font-size: 12px; text-transform: uppercase; margin-bottom: 5px;">${msg.type}</div>
-                    <div style="color: #334155; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">${msg.innhold}</div>
-                    <div style="color: #94a3b8; font-size: 11px; margin-top: 5px;">Registrert av: ${msg.bruker || "Ukjent"}</div>
-                </div>`;
+                const loc = carLocMap[msg.bil] || 'Jæren'; // Default til Jæren hvis ukjent
+                if(!groupedMessages[loc]) groupedMessages[loc] = [];
+                groupedMessages[loc].push(msg);
             });
 
-            const digestHtml = `
-                <h2 style="color: #1e293b; margin-top: 0;">Oppdatering fra Billageret</h2>
-                <p>Det er registrert <strong>${messages.length}</strong> nye hendelser siden sist:</p>
-                <div style="margin-top: 20px;">${listHtml}</div>
-                <div style="text-align: center; margin-top: 30px;"><a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL BILLAGER</a></div>
-            `;
+            // Send epost per lokasjon
+            for (const [location, msgs] of Object.entries(groupedMessages)) {
+                
+                // Finn riktig epost-mottaker for denne lokasjonen
+                const adminEmailsStr = configMap[`bilansvarlig_epost_${location}`] || configMap['bilansvarlig_epost']; // Fallback til gammel nøkkel
+                
+                if (!adminEmailsStr) {
+                    console.log(`Ingen admin-epost funnet for ${location}, skipper sending.`);
+                    // Vi markerer dem likevel som sendt for å unngå spam i loopen? Nei, bedre å la dem ligge så man oppdager feilen i config.
+                    // Men for å unngå evig loop i denne testen, markerer vi. I prod bør man kanskje logge en error.
+                    continue; 
+                }
 
-            for (const email of adminEmails) {
-                try {
-                    await transporter.sendMail({
-                      from: `"BookBil System" <${process.env.GMAIL_USER}>`,
-                      to: email,
-                      subject: `Billager: ${messages.length} nye hendelser`,
-                      html: mailHeader + digestHtml + mailFooter
-                    });
-                } catch (err) { console.error(`Feil ved sending til ${email}:`, err); }
+                const adminEmails = adminEmailsStr.split(",").map(e => e.trim()).filter(e => e);
+                
+                let listHtml = "";
+                msgs.forEach(msg => {
+                    const timeStr = new Date(msg.created_at).toLocaleTimeString("no-NO", {day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Oslo"});
+                    let icon = "📝"; let color = "#3b82f6";
+                    if(msg.type.includes("Skade") || msg.type.includes("Feil")) { icon = "⚠️"; color = "#ef4444"; }
+                    else if(msg.type.includes("Verksted")) { icon = "🔧"; color = "#a855f7"; }
+                    else if(msg.type.includes("Statusendring")) { icon = "🔄"; color = "#f59e0b"; }
+
+                    listHtml += `
+                    <div style="border-bottom: 1px solid #e2e8f0; padding: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <strong style="color: #0f172a; font-size: 16px;">${icon} ${msg.bil || "Ukjent bil"}</strong>
+                            <span style="color: #64748b; font-size: 12px;">${timeStr}</span>
+                        </div>
+                        <div style="color: ${color}; font-weight: bold; font-size: 12px; text-transform: uppercase; margin-bottom: 5px;">${msg.type}</div>
+                        <div style="color: #334155; font-size: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">${msg.innhold}</div>
+                        <div style="color: #94a3b8; font-size: 11px; margin-top: 5px;">Registrert av: ${msg.bruker || "Ukjent"}</div>
+                    </div>`;
+                });
+
+                const digestHtml = `
+                    <h2 style="color: #1e293b; margin-top: 0;">Oppdatering fra Billageret (${location})</h2>
+                    <p>Det er registrert <strong>${msgs.length}</strong> nye hendelser siden sist:</p>
+                    <div style="margin-top: 20px;">${listHtml}</div>
+                    <div style="text-align: center; margin-top: 30px;"><a href="${process.env.APP_LINK}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">GÅ TIL BILLAGER</a></div>
+                `;
+
+                for (const email of adminEmails) {
+                    try {
+                        await transporter.sendMail({
+                          from: `"BookBil System" <${process.env.GMAIL_USER}>`,
+                          to: email,
+                          subject: `Billager ${location}: ${msgs.length} nye hendelser`,
+                          html: getMailHeader(location) + digestHtml + mailFooter
+                        });
+                        console.log(`Admin-epost sendt til ${email} for lokasjon ${location}`);
+                    } catch (err) { console.error(`Feil ved sending til ${email}:`, err); }
+                }
             }
+
+            // Marker alle som sendt
             const ids = messages.map(m => m.id);
             await supabase.from("meldinger").update({ sendt: true }).in("id", ids);
           }
@@ -311,5 +334,3 @@ jobs:
           }
           run();
           '
-
-
