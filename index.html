@@ -615,7 +615,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
           </div>
           <div>
               <label class="text-[10px] font-bold text-slate-500">ANSVARLIG</label>
-              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Olsen">
+              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Avsnitt 2">
           </div>
       </div>
       
@@ -630,8 +630,8 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
       </div>
 
       <div><label class="text-[10px] font-bold text-slate-500">STATUS</label><select id="adm-stat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm"><option value="Aktiv">Aktiv</option><option value="Verksted">Verksted</option><option value="Skade">Skade</option><option value="EU-kontroll">EU-kontroll</option><option value="Annet">Annet</option></select></div>
-      <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR (SYNLIG)</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Skriv beskjed..."></div>
-      <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater kun for admin..."></textarea></div>
+      <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Legger tekst på bil i oversikt."></div>
+      <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater for kjøretøyet. Vises ikke i oversikten."></textarea></div>
   </div>
   <div class="flex gap-2 mt-4"><button id="btn-adm-del" onclick="delC(s.admId, $id('adm-name').value)" class="p-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900"><span class="material-icons-round">delete</span></button><button onclick="saveAdmCar()" class="flex-1 bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm">LAGRE ENDRINGER</button></div>
  </div>
@@ -1835,7 +1835,7 @@ function rSet(c) {
             </div>
              <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
                 <div class="flex flex-col">
-                    <span class="text-base text-slate-200 font-medium">Vis biltyper (Piller)</span>
+                    <span class="text-base text-slate-200 font-medium">Vis biltyper</span>
                     <p class="text-xs text-slate-500 mt-1 leading-tight">Viser type bil (Uniformert/Sivil) som merker i oversikten.</p>
                 </div>
                 <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
