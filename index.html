@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f172a">
-<title>BookBil Jæren</title>
+<title>BookBil</title>
 
 <!-- Manifest -->
 <link rel="manifest" href="manifest.json">
@@ -270,17 +270,31 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 <!-- Added padding-top safe area logic -->
 <div id="app" class="hidden h-full flex flex-col relative w-full" style="padding-top: env(safe-area-inset-top);">
  
- <!-- VARSLING BANNER (Nytt & Smalere) -->
+ <!-- VARSLING BANNER -->
  <div id="push-msg" class="hidden w-full bg-blue-600/90 backdrop-blur text-white p-3 z-[40] shadow-xl border-b border-blue-400/30">
    <div class="flex justify-between items-start max-w-xl mx-auto gap-3">
      <div class="flex-1">
-       <p class="font-bold text-xs mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">notifications_active</span> Ønsker du varsler på mobilen?</p>
-       <p class="text-[12px] text-blue-100 leading-snug mb-2">Du kan aktivere push-varsler for dine reservasjoner. Hvis varsler ikke fungerer, prøv å reinstallere appen. Se brukermanual for mer informasjon om hvordan varsler fungerer.</p>
+       <p class="font-bold text-xs mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">notifications_active</span> Ønsker du varsler?</p>
+       <p class="text-[10px] text-blue-100 leading-snug mb-2">Du kan aktivere varsler for dine reservasjoner. Hvis det ikke fungerer, prøv å reinstallere appen.</p>
        <button onclick="enablePushFromBanner()" class="bg-white text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-black shadow-sm active:scale-95 transition-transform">AKTIVER VARSLER</button>
      </div>
      <button onclick="dismissPushMsg()" class="text-blue-200 hover:text-white p-1"><span class="material-icons-round text-lg">close</span></button>
    </div>
  </div>
+
+ <!-- TVUNGEN LOKASJONSVALG MODAL (NEW) -->
+ <div id="m-loc-force" class="fixed inset-0 bg-[#0f172a] z-[100] hidden flex flex-col items-center justify-center p-6 text-center">
+    <span class="material-icons-round text-blue-500 text-6xl mb-4">location_on</span>
+    <h2 class="text-2xl font-black text-white uppercase mb-2">Velg Tjenestested</h2>
+    <p class="text-slate-400 text-sm mb-8 max-w-xs">For å bruke BookBil må du velge hvilket tjenestested du tilhører. Dette avgjør hvilke biler du ser.</p>
+    <div class="w-full max-w-xs space-y-3">
+        <button onclick="changeLocation('Jæren')" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white font-bold hover:bg-slate-700 transition-colors">JÆREN</button>
+        <button onclick="changeLocation('Sandnes')" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white font-bold hover:bg-slate-700 transition-colors">SANDNES</button>
+        <button onclick="changeLocation('Stavanger')" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white font-bold hover:bg-slate-700 transition-colors">STAVANGER</button>
+        <button onclick="changeLocation('Dalane')" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white font-bold hover:bg-slate-700 transition-colors">DALANE</button>
+    </div>
+ </div>
+
 
  <!-- DASHBOARD HEADER -->
  <header class="flex-none pt-2 pb-2 px-4 bg-[#0f172a] z-30 border-b border-slate-800 shadow-sm">
@@ -635,7 +649,44 @@ const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 const $id = (id) => document.getElementById(id);
 const _s = supabase.createClient(S_URL, S_KEY);
 
-let s = { u:null, bid:null, c:[], r:[], fullLog: null, sel:[], co:null, editId:null, v:'cars', f:{c:'all',d:'',m:false}, h:JSON.parse(localStorage.getItem('h')||'[]'), rid:null, rc:null, savedEmail: '', varsel: true, pushEnabled: false, deferredPrompt: null, activeModal: null, tlClick: 0, admCar: null, admId: null, oldAdmCarName: null, tlDay: 0, expDur: 1, bilansvarlig: '', workshopMode: false, expCar: null, expStart: null, expEnd: null, visType: localStorage.getItem('visType') !== 'false', visResp: localStorage.getItem('visResp') === 'true', uiLarge: localStorage.getItem('uiLarge') === 'true', kioskMode: false };
+// State object extended with 'loc' (Location)
+let s = { 
+    u:null, 
+    bid:null, 
+    c:[], 
+    r:[], 
+    fullLog: null, 
+    sel:[], 
+    co:null, 
+    editId:null, 
+    v:'cars', 
+    f:{c:'all',d:'',m:false}, 
+    h:JSON.parse(localStorage.getItem('h')||'[]'), 
+    rid:null, 
+    rc:null, 
+    savedEmail: '', 
+    varsel: true, 
+    pushEnabled: false, 
+    deferredPrompt: null, 
+    activeModal: null, 
+    tlClick: 0, 
+    admCar: null, 
+    admId: null, 
+    oldAdmCarName: null, 
+    tlDay: 0, 
+    expDur: 1, 
+    bilansvarlig: '', 
+    workshopMode: false, 
+    expCar: null, 
+    expStart: null, 
+    expEnd: null, 
+    visType: localStorage.getItem('visType') !== 'false', 
+    visResp: localStorage.getItem('visResp') === 'true', 
+    uiLarge: localStorage.getItem('uiLarge') === 'true', 
+    kioskMode: false,
+    loc: localStorage.getItem('bookbil_loc') || null // Default null to trigger DB fetch check
+};
+
 let touchStartX = 0;
 let touchStartY = 0; 
 
@@ -759,8 +810,36 @@ async function load() {
         // Henter data separat for å unngå at feil i én spørring stopper alt
         const c = await _s.from('biler').select('*').order('bil');
         const r = await _s.from('bookinger').select('*'); // Henter alt for å være sikker
-        const u = await _s.from('brukere').select('epost, varsel').eq('brukernavn', s.bid).maybeSingle();
-        const conf = await _s.from('konfigurasjon').select('*').eq('nokkel', 'bilansvarlig_epost').maybeSingle();
+        
+        // Henter brukerdata, inkludert lokasjon
+        const u = await _s.from('brukere').select('epost, varsel, lokasjon').eq('brukernavn', s.bid).maybeSingle();
+        
+        // --- NY LOGIKK FOR TVUNGEN VALG ---
+        if(u.data) {
+             s.savedEmail = u.data.epost;
+             s.varsel = u.data.varsel;
+
+             if (!u.data.lokasjon) {
+                 // Ingen lokasjon lagret i DB -> Tving valg via modal
+                 // Vi setter ikke s.loc ennå, venter på valg
+                 openM('m-loc-force');
+             } else {
+                 // Lokasjon funnet -> Oppdater state
+                 s.loc = u.data.lokasjon;
+                 localStorage.setItem('bookbil_loc', s.loc);
+             }
+        }
+        // Fallback for visualisering før valg: Hvis s.loc er null, bruk 'Jæren' midlertidig for UI
+        const currentLoc = s.loc || 'Jæren'; 
+
+        // Dynamisk henting av bilansvarlig basert på AKTIV lokasjon
+        let confKey = 'bilansvarlig_epost_' + currentLoc;
+        let conf = await _s.from('konfigurasjon').select('*').eq('nokkel', confKey).maybeSingle();
+        
+        // Fallback for Jæren (legacy key)
+        if (!conf.data && currentLoc === 'Jæren') {
+             conf = await _s.from('konfigurasjon').select('*').eq('nokkel', 'bilansvarlig_epost').maybeSingle();
+        }
 
         if (c.error) console.error("Feil ved henting av biler:", c.error);
         if (r.error) console.error("Feil ved henting av bookinger:", r.error);
@@ -768,8 +847,7 @@ async function load() {
         s.c = c.data || [];
         s.r = r.data || [];
         
-        if(u.data) { s.savedEmail = u.data.epost; s.varsel = u.data.varsel; }
-        if(conf.data) { s.bilansvarlig = conf.data.verdi; }
+        if(conf.data) { s.bilansvarlig = conf.data.verdi; } else { s.bilansvarlig = ""; }
         
         // Oppdatert header-visning
         const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
@@ -779,7 +857,7 @@ async function load() {
              $id('u-disp').innerHTML = `KIOSK-MODUS <span class="opacity-50 mx-1">•</span> <span class="font-normal opacity-75">${time}</span>`;
         }
         
-        checkPushPrompt(); // Sjekk banner hver gang vi laster
+        checkPushPrompt(); 
         render();
     } catch(e) { 
         console.error("Kritisk feil i load():", e); 
@@ -802,7 +880,9 @@ function render() {
     
     if(stats) stats.classList.remove('hidden'); 
     if(tabsContainer) tabsContainer.classList.remove('hidden'); 
-    if(title) title.innerText = "BookBil Jæren";
+    
+    // Dynamic Title based on location
+    if(title) title.innerText = "BookBil " + (s.loc || '');
     
     // KIOSK MODE: Hide "Mine" tab logic inside render to ensure dynamic update
     if (s.kioskMode) {
@@ -830,6 +910,9 @@ function render() {
 function calcStats() {
     const now = new Date(); let total = 0; let free = 0;
     s.c.forEach(b => {
+        // FILTER: Skip cars not in current location (if location is set in DB)
+        if(b.lokasjon && b.lokasjon !== s.loc && s.loc !== null) return;
+        
         if(s.h.includes(b.bil)) return;
         total++;
         if(b.status === 'Aktiv') {
@@ -916,6 +999,9 @@ function rCars(c) {
     const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1); tomorrow.setHours(0,0,0,0);
 
     sortedCars.forEach(b => {
+        // FILTER: Skip cars not in current location (if location is set in DB)
+        if(b.lokasjon && b.lokasjon !== s.loc && s.loc !== null) return;
+
         if(s.h.includes(b.bil)) return;
         const act = s.r.find(r => r.bil===b.bil && new Date(r.start_tid)<=now && new Date(r.slutt_tid)>=now);
         const nxt = s.r.filter(r => r.bil===b.bil && new Date(r.start_tid)>now).sort((a,x)=>new Date(a.start_tid)-new Date(x.start_tid))[0];
@@ -1055,6 +1141,9 @@ function renderExpressList() {
     else endTime = new Date(now.getTime() + s.expDur * 3600000);
     
     const availableCars = s.c.filter(b => {
+        // FILTER: Skip cars not in current location (if location is set in DB)
+        if(b.lokasjon && b.lokasjon !== s.loc) return false;
+
         if(b.status !== 'Aktiv' || s.h.includes(b.bil)) return false;
         return !s.r.some(r => { const rStart = new Date(r.start_tid); const rEnd = new Date(r.slutt_tid); return r.bil === b.bil && now < rEnd && endTime > rStart; });
     }).sort((a,b) => {
@@ -1447,7 +1536,12 @@ function findC() {
     const l=$id('s-res'); l.innerHTML=""; l.classList.remove('hidden');
     if(st >= en) return showToast("Velg slutt-tid", "error");
 
-    const cars = s.c.filter(b => b.status==='Aktiv' && !s.h.includes(b.bil));
+    const cars = s.c.filter(b => {
+        // FILTER: Skip cars not in current location (if location is set in DB)
+        if(b.lokasjon && b.lokasjon !== s.loc) return false;
+        
+        return b.status==='Aktiv' && !s.h.includes(b.bil);
+    });
     
     const available = [];
     const busy = [];
@@ -1538,9 +1632,10 @@ async function subRet(id, c) {
 function rAdm(c) {
     let html = `<div class="flex flex-wrap gap-2 mb-4 bg-slate-800 p-3 rounded-xl border border-slate-700">`;
     s.c.forEach(b => {
+       // Also filter admin list by location if the column exists
+       if(b.lokasjon && b.lokasjon !== s.loc) return;
+       
        let colorClass = 'pill-gray'; if (b.status === 'Aktiv') { if (b.kommentar) colorClass = 'pill-yellow'; else colorClass = 'pill-green'; }
-       const carJson = JSON.stringify(b).replace(/"/g, '&quot;');
-       // FIX: Use ID instead of JSON object to prevent onclick issues
        html += `<button onclick="openAdmEdit({id: '${b.id}'})" class="car-pill ${colorClass} px-3 py-1 rounded-full text-xs font-bold">${b.bil}</button>`;
     });
     
@@ -1604,7 +1699,16 @@ async function saveAdmCar() {
     
     if(!name) return showToast("Mangler navn", "error");
 
-    const data = { bil: name, ansvarlig: resp, kategori: cat, status: stat, kommentar: comm, intern_info: info };
+    // Add location to the payload (it will be ignored by Supabase if column doesn't exist yet)
+    const data = { 
+        bil: name, 
+        ansvarlig: resp, 
+        kategori: cat, 
+        status: stat, 
+        kommentar: comm, 
+        intern_info: info,
+        lokasjon: s.loc // Tag new cars with current location
+    };
 
     let error;
     if (s.admId) {
@@ -1649,11 +1753,18 @@ function rLog(c) {
         return;
     }
     const now = new Date();
-    // Filter out reservations that haven't ended yet
-    const l = s.fullLog.filter(h => new Date(h.slutt_tid) < now); 
+    // Filter finished trips AND filter by location (only cars in current location list s.c)
+    // NOTE: This assumes s.c contains all relevant cars for the current location.
+    // If a car was deleted, it won't be in s.c, so it won't show in history.
+    // Given the constraints, this is the safest way to filter by location without joining tables in JS.
+    const l = s.fullLog.filter(h => {
+        const isFinished = new Date(h.slutt_tid) < now;
+        const carExistsInLocation = s.c.some(car => car.bil === h.bil && (car.lokasjon === s.loc || (!car.lokasjon && s.loc === 'Jæren'))); 
+        return isFinished && carExistsInLocation;
+    }); 
     
     if(l.length === 0) {
-         c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV (HISTORIKK)</button><div class='text-center text-slate-500 mt-10'>Ingen historikk funnet.</div>`;
+         c.innerHTML = `<button onclick="csv()" class="w-full bg-blue-900/50 text-blue-300 py-3 rounded-xl text-xs font-bold border border-blue-800 mb-4 shadow-lg flex items-center justify-center gap-2"><span class="material-icons-round text-sm">download</span> LAST NED CSV (HISTORIKK)</button><div class='text-center text-slate-500 mt-10'>Ingen historikk funnet for ${s.loc}.</div>`;
          return;
     }
 
@@ -1669,17 +1780,37 @@ async function csv() {
         await loadFullHistory();
     }
     const now = new Date();
-    // Filter finished trips only for CSV as well
-    const l = s.fullLog.filter(h => new Date(h.slutt_tid) < now);
+    // Filter finished trips AND filter by location for CSV export too
+    const l = s.fullLog.filter(h => {
+        const isFinished = new Date(h.slutt_tid) < now;
+        const carExistsInLocation = s.c.some(car => car.bil === h.bil && (car.lokasjon === s.loc || (!car.lokasjon && s.loc === 'Jæren'))); 
+        return isFinished && carExistsInLocation;
+    });
     
     const t = "Bil,Bruker,Start,Slutt,Formål,Merknad\n" + l.map(x => `${x.bil},${x.bid},${fmtD(x.start_tid)} ${fmtT(x.start_tid)},${fmtD(x.slutt_tid)} ${fmtT(x.slutt_tid)},"${x.formal}",${x.kommentar||''}`).join('\n'); 
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv;charset=utf-8;' })); a.download = "logg.csv"; a.click(); 
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type: 'text/csv;charset=utf-8;' })); a.download = `logg_${s.loc}.csv`; a.click(); 
 }
 
 function rSet(c) {
-    let p = s.c.map(b => `<button onclick="tVis('${b.bil}')" class="px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${s.h.includes(b.bil)?'bg-slate-800 text-slate-500 border-slate-700 opacity-50':'bg-blue-600 text-white border-blue-500 shadow-md'}">${b.bil}</button>`).join('');
+    // Filter cars in settings list based on location
+    let p = s.c.filter(b => (b.lokasjon === s.loc || (!b.lokasjon && s.loc === 'Jæren'))).map(b => `<button onclick="tVis('${b.bil}')" class="px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${s.h.includes(b.bil)?'bg-slate-800 text-slate-500 border-slate-700 opacity-50':'bg-blue-600 text-white border-blue-500 shadow-md'}">${b.bil}</button>`).join('');
     
+    // Define available locations (Can be expanded later or fetched from DB)
+    const locations = ['Jæren', 'Sandnes', 'Stavanger', 'Dalane'];
+    const locOptions = locations.map(l => `<option value="${l}" ${s.loc === l ? 'selected' : ''}>${l}</option>`).join('');
+
     c.innerHTML = `
+    <!-- Card 0: Lokasjon (NEW) -->
+    <div class="settings-card border-blue-500/50 bg-blue-900/10">
+        <div class="settings-header"><span class="material-icons-round text-white">location_on</span> Tjenestested</div>
+        <div class="flex flex-col gap-2">
+             <label class="text-xs text-slate-400">Velg hvor du vil booke bil:</label>
+             <select onchange="changeLocation(this.value, this)" class="w-full bg-slate-900 p-3 rounded-xl border border-slate-600 text-white text-base font-bold">
+                ${locOptions}
+             </select>
+        </div>
+    </div>
+
     <!-- Card 1: Min Profil -->
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-blue-500">person</span> Min Profil</div>
@@ -1718,9 +1849,9 @@ function rSet(c) {
             </div>
             
             <div class="pt-2">
-                <p class="text-xs text-slate-500 font-bold uppercase mb-3">Velg biler som skal vises</p>
+                <p class="text-xs text-slate-500 font-bold uppercase mb-3">Velg biler som skal vises (${s.loc})</p>
                 <div class="flex flex-wrap gap-2">
-                    ${p}
+                    ${p || "<span class='text-slate-500 text-xs italic'>Ingen biler funnet for dette stedet.</span>"}
                 </div>
             </div>
         </div>
@@ -1763,7 +1894,7 @@ function rSet(c) {
     <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800">
         <h2 class="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2"><span class="material-icons-round text-slate-500">admin_panel_settings</span> Administrasjon</h2>
         <div class="mb-6">
-            <p class="text-xs text-slate-500 mb-2 font-bold uppercase">Bilansvarlige (Mottar varsler)</p>
+            <p class="text-xs text-slate-500 mb-2 font-bold uppercase">Bilansvarlige for ${s.loc}</p>
             <div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div>
             <div class="flex gap-2">
                 <input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white outline-none focus:border-blue-500">
@@ -1782,15 +1913,81 @@ function rSet(c) {
     renderAdminEmails();
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
 }
+
+async function changeLocation(newLoc, selectElem) {
+    if(!selectElem) {
+        // Called from modal, just do it
+        await applyLocationChange(newLoc);
+        return;
+    }
+    
+    // Called from select, confirm first
+    if(!confirm(`Du bytter nå lokasjon til ${newLoc}.\n\nOversikten vil nå vise biler og reservasjoner tilknyttet ${newLoc}. Vil du fortsette?`)) {
+        // Reset selection if cancelled
+        selectElem.value = s.loc;
+        return;
+    }
+    await applyLocationChange(newLoc);
+}
+
+async function applyLocationChange(newLoc) {
+    s.loc = newLoc;
+    localStorage.setItem('bookbil_loc', newLoc);
+    
+    // Save to DB
+    await _s.from('brukere').update({ lokasjon: newLoc }).eq('brukernavn', s.bid);
+    
+    showToast(`Byttet til ${newLoc}`, 'success');
+    
+    // Close modal if open
+    $id('m-loc-force').classList.add('hidden');
+    
+    // Clear filtered list when switching to ensure clean slate
+    s.h = []; 
+    localStorage.setItem('h', JSON.stringify(s.h));
+
+    // Reload data to fetch correct admin emails and refresh views
+    load();
+}
+
 function renderAdminEmails() {
     const list = $id('admin-email-list'); if(!list) return; list.innerHTML = "";
     const emails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : [];
     if(emails.length === 0) { list.innerHTML = "<span class='text-xs text-slate-500 italic'>Ingen registrert.</span>"; return; }
     emails.forEach(email => { const pill = document.createElement('div'); pill.className = 'email-pill'; pill.innerHTML = `<span>${email}</span><button onclick="removeAdminEmail('${email}')">×</button>`; list.appendChild(pill); });
 }
-async function addAdminEmail() { const input = $id('s-admin-new-em'); const newEmail = input.value.trim(); if(!newEmail) return; const currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : []; if(currentEmails.includes(newEmail)) { showToast("Allerede lagt til", "info"); return; } currentEmails.push(newEmail); await saveAdminConfig(currentEmails.join(',')); input.value = ""; }
-async function removeAdminEmail(email) { if(!confirm(`Fjerne ${email} som bilansvarlig?`)) return; let currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : []; currentEmails = currentEmails.filter(e => e !== email); await saveAdminConfig(currentEmails.join(',')); }
-async function saveAdminConfig(val) { const { error } = await _s.from('konfigurasjon').upsert({ nokkel: 'bilansvarlig_epost', verdi: val }); if(error) showToast("Feil ved lagring", "error"); else { s.bilansvarlig = val; renderAdminEmails(); showToast("Lagret!", "success"); } }
+async function addAdminEmail() { 
+    const input = $id('s-admin-new-em'); 
+    const newEmail = input.value.trim(); 
+    if(!newEmail) return; 
+    
+    const currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : []; 
+    if(currentEmails.includes(newEmail)) { showToast("Allerede lagt til", "info"); return; } 
+    
+    currentEmails.push(newEmail); 
+    await saveAdminConfig(currentEmails.join(',')); 
+    input.value = ""; 
+}
+async function removeAdminEmail(email) { 
+    if(!confirm(`Fjerne ${email} som bilansvarlig for ${s.loc}?`)) return; 
+    let currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : []; 
+    currentEmails = currentEmails.filter(e => e !== email); 
+    await saveAdminConfig(currentEmails.join(',')); 
+}
+
+async function saveAdminConfig(val) { 
+    // Construct dynamic key based on location
+    const confKey = 'bilansvarlig_epost_' + s.loc;
+    
+    const { error } = await _s.from('konfigurasjon').upsert({ nokkel: confKey, verdi: val }); 
+    if(error) {
+        showToast("Feil ved lagring", "error"); 
+    } else { 
+        s.bilansvarlig = val; 
+        renderAdminEmails(); 
+        showToast("Lagret!", "success"); 
+    } 
+}
 function tVis(c) { s.h.includes(c) ? s.h=s.h.filter(x=>x!==c) : s.h.push(c); localStorage.setItem('h',JSON.stringify(s.h)); render(); }
 function togVis(k, v) { s[k] = v; localStorage.setItem(k, v); render(); if(s.v === 'cars') load(); }
 function togUiSize(v) { s.uiLarge = v; localStorage.setItem('uiLarge', v); if(v) document.body.classList.add('ui-large'); else document.body.classList.remove('ui-large'); render(); }
