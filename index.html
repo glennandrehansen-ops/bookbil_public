@@ -253,30 +253,39 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 @keyframes s2 { 0%, 23% { opacity: 0; transform: scale(0.95); } 25%, 47% { opacity: 1; transform: scale(1); } 49%, 100% { opacity: 0; transform: scale(1.05); } }
 @keyframes s3 { 0%, 48% { opacity: 0; transform: scale(0.95); } 50%, 72% { opacity: 1; transform: scale(1); } 74%, 100% { opacity: 0; transform: scale(1.05); } }
 @keyframes s4 { 0%, 73% { opacity: 0; transform: scale(0.95); } 75%, 97% { opacity: 1; transform: scale(1); } 99%, 100% { opacity: 0; transform: scale(1.05); } }
+
 .s1-strobe { animation: strobe 1.5s infinite; }
 .s1-glow { animation: pulse-light 3s infinite alternate; }
+
 .s2-cursor { animation: cursor-click 16s infinite; }
 .s2-btn { animation: btn-press 16s infinite; }
 .s2-check { animation: check-pop 16s infinite; transform-origin: 300px 190px; }
+
 @keyframes cursor-click { 0%, 28% { transform: translate(400px, 300px); opacity: 0; } 31% { transform: translate(300px, 195px); opacity: 1; } 33% { transform: translate(300px, 195px) scale(0.8); opacity: 1; } 35%, 45% { transform: translate(300px, 195px) scale(1); opacity: 0; } 100% { opacity: 0; } }
 @keyframes btn-press { 0%, 32% { fill: #2563eb; transform: scale(1); } 33% { fill: #1d4ed8; transform: scale(0.95); } 35%, 100% { fill: #10b981; transform: scale(1); } }
 @keyframes check-pop { 0%, 34% { opacity: 0; transform: scale(0); } 36%, 47% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0); } }
-.s3-bg-pan { animation: pan-left 4s linear infinite; }
-.s3-road-pan { animation: pan-left-fast 0.6s linear infinite; }
+
+.s3-bg-pan { animation: pan-left 6s linear infinite; }
+.s3-forward-lines { animation: drive-forward 0.4s infinite linear; }
 .s3-car { animation: car-drive 1s infinite alternate ease-in-out; }
 .s3-strobe { animation: strobe 0.4s infinite steps(1); }
 .s3-headlight { animation: pulse-light 2s infinite alternate; }
-@keyframes pan-left { from { transform: translateX(0); } to { transform: translateX(-200px); } }
-@keyframes pan-left-fast { from { transform: translateX(0); } to { transform: translateX(-100px); } }
+
+@keyframes pan-left { from { transform: translateX(0); } to { transform: translateX(-150px); } }
+@keyframes drive-forward { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -40; } }
 @keyframes car-drive { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+
 .s4-key { animation: drop-key 16s infinite cubic-bezier(0.4, 0, 0.2, 1); }
 .s4-screen { animation: screen-success 16s infinite; }
 .s4-indicator { animation: indicator-success 16s infinite; }
+
 @keyframes drop-key { 0%, 80% { transform: translate(300px, -50px) rotate(-10deg); opacity: 0; } 82% { transform: translate(300px, 120px) rotate(5deg); opacity: 1; } 85% { transform: translate(300px, 180px) rotate(0deg); opacity: 1; } 87%, 100% { transform: translate(300px, 250px) rotate(0deg); opacity: 0; } }
 @keyframes screen-success { 0%, 86% { fill: #1e3a8a; } 87%, 100% { fill: #064e3b; } }
 @keyframes indicator-success { 0%, 86% { fill: #3b82f6; filter: none; } 87%, 100% { fill: #10b981; filter: drop-shadow(0 0 8px #10b981); } }
+
 @keyframes strobe { 0%, 48%, 52%, 100% { opacity: 0.2; } 50% { opacity: 1; filter: drop-shadow(0 0 15px #3b82f6); } }
 @keyframes pulse-light { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+
 .text-title { font-family: sans-serif; font-weight: 900; font-size: 28px; fill: #f8fafc; text-anchor: middle; letter-spacing: 1px; }
 .text-sub { font-family: sans-serif; font-weight: 700; font-size: 14px; fill: #64748b; text-anchor: middle; text-transform: uppercase; letter-spacing: 2px; }
 </style>
@@ -289,7 +298,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 <!-- AUTENTISERING -->
 <div id="auth" class="flex flex-col items-center justify-center h-screen p-6 text-center fixed inset-0 z-[60] bg-[#0f172a]">
  
- <div class="w-full max-w-sm aspect-[16/10] mb-8 relative">
+ <div class="w-full max-w-sm aspect-[16/10] mb-6 relative pointer-events-none">
     <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet" class="w-full h-full block" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <filter id="glow">
@@ -337,7 +346,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
             </g>
 
             <!-- BY-SILHUETT -->
-            <g id="city-skyline" fill="#1e293b" opacity="0.4">
+            <g id="city-skyline" fill="#1e293b" opacity="0.3">
                 <rect x="0" y="100" width="40" height="150" />
                 <rect x="45" y="60" width="50" height="190" />
                 <rect x="100" y="120" width="35" height="130" />
@@ -369,16 +378,17 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
         <g class="scene scene-2">
             <text x="300" y="50" class="text-title">Reserver</text>
             <text x="300" y="75" class="text-sub">Velg kjøretøy fra oversikten</text>
-            <rect x="150" y="100" width="300" height="220" rx="16" fill="#0f172a" stroke="#334155" stroke-width="2" />
-            <rect x="152" y="102" width="296" height="40" rx="14" fill="#1e293b" />
+            <!-- Løst fra bakgrunnen med egen farge -->
+            <rect x="150" y="100" width="300" height="220" rx="16" fill="#1e293b" stroke="#334155" stroke-width="2" />
+            <rect x="152" y="102" width="296" height="40" rx="14" fill="#0f172a" />
             <circle cx="175" cy="122" r="8" fill="#3b82f6" />
             <rect x="190" y="118" width="60" height="8" rx="4" fill="#f8fafc" />
             <rect x="410" y="115" width="20" height="14" rx="4" fill="#334155" />
-            <rect x="165" y="155" width="270" height="8" rx="4" fill="#1e293b" />
+            <rect x="165" y="155" width="270" height="8" rx="4" fill="#0f172a" />
             <rect x="200" y="155" width="100" height="8" rx="4" fill="#3b82f6" />
             <circle cx="200" cy="159" r="6" fill="#fff" />
             <circle cx="300" cy="159" r="6" fill="#fff" />
-            <rect x="165" y="180" width="270" height="50" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1" />
+            <rect x="165" y="180" width="270" height="50" rx="10" fill="#0f172a" stroke="#475569" stroke-width="1" />
             <rect x="175" y="190" width="4" height="30" rx="2" fill="#10b981" />
             <path d="M190,205 L215,205 Q220,205 220,210 L225,215 L185,215 L190,210 Q190,205 190,205 Z" fill="#f8fafc" />
             <rect x="195" y="200" width="15" height="4" rx="1" fill="#3b82f6" />
@@ -386,7 +396,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
             <rect x="235" y="210" width="60" height="6" rx="3" fill="#64748b" />
             <rect x="350" y="192" width="70" height="26" rx="8" class="s2-btn" fill="#2563eb" style="transform-origin: 385px 205px;" />
             <rect x="365" y="202" width="40" height="6" rx="3" fill="#ffffff" />
-            <rect x="165" y="240" width="270" height="50" rx="10" fill="#1e293b" opacity="0.5" />
+            <rect x="165" y="240" width="270" height="50" rx="10" fill="#0f172a" opacity="0.5" />
             <rect x="175" y="250" width="4" height="30" rx="2" fill="#ef4444" />
             <rect x="235" y="255" width="40" height="8" rx="4" fill="#cbd5e1" />
             <g class="s2-check">
@@ -398,19 +408,23 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
             </g>
         </g>
 
-        <!-- SCENE 3: I DRIFT -->
+        <!-- SCENE 3: PÅ OPPDRAG -->
         <g class="scene scene-3">
-            <text x="300" y="50" class="text-title">I drift</text>
-            <text x="300" y="75" class="text-sub">Bilen er registrert opptatt</text>
+            <text x="300" y="50" class="text-title">På oppdrag</text>
+            <text x="300" y="75" class="text-sub">Bilen er din og klar til bruk</text>
+            
             <g class="s3-bg-pan">
                 <use href="#city-skyline" x="0" y="0" />
                 <use href="#city-skyline" x="600" y="0" />
             </g>
-            <rect x="0" y="285" width="600" height="115" fill="#0f172a" opacity="0.8" />
-            <g class="s3-road-pan">
-                <line x1="0" y1="330" x2="700" y2="330" stroke="#334155" stroke-width="4" stroke-dasharray="40 60" />
-                <line x1="0" y1="360" x2="700" y2="360" stroke="#1e293b" stroke-width="2" stroke-dasharray="20 40" />
+            
+            <g>
+                <polygon points="250,240 350,240 550,400 50,400" fill="#0b1121" />
+                <line x1="250" y1="240" x2="50" y2="400" stroke="#1e293b" stroke-width="3" />
+                <line x1="350" y1="240" x2="550" y2="400" stroke="#1e293b" stroke-width="3" />
+                <line x1="300" y1="240" x2="300" y2="400" stroke="#334155" stroke-width="4" stroke-dasharray="20 20" class="s3-forward-lines" />
             </g>
+            
             <g class="s3-car">
                 <use href="#car-front" transform="translate(0, 0)" />
                 <rect x="240" y="165" width="120" height="10" rx="3" fill="#1e293b" />
@@ -418,7 +432,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
                 <rect x="303" y="167" width="55" height="6" rx="2" fill="#ef4444" class="s3-strobe" style="animation-delay: 0.2s;" />
                 <rect x="215" y="232" width="30" height="12" rx="4" fill="#fef08a" class="s3-headlight" filter="url(#glow-strong)" />
                 <rect x="355" y="232" width="30" height="12" rx="4" fill="#fef08a" class="s3-headlight" filter="url(#glow-strong)" />
-                <polygon points="230,240 100,400 500,400 370,240" fill="#fef08a" opacity="0.1" />
+                <polygon points="230,240 50,400 550,400 370,240" fill="#fef08a" opacity="0.05" />
             </g>
         </g>
 
@@ -450,36 +464,20 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
     </svg>
  </div>
  
- <p class="text-slate-500 text-sm mb-6">Logg inn med din BID@politiet.no</p>
- <div id="f-email" class="w-full max-w-xs space-y-4">
-   <input type="email" id="l-email" placeholder="bid@politiet.no" class="w-full p-4 rounded-xl text-center text-lg font-bold">
-   <button onclick="sendOtp()" id="btn-send" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-lg text-white shadow-lg active:scale-95">SEND KODE</button>
+ <p class="text-slate-500 text-sm mb-6 z-10 relative pointer-events-auto">Logg inn med din BID@politiet.no</p>
+ <div id="f-email" class="w-full max-w-xs space-y-4 z-10 relative pointer-events-auto">
+   <input type="email" id="l-email" placeholder="bid@politiet.no" class="w-full p-4 rounded-xl text-center text-lg font-bold border border-slate-700 bg-slate-900/80 backdrop-blur-sm text-white focus:border-blue-500 outline-none">
+   <button onclick="sendOtp()" id="btn-send" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-lg text-white shadow-lg active:scale-95 transition-transform">SEND KODE</button>
  </div>
- <div id="f-otp" class="w-full max-w-xs space-y-4 hidden">
-   <input type="text" id="l-otp" placeholder="12345678" maxlength="8" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-widest">
-   <button onclick="verifyOtp()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold">LOGG INN</button>
-   <button onclick="resetAuth()" class="text-slate-500 text-sm underline mt-4">Angre</button>
+ <div id="f-otp" class="w-full max-w-xs space-y-4 hidden z-10 relative pointer-events-auto">
+   <input type="text" id="l-otp" placeholder="12345678" maxlength="8" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-widest border border-slate-700 bg-slate-900/80 backdrop-blur-sm text-white focus:border-blue-500 outline-none">
+   <button onclick="verifyOtp()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">LOGG INN</button>
+   <button onclick="resetAuth()" class="text-slate-400 text-sm underline mt-4 hover:text-white transition-colors">Angre</button>
  </div>
- <button onclick="window.open('https://bbmanual.pages.dev/')" class="text-blue-500 font-bold text-sm mt-6 flex items-center justify-center gap-2"><span class="material-icons-round">auto_stories</span> Brukermanual</button>
+ <button onclick="window.open('https://bbmanual.pages.dev/')" class="text-blue-500 font-bold text-sm mt-8 flex items-center justify-center gap-2 z-10 relative hover:text-blue-400 transition-colors pointer-events-auto"><span class="material-icons-round">auto_stories</span> Brukermanual</button>
 </div>
 
-<!-- HOVEDAPP -->
-<!-- Added padding-top safe area logic -->
-<div id="app" class="hidden h-full flex flex-col relative w-full" style="padding-top: env(safe-area-inset-top);">
- 
- <!-- VARSLING BANNER -->
- <div id="push-msg" class="hidden w-full bg-blue-600/90 backdrop-blur text-white p-3 z-[40] shadow-xl border-b border-blue-400/30">
-   <div class="flex justify-between items-start max-w-xl mx-auto gap-3">
-     <div class="flex-1">
-       <p class="font-bold text-xs mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">notifications_active</span> Ønsker du varsler?</p>
-       <p class="text-[10px] text-blue-100 leading-snug mb-2">Du kan aktivere varsler for dine reservasjoner. Hvis det ikke fungerer, prøv å reinstallere appen.</p>
-       <button onclick="enablePushFromBanner()" class="bg-white text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-black shadow-sm active:scale-95 transition-transform">AKTIVER VARSLER</button>
-     </div>
-     <button onclick="dismissPushMsg()" class="text-blue-200 hover:text-white p-1"><span class="material-icons-round text-lg">close</span></button>
-   </div>
- </div>
-
- <!-- TVUNGEN LOKASJONSVALG MODAL (NEW) -->
+<!-- TVUNGEN LOKASJONSVALG MODAL (NEW) -->
  <div id="m-loc-force" class="fixed inset-0 bg-[#0f172a] z-[100] hidden flex flex-col items-center justify-center p-6 text-center">
     <span class="material-icons-round text-blue-500 text-6xl mb-4">location_on</span>
     <h2 class="text-2xl font-black text-white uppercase mb-2">Velg Tjenestested</h2>
