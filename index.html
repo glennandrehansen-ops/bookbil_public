@@ -242,6 +242,43 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 .toast-success { border-bottom: 3px solid #10b981; }
 .toast-error { border-bottom: 3px solid #ef4444; }
 .toast-info { border-bottom: 3px solid #3b82f6; }
+
+/* SVG ANIMASJONER FOR INNLOGGING */
+.scene { opacity: 0; transform-origin: center; }
+.scene-1 { animation: s1 16s infinite; }
+.scene-2 { animation: s2 16s infinite; }
+.scene-3 { animation: s3 16s infinite; }
+.scene-4 { animation: s4 16s infinite; }
+@keyframes s1 { 0%, 2% { opacity: 0; transform: scale(0.95); } 4%, 22% { opacity: 1; transform: scale(1); } 24%, 100% { opacity: 0; transform: scale(1.05); } }
+@keyframes s2 { 0%, 23% { opacity: 0; transform: scale(0.95); } 25%, 47% { opacity: 1; transform: scale(1); } 49%, 100% { opacity: 0; transform: scale(1.05); } }
+@keyframes s3 { 0%, 48% { opacity: 0; transform: scale(0.95); } 50%, 72% { opacity: 1; transform: scale(1); } 74%, 100% { opacity: 0; transform: scale(1.05); } }
+@keyframes s4 { 0%, 73% { opacity: 0; transform: scale(0.95); } 75%, 97% { opacity: 1; transform: scale(1); } 99%, 100% { opacity: 0; transform: scale(1.05); } }
+.s1-strobe { animation: strobe 1.5s infinite; }
+.s1-glow { animation: pulse-light 3s infinite alternate; }
+.s2-cursor { animation: cursor-click 16s infinite; }
+.s2-btn { animation: btn-press 16s infinite; }
+.s2-check { animation: check-pop 16s infinite; transform-origin: 300px 190px; }
+@keyframes cursor-click { 0%, 28% { transform: translate(400px, 300px); opacity: 0; } 31% { transform: translate(300px, 195px); opacity: 1; } 33% { transform: translate(300px, 195px) scale(0.8); opacity: 1; } 35%, 45% { transform: translate(300px, 195px) scale(1); opacity: 0; } 100% { opacity: 0; } }
+@keyframes btn-press { 0%, 32% { fill: #2563eb; transform: scale(1); } 33% { fill: #1d4ed8; transform: scale(0.95); } 35%, 100% { fill: #10b981; transform: scale(1); } }
+@keyframes check-pop { 0%, 34% { opacity: 0; transform: scale(0); } 36%, 47% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0); } }
+.s3-bg-pan { animation: pan-left 4s linear infinite; }
+.s3-road-pan { animation: pan-left-fast 0.6s linear infinite; }
+.s3-car { animation: car-drive 1s infinite alternate ease-in-out; }
+.s3-strobe { animation: strobe 0.4s infinite steps(1); }
+.s3-headlight { animation: pulse-light 2s infinite alternate; }
+@keyframes pan-left { from { transform: translateX(0); } to { transform: translateX(-200px); } }
+@keyframes pan-left-fast { from { transform: translateX(0); } to { transform: translateX(-100px); } }
+@keyframes car-drive { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+.s4-key { animation: drop-key 16s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+.s4-screen { animation: screen-success 16s infinite; }
+.s4-indicator { animation: indicator-success 16s infinite; }
+@keyframes drop-key { 0%, 80% { transform: translate(300px, -50px) rotate(-10deg); opacity: 0; } 82% { transform: translate(300px, 120px) rotate(5deg); opacity: 1; } 85% { transform: translate(300px, 180px) rotate(0deg); opacity: 1; } 87%, 100% { transform: translate(300px, 250px) rotate(0deg); opacity: 0; } }
+@keyframes screen-success { 0%, 86% { fill: #1e3a8a; } 87%, 100% { fill: #064e3b; } }
+@keyframes indicator-success { 0%, 86% { fill: #3b82f6; filter: none; } 87%, 100% { fill: #10b981; filter: drop-shadow(0 0 8px #10b981); } }
+@keyframes strobe { 0%, 48%, 52%, 100% { opacity: 0.2; } 50% { opacity: 1; filter: drop-shadow(0 0 15px #3b82f6); } }
+@keyframes pulse-light { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+.text-title { font-family: sans-serif; font-weight: 900; font-size: 28px; fill: #f8fafc; text-anchor: middle; letter-spacing: 1px; }
+.text-sub { font-family: sans-serif; font-weight: 700; font-size: 14px; fill: #64748b; text-anchor: middle; text-transform: uppercase; letter-spacing: 2px; }
 </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
@@ -251,8 +288,168 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 
 <!-- AUTENTISERING -->
 <div id="auth" class="flex flex-col items-center justify-center h-screen p-6 text-center fixed inset-0 z-[60] bg-[#0f172a]">
- <span class="material-icons-round text-blue-500 text-7xl mb-4">local_police</span>
- <h1 class="text-3xl font-black mb-1 uppercase text-white">BookBil</h1>
+ 
+ <div class="w-full max-w-sm aspect-[16/10] mb-8 relative">
+    <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet" class="w-full h-full block" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            
+            <filter id="glow-strong">
+                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+
+            <!-- DETALJERT NORSK POLITIBIL FRONT -->
+            <g id="car-front">
+                <ellipse cx="300" cy="285" rx="80" ry="8" fill="#000" opacity="0.6"/>
+                <rect x="225" y="250" width="20" height="35" rx="4" fill="#020617" />
+                <rect x="355" y="250" width="20" height="35" rx="4" fill="#020617" />
+                <path d="M225,180 L375,180 Q390,180 395,210 L405,260 Q405,275 390,275 L210,275 Q195,275 195,260 L205,210 Q210,180 225,180 Z" fill="#f8fafc" />
+                <path d="M235,185 L365,185 L378,225 L222,225 Z" fill="#0f172a" />
+                <path d="M240,190 L300,190 L290,220 L230,220 Z" fill="#ffffff" opacity="0.05" />
+                <path d="M213,260 L387,260 L387,275 L213,275 Z" fill="#000" opacity="0.1" />
+                <path d="M215,262 L235,262 L245,275 L225,275 Z" fill="#e2fd52" />
+                <path d="M265,262 L285,262 L295,275 L275,275 Z" fill="#e2fd52" />
+                <path d="M315,262 L335,262 L345,275 L325,275 Z" fill="#e2fd52" />
+                <path d="M365,262 L385,262 L390,268 L390,275 L375,275 Z" fill="#e2fd52" />
+                <rect x="260" y="235" width="80" height="20" rx="3" fill="#1e293b" />
+                <path d="M270,235 L330,235 L325,250 L275,250 Z" fill="#020617" />
+                <rect x="285" y="265" width="30" height="8" rx="2" fill="#111" />
+                <rect x="215" y="232" width="30" height="12" rx="4" fill="#334155" />
+                <rect x="355" y="232" width="30" height="12" rx="4" fill="#334155" />
+                <rect x="220" y="234" width="20" height="8" rx="2" fill="#f8fafc" />
+                <rect x="360" y="234" width="20" height="8" rx="2" fill="#f8fafc" />
+                <path d="M195,215 Q180,215 180,225 L180,230 Q180,235 190,235" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
+                <path d="M405,215 Q420,215 420,225 L420,230 Q420,235 410,235" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
+            </g>
+
+            <!-- DETALJERT BILNØKKEL (FOB) -->
+            <g id="car-fob">
+                <rect x="-15" y="-25" width="30" height="50" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2" />
+                <circle cx="0" cy="-10" r="5" fill="#0f172a" />
+                <circle cx="0" cy="5" r="5" fill="#0f172a" />
+                <circle cx="0" cy="15" r="3" fill="#ef4444" opacity="0.8" />
+                <path d="M-5,-25 L-5,-35 Q0,-40 5,-35 L5,-25" fill="none" stroke="#94a3b8" stroke-width="3" />
+                <circle cx="0" cy="-45" r="8" fill="none" stroke="#94a3b8" stroke-width="2" />
+            </g>
+
+            <!-- BY-SILHUETT -->
+            <g id="city-skyline" fill="#1e293b" opacity="0.4">
+                <rect x="0" y="100" width="40" height="150" />
+                <rect x="45" y="60" width="50" height="190" />
+                <rect x="100" y="120" width="35" height="130" />
+                <rect x="140" y="80" width="60" height="170" />
+                <rect x="210" y="140" width="40" height="110" />
+                <rect x="260" y="50" width="55" height="200" />
+                <rect x="320" y="90" width="45" height="160" />
+                <rect x="370" y="110" width="30" height="140" />
+                <rect x="410" y="70" width="65" height="180" />
+                <rect x="480" y="130" width="50" height="120" />
+                <rect x="540" y="40" width="60" height="210" />
+                <rect x="610" y="100" width="40" height="150" />
+                <rect x="655" y="60" width="50" height="190" />
+                <rect x="710" y="120" width="35" height="130" />
+            </g>
+        </defs>
+
+        <!-- SCENE 1: VELKOMMEN -->
+        <g class="scene scene-1">
+            <use href="#car-front" transform="translate(0, 0)" />
+            <rect x="240" y="165" width="120" height="10" rx="3" fill="#1e293b" />
+            <rect x="242" y="167" width="116" height="6" rx="2" fill="#3b82f6" class="s1-strobe" />
+            <rect x="225" y="234" width="10" height="8" rx="1" fill="#fff" class="s1-glow" />
+            <rect x="365" y="234" width="10" height="8" rx="1" fill="#fff" class="s1-glow" />
+            <text x="300" y="350" font-family="sans-serif" font-weight="900" font-size="48px" fill="#fff" text-anchor="middle" letter-spacing="4px">BOOKBIL</text>
+        </g>
+
+        <!-- SCENE 2: RESERVER -->
+        <g class="scene scene-2">
+            <text x="300" y="50" class="text-title">Reserver</text>
+            <text x="300" y="75" class="text-sub">Velg kjøretøy fra oversikten</text>
+            <rect x="150" y="100" width="300" height="220" rx="16" fill="#0f172a" stroke="#334155" stroke-width="2" />
+            <rect x="152" y="102" width="296" height="40" rx="14" fill="#1e293b" />
+            <circle cx="175" cy="122" r="8" fill="#3b82f6" />
+            <rect x="190" y="118" width="60" height="8" rx="4" fill="#f8fafc" />
+            <rect x="410" y="115" width="20" height="14" rx="4" fill="#334155" />
+            <rect x="165" y="155" width="270" height="8" rx="4" fill="#1e293b" />
+            <rect x="200" y="155" width="100" height="8" rx="4" fill="#3b82f6" />
+            <circle cx="200" cy="159" r="6" fill="#fff" />
+            <circle cx="300" cy="159" r="6" fill="#fff" />
+            <rect x="165" y="180" width="270" height="50" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1" />
+            <rect x="175" y="190" width="4" height="30" rx="2" fill="#10b981" />
+            <path d="M190,205 L215,205 Q220,205 220,210 L225,215 L185,215 L190,210 Q190,205 190,205 Z" fill="#f8fafc" />
+            <rect x="195" y="200" width="15" height="4" rx="1" fill="#3b82f6" />
+            <rect x="235" y="195" width="40" height="8" rx="4" fill="#f8fafc" />
+            <rect x="235" y="210" width="60" height="6" rx="3" fill="#64748b" />
+            <rect x="350" y="192" width="70" height="26" rx="8" class="s2-btn" fill="#2563eb" style="transform-origin: 385px 205px;" />
+            <rect x="365" y="202" width="40" height="6" rx="3" fill="#ffffff" />
+            <rect x="165" y="240" width="270" height="50" rx="10" fill="#1e293b" opacity="0.5" />
+            <rect x="175" y="250" width="4" height="30" rx="2" fill="#ef4444" />
+            <rect x="235" y="255" width="40" height="8" rx="4" fill="#cbd5e1" />
+            <g class="s2-check">
+                <circle cx="300" cy="190" r="30" fill="#10b981" filter="url(#glow)" />
+                <path d="M285,190 L295,200 L315,180" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+            <g class="s2-cursor">
+                <path d="M0,0 L16,12 L8,14 L12,24 L8,26 L4,16 L-4,20 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1" filter="url(#glow)" />
+            </g>
+        </g>
+
+        <!-- SCENE 3: I DRIFT -->
+        <g class="scene scene-3">
+            <text x="300" y="50" class="text-title">I drift</text>
+            <text x="300" y="75" class="text-sub">Bilen er registrert opptatt</text>
+            <g class="s3-bg-pan">
+                <use href="#city-skyline" x="0" y="0" />
+                <use href="#city-skyline" x="600" y="0" />
+            </g>
+            <rect x="0" y="285" width="600" height="115" fill="#0f172a" opacity="0.8" />
+            <g class="s3-road-pan">
+                <line x1="0" y1="330" x2="700" y2="330" stroke="#334155" stroke-width="4" stroke-dasharray="40 60" />
+                <line x1="0" y1="360" x2="700" y2="360" stroke="#1e293b" stroke-width="2" stroke-dasharray="20 40" />
+            </g>
+            <g class="s3-car">
+                <use href="#car-front" transform="translate(0, 0)" />
+                <rect x="240" y="165" width="120" height="10" rx="3" fill="#1e293b" />
+                <rect x="242" y="167" width="55" height="6" rx="2" fill="#3b82f6" class="s3-strobe" />
+                <rect x="303" y="167" width="55" height="6" rx="2" fill="#ef4444" class="s3-strobe" style="animation-delay: 0.2s;" />
+                <rect x="215" y="232" width="30" height="12" rx="4" fill="#fef08a" class="s3-headlight" filter="url(#glow-strong)" />
+                <rect x="355" y="232" width="30" height="12" rx="4" fill="#fef08a" class="s3-headlight" filter="url(#glow-strong)" />
+                <polygon points="230,240 100,400 500,400 370,240" fill="#fef08a" opacity="0.1" />
+            </g>
+        </g>
+
+        <!-- SCENE 4: LEVERING -->
+        <g class="scene scene-4">
+            <text x="300" y="50" class="text-title">Levering</text>
+            <text x="300" y="75" class="text-sub">Returner nøkkelen for å avslutte turen</text>
+            <g transform="translate(200, 140)">
+                <rect x="0" y="0" width="200" height="180" rx="16" fill="#1e293b" stroke="#334155" stroke-width="4" />
+                <rect x="40" y="20" width="120" height="40" rx="6" fill="#0f172a" />
+                <rect x="45" y="25" width="110" height="30" rx="4" class="s4-screen" />
+                <circle cx="170" cy="40" r="4" class="s4-indicator" />
+                <rect x="40" y="75" width="20" height="15" rx="2" fill="#334155" />
+                <rect x="65" y="75" width="20" height="15" rx="2" fill="#334155" />
+                <rect x="90" y="75" width="20" height="15" rx="2" fill="#334155" />
+                <rect x="40" y="95" width="20" height="15" rx="2" fill="#334155" />
+                <rect x="65" y="95" width="20" height="15" rx="2" fill="#334155" />
+                <rect x="90" y="95" width="20" height="15" rx="2" fill="#334155" />
+                <rect x="40" y="115" width="20" height="15" rx="2" fill="#334155" />
+                <rect x="65" y="115" width="20" height="15" rx="2" fill="#334155" />
+                <rect x="90" y="115" width="20" height="15" rx="2" fill="#334155" />
+                <rect x="130" y="80" width="40" height="50" rx="4" fill="#0f172a" stroke="#475569" stroke-width="2" />
+                <rect x="145" y="85" width="10" height="40" rx="5" fill="#000" />
+            </g>
+            <g class="s4-key">
+                <use href="#car-fob" />
+            </g>
+        </g>
+    </svg>
+ </div>
+ 
  <p class="text-slate-500 text-sm mb-6">Logg inn med din BID@politiet.no</p>
  <div id="f-email" class="w-full max-w-xs space-y-4">
    <input type="email" id="l-email" placeholder="bid@politiet.no" class="w-full p-4 rounded-xl text-center text-lg font-bold">
@@ -610,12 +807,12 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
   <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4">
       <div class="grid grid-cols-2 gap-4">
           <div>
-              <label class="text-[10px] font-bold text-slate-500">BRUKSNUMMER</label>
+              <label class="text-[10px] font-bold text-slate-500">NAVN/REGNR</label>
               <input type="text" id="adm-name" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm font-bold uppercase">
           </div>
           <div>
               <label class="text-[10px] font-bold text-slate-500">ANSVARLIG</label>
-              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Avsnitt 2">
+              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Olsen">
           </div>
       </div>
       
@@ -630,8 +827,8 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
       </div>
 
       <div><label class="text-[10px] font-bold text-slate-500">STATUS</label><select id="adm-stat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm"><option value="Aktiv">Aktiv</option><option value="Verksted">Verksted</option><option value="Skade">Skade</option><option value="EU-kontroll">EU-kontroll</option><option value="Annet">Annet</option></select></div>
-      <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Legger tekst på bil i oversikt."></div>
-      <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater for kjøretøyet. Vises ikke i oversikten."></textarea></div>
+      <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR (SYNLIG)</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Skriv beskjed..."></div>
+      <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater kun for admin..."></textarea></div>
   </div>
   <div class="flex gap-2 mt-4"><button id="btn-adm-del" onclick="delC(s.admId, $id('adm-name').value)" class="p-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900"><span class="material-icons-round">delete</span></button><button onclick="saveAdmCar()" class="flex-1 bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm">LAGRE ENDRINGER</button></div>
  </div>
@@ -1835,7 +2032,7 @@ function rSet(c) {
             </div>
              <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
                 <div class="flex flex-col">
-                    <span class="text-base text-slate-200 font-medium">Vis biltyper</span>
+                    <span class="text-base text-slate-200 font-medium">Vis biltyper (Piller)</span>
                     <p class="text-xs text-slate-500 mt-1 leading-tight">Viser type bil (Uniformert/Sivil) som merker i oversikten.</p>
                 </div>
                 <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
