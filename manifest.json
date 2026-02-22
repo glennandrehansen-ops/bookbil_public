@@ -1,6 +1,6 @@
 {
-  "name": "BookBil",
-  "short_name": "Bilbooking",
+  "name": "BookBil - bilbooking gjort enkelt",
+  "short_name": "BookBil",
   "id": "/index.html",
   "start_url": "./index.html",
   "display": "standalone",
