@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -37,26 +38,23 @@ body {
 }
 
 /* --- UI LARGE MODE OVERRIDES --- */
-body.ui-large { font-size: 18px; }
-.ui-large .fleet-row { padding: 22px 18px; } 
-.ui-large .fleet-row h2 { font-size: 22px; } 
-.ui-large .btn-action { padding: 14px 22px; font-size: 14px; }
-.ui-large input, .ui-large select { height: 58px !important; font-size: 17px !important; }
-.ui-large .material-icons-round { transform: scale(1.25); } 
-.ui-large .time-label { font-size: 13px; font-weight: 900; } 
-.ui-large .seg-tab { padding: 14px 6px; font-size: 13px; font-weight: 900; }
-.ui-large .settings-card { padding: 24px; }
-.ui-large .settings-header { font-size: 18px; margin-bottom: 20px; }
-.ui-large .text-xs { font-size: 0.85rem !important; line-height: 1.25rem; }
-.ui-large .text-[10px] { font-size: 0.75rem !important; }
-.ui-large .text-[9px] { font-size: 0.7rem !important; }
-.ui-large .modal-content-bottom { padding-bottom: 60px; }
-.ui-large .time-block { width: 48px; }
-.ui-large .time-block.start::after, .ui-large .time-block.end::after { font-size: 18px; }
-.ui-large .big-fab { width: 72px; height: 72px; }
-.ui-large .big-fab .material-icons-round { font-size: 44px; }
-.ui-large .bottom-nav { height: 90px; }
-.ui-large .bottom-nav span { font-size: 11px !important; }
+body.ui-large { font-size: 17px; }
+.ui-large .fleet-row { padding: 18px 16px; } 
+.ui-large .fleet-row h2 { font-size: 20px; } 
+.ui-large .btn-action { padding: 10px 18px; font-size: 12px; }
+.ui-large input, .ui-large select { height: 52px !important; font-size: 16px !important; }
+.ui-large .material-icons-round { font-size: 1.25em !important; } /* Skalerer ikoner relativt til tekst */
+.ui-large .time-label { font-size: 12px; } 
+.ui-large .seg-tab { padding: 12px 4px; font-size: 12px; font-weight: 900; }
+.ui-large .settings-card { padding: 20px; }
+.ui-large .settings-header { font-size: 18px; margin-bottom: 16px; }
+.ui-large .text-xs { font-size: 13px !important; line-height: 1.2rem; }
+.ui-large .text-[10px] { font-size: 11px !important; }
+.ui-large .text-[9px] { font-size: 10px !important; }
+.ui-large .bottom-nav { height: 82px; }
+.ui-large .bottom-nav .material-icons-round { font-size: 28px !important; } /* Spesifikk fiks for bunn-ikoner */
+.ui-large .big-fab { width: 68px; height: 68px; }
+.ui-large .big-fab .material-icons-round { font-size: 40px !important; }
 
 /* Fleet Row (Liste-element) */
 .fleet-row {
@@ -211,6 +209,28 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+/* MARQUEE EFFEKT FOR LANG UNDERTEKST */
+.marquee-parent {
+    overflow: hidden;
+    white-space: nowrap;
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    position: relative;
+    width: 100%;
+}
+.marquee-child {
+    display: inline-block;
+    white-space: nowrap;
+    will-change: transform;
+}
+.animate-marquee {
+    animation: marquee-scroll 8s linear infinite alternate;
+    animation-delay: 2s;
+}
+@keyframes marquee-scroll {
+    0%, 20% { transform: translateX(0); }
+    80%, 100% { transform: translateX(var(--scroll-dist)); }
+}
 
 /* Settings Cards */
 .settings-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
@@ -1373,8 +1393,22 @@ function rCars(c) {
         row.className = `fleet-row ${rowBg} ${rowOp}`;
         row.onclick = () => book(b.bil);
         let minBilTag = (act && act.bid === s.bid && !s.kioskMode) ? `<span class="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold uppercase ml-2 flex-shrink-0">Min bil</span>` : '';
-        row.innerHTML = `<div class="flex items-center flex-1 min-w-0 gap-3"><div class="status-stripe ${stripeClass}"></div><div class="flex-1 min-w-0 py-1 overflow-hidden"><div class="flex items-center gap-1 overflow-x-auto no-scrollbar mask-right"><h2 class="text-base font-bold ${titleColor} leading-tight whitespace-nowrap mr-1 flex-shrink-0">${b.bil}</h2>${getBadgesHtml(b, false, s.visResp, s.visType)} ${minBilTag}</div><p class="text-xs ${subColor} mt-0.5 font-medium truncate">${subText}</p></div></div><div class="flex-shrink-0 ml-2">${actionBtn}</div>`;
+        row.innerHTML = `<div class="flex items-center flex-1 min-w-0 gap-3"><div class="status-stripe ${stripeClass}"></div><div class="flex-1 min-w-0 py-1 overflow-hidden"><div class="flex items-center gap-1 overflow-x-auto no-scrollbar mask-right"><h2 class="text-base font-bold ${titleColor} leading-tight whitespace-nowrap mr-1 flex-shrink-0">${b.bil}</h2>${getBadgesHtml(b, false, s.visResp, s.visType)} ${minBilTag}</div><div class="marquee-parent"><p class="text-xs ${subColor} mt-0.5 font-medium marquee-child">${subText}</p></div></div></div><div class="flex-shrink-0 ml-2">${actionBtn}</div>`;
         wrapper.appendChild(row);
+
+        // Aktiver marquee hvis teksten er for lang
+        setTimeout(() => {
+            const p = row.querySelector('.marquee-child');
+            const parent = row.querySelector('.marquee-parent');
+            if (p && parent) {
+                const isOverflowing = p.scrollWidth > parent.clientWidth;
+                if (isOverflowing) {
+                    const dist = parent.clientWidth - p.scrollWidth - 30;
+                    p.style.setProperty('--scroll-dist', `${dist}px`);
+                    p.classList.add('animate-marquee');
+                }
+            }
+        }, 150);
     });
     c.appendChild(wrapper);
 }
