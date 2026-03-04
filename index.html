@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -36,15 +38,26 @@ body {
 }
 
 /* --- UI LARGE MODE OVERRIDES --- */
-body.ui-large { font-size: 17px; }
-.ui-large .fleet-row { padding: 20px 16px; } 
-.ui-large .fleet-row h2 { font-size: 20px; } 
-.ui-large .btn-action { padding: 12px 20px; font-size: 13px; }
-.ui-large input, .ui-large select { height: 54px !important; font-size: 16px !important; }
-.ui-large .material-icons-round { transform: scale(1.2); } 
-.ui-large .time-label { font-size: 11px; } 
-/* FIX: Keep tab font size manageable on mobile even in large mode, but bold it */
-.ui-large .seg-tab { padding: 12px 4px; font-size: 11px; font-weight: 900; }
+body.ui-large { font-size: 18px; }
+.ui-large .fleet-row { padding: 22px 18px; } 
+.ui-large .fleet-row h2 { font-size: 22px; } 
+.ui-large .btn-action { padding: 14px 22px; font-size: 14px; }
+.ui-large input, .ui-large select { height: 58px !important; font-size: 17px !important; }
+.ui-large .material-icons-round { transform: scale(1.25); } 
+.ui-large .time-label { font-size: 13px; font-weight: 900; } 
+.ui-large .seg-tab { padding: 14px 6px; font-size: 13px; font-weight: 900; }
+.ui-large .settings-card { padding: 24px; }
+.ui-large .settings-header { font-size: 18px; margin-bottom: 20px; }
+.ui-large .text-xs { font-size: 0.85rem !important; line-height: 1.25rem; }
+.ui-large .text-[10px] { font-size: 0.75rem !important; }
+.ui-large .text-[9px] { font-size: 0.7rem !important; }
+.ui-large .modal-content-bottom { padding-bottom: 60px; }
+.ui-large .time-block { width: 48px; }
+.ui-large .time-block.start::after, .ui-large .time-block.end::after { font-size: 18px; }
+.ui-large .big-fab { width: 72px; height: 72px; }
+.ui-large .big-fab .material-icons-round { font-size: 44px; }
+.ui-large .bottom-nav { height: 90px; }
+.ui-large .bottom-nav span { font-size: 11px !important; }
 
 /* Fleet Row (Liste-element) */
 .fleet-row {
@@ -253,32 +266,50 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 @keyframes s2 { 0%, 23% { opacity: 0; transform: scale(0.95); } 25%, 47% { opacity: 1; transform: scale(1); } 49%, 100% { opacity: 0; transform: scale(1.05); } }
 @keyframes s3 { 0%, 48% { opacity: 0; transform: scale(0.95); } 50%, 72% { opacity: 1; transform: scale(1); } 74%, 100% { opacity: 0; transform: scale(1.05); } }
 @keyframes s4 { 0%, 73% { opacity: 0; transform: scale(0.95); } 75%, 97% { opacity: 1; transform: scale(1); } 99%, 100% { opacity: 0; transform: scale(1.05); } }
+
 .s1-strobe { animation: strobe 1.5s infinite; }
 .s1-glow { animation: pulse-light 3s infinite alternate; }
+
 .s2-cursor { animation: cursor-click 16s infinite; }
 .s2-btn { animation: btn-press 16s infinite; }
 .s2-check { animation: check-pop 16s infinite; transform-origin: 300px 190px; }
+
 @keyframes cursor-click { 0%, 28% { transform: translate(400px, 300px); opacity: 0; } 31% { transform: translate(300px, 195px); opacity: 1; } 33% { transform: translate(300px, 195px) scale(0.8); opacity: 1; } 35%, 45% { transform: translate(300px, 195px) scale(1); opacity: 0; } 100% { opacity: 0; } }
 @keyframes btn-press { 0%, 32% { fill: #2563eb; transform: scale(1); } 33% { fill: #1d4ed8; transform: scale(0.95); } 35%, 100% { fill: #10b981; transform: scale(1); } }
 @keyframes check-pop { 0%, 34% { opacity: 0; transform: scale(0); } 36%, 47% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0); } }
-.s3-bg-pan { animation: pan-left 4s linear infinite; }
-.s3-road-pan { animation: pan-left-fast 0.6s linear infinite; }
+
+.s3-bg-pan { animation: pan-left 6s linear infinite; }
+.s3-forward-lines { animation: drive-forward 0.4s infinite linear; }
 .s3-car { animation: car-drive 1s infinite alternate ease-in-out; }
 .s3-strobe { animation: strobe 0.4s infinite steps(1); }
 .s3-headlight { animation: pulse-light 2s infinite alternate; }
-@keyframes pan-left { from { transform: translateX(0); } to { transform: translateX(-200px); } }
-@keyframes pan-left-fast { from { transform: translateX(0); } to { transform: translateX(-100px); } }
+
+@keyframes pan-left { from { transform: translateX(0); } to { transform: translateX(-150px); } }
+@keyframes drive-forward { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -40; } }
 @keyframes car-drive { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+
 .s4-key { animation: drop-key 16s infinite cubic-bezier(0.4, 0, 0.2, 1); }
 .s4-screen { animation: screen-success 16s infinite; }
 .s4-indicator { animation: indicator-success 16s infinite; }
+
 @keyframes drop-key { 0%, 80% { transform: translate(300px, -50px) rotate(-10deg); opacity: 0; } 82% { transform: translate(300px, 120px) rotate(5deg); opacity: 1; } 85% { transform: translate(300px, 180px) rotate(0deg); opacity: 1; } 87%, 100% { transform: translate(300px, 250px) rotate(0deg); opacity: 0; } }
 @keyframes screen-success { 0%, 86% { fill: #1e3a8a; } 87%, 100% { fill: #064e3b; } }
 @keyframes indicator-success { 0%, 86% { fill: #3b82f6; filter: none; } 87%, 100% { fill: #10b981; filter: drop-shadow(0 0 8px #10b981); } }
+
 @keyframes strobe { 0%, 48%, 52%, 100% { opacity: 0.2; } 50% { opacity: 1; filter: drop-shadow(0 0 15px #3b82f6); } }
 @keyframes pulse-light { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+
 .text-title { font-family: sans-serif; font-weight: 900; font-size: 28px; fill: #f8fafc; text-anchor: middle; letter-spacing: 1px; }
 .text-sub { font-family: sans-serif; font-weight: 700; font-size: 14px; fill: #64748b; text-anchor: middle; text-transform: uppercase; letter-spacing: 2px; }
+
+/* SPLASH SCREEN ANIMASJON */
+@keyframes splash-flash {
+    0%, 15% { opacity: 0; filter: none; }
+    20%, 30%, 40% { opacity: 1; filter: drop-shadow(0 0 25px #3b82f6); }
+    25%, 35%, 50% { opacity: 0; filter: none; }
+    100% { opacity: 0; filter: none; }
+}
+.splash-strobe { animation: splash-flash 1.5s infinite; }
 </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
@@ -286,10 +317,45 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 <div id="offline-msg" class="hidden fixed top-0 w-full bg-red-600 text-white text-xs font-bold text-center py-1 z-[100]">INGEN INTERNETTFORBINDELSE</div>
 <div id="toast-container"></div>
 
+<!-- SPLASH SCREEN -->
+<div id="splash-screen" class="fixed inset-0 z-[200] bg-[#020617] flex flex-col items-center justify-center transition-opacity duration-500">
+    <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet" class="w-full max-w-sm block" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <g id="splash-car">
+                <ellipse cx="300" cy="285" rx="80" ry="8" fill="#000" opacity="0.6"/>
+                <rect x="225" y="250" width="20" height="35" rx="4" fill="#020617" />
+                <rect x="355" y="250" width="20" height="35" rx="4" fill="#020617" />
+                <path d="M225,180 L375,180 Q390,180 395,210 L405,260 Q405,275 390,275 L210,275 Q195,275 195,260 L205,210 Q210,180 225,180 Z" fill="#f8fafc" />
+                <path d="M235,185 L365,185 L378,225 L222,225 Z" fill="#0f172a" />
+                <path d="M240,190 L300,190 L290,220 L230,220 Z" fill="#ffffff" opacity="0.05" />
+                <path d="M213,260 L387,260 L387,275 L213,275 Z" fill="#000" opacity="0.1" />
+                <path d="M215,262 L235,262 L245,275 L225,275 Z" fill="#e2fd52" />
+                <path d="M265,262 L285,262 L295,275 L275,275 Z" fill="#e2fd52" />
+                <path d="M315,262 L335,262 L345,275 L325,275 Z" fill="#e2fd52" />
+                <path d="M365,262 L385,262 L390,268 L390,275 L375,275 Z" fill="#e2fd52" />
+                <rect x="260" y="235" width="80" height="20" rx="3" fill="#1e293b" />
+                <path d="M270,235 L330,235 L325,250 L275,250 Z" fill="#020617" />
+                <rect x="285" y="265" width="30" height="8" rx="2" fill="#111" />
+                <rect x="215" y="232" width="30" height="12" rx="4" fill="#334155" />
+                <rect x="355" y="232" width="30" height="12" rx="4" fill="#334155" />
+                <rect x="220" y="234" width="20" height="8" rx="2" fill="#f8fafc" />
+                <rect x="360" y="234" width="20" height="8" rx="2" fill="#f8fafc" />
+                <path d="M195,215 Q180,215 180,225 L180,230 Q180,235 190,235" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
+                <path d="M405,215 Q420,215 420,225 L420,230 Q420,235 410,235" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" />
+            </g>
+        </defs>
+
+        <use href="#splash-car" transform="translate(0, 0)" />
+        <rect x="240" y="165" width="120" height="10" rx="3" fill="#1e293b" />
+        <rect x="242" y="167" width="116" height="6" rx="2" fill="#3b82f6" class="splash-strobe" />
+        <text x="300" y="360" font-family="sans-serif" font-weight="900" font-size="48px" fill="#fff" text-anchor="middle" letter-spacing="4px">BOOKBIL</text>
+    </svg>
+</div>
+
 <!-- AUTENTISERING -->
-<div id="auth" class="flex flex-col items-center justify-center h-screen p-6 text-center fixed inset-0 z-[60] bg-[#0f172a]">
+<div id="auth" class="flex flex-col items-center justify-center h-screen p-6 text-center fixed inset-0 z-[60] bg-[#0f172a] hidden">
  
- <div class="w-full max-w-sm aspect-[16/10] mb-8 relative">
+ <div class="w-full max-w-sm aspect-[16/10] mb-6 relative pointer-events-none">
     <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet" class="w-full h-full block" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <filter id="glow">
@@ -337,7 +403,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
             </g>
 
             <!-- BY-SILHUETT -->
-            <g id="city-skyline" fill="#1e293b" opacity="0.4">
+            <g id="city-skyline" fill="#1e293b" opacity="0.3">
                 <rect x="0" y="100" width="40" height="150" />
                 <rect x="45" y="60" width="50" height="190" />
                 <rect x="100" y="120" width="35" height="130" />
@@ -369,16 +435,16 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
         <g class="scene scene-2">
             <text x="300" y="50" class="text-title">Reserver</text>
             <text x="300" y="75" class="text-sub">Velg kjøretøy fra oversikten</text>
-            <rect x="150" y="100" width="300" height="220" rx="16" fill="#0f172a" stroke="#334155" stroke-width="2" />
-            <rect x="152" y="102" width="296" height="40" rx="14" fill="#1e293b" />
+            <rect x="150" y="100" width="300" height="220" rx="16" fill="#1e293b" stroke="#334155" stroke-width="2" />
+            <rect x="152" y="102" width="296" height="40" rx="14" fill="#0f172a" />
             <circle cx="175" cy="122" r="8" fill="#3b82f6" />
             <rect x="190" y="118" width="60" height="8" rx="4" fill="#f8fafc" />
             <rect x="410" y="115" width="20" height="14" rx="4" fill="#334155" />
-            <rect x="165" y="155" width="270" height="8" rx="4" fill="#1e293b" />
+            <rect x="165" y="155" width="270" height="8" rx="4" fill="#0f172a" />
             <rect x="200" y="155" width="100" height="8" rx="4" fill="#3b82f6" />
             <circle cx="200" cy="159" r="6" fill="#fff" />
             <circle cx="300" cy="159" r="6" fill="#fff" />
-            <rect x="165" y="180" width="270" height="50" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1" />
+            <rect x="165" y="180" width="270" height="50" rx="10" fill="#0f172a" stroke="#475569" stroke-width="1" />
             <rect x="175" y="190" width="4" height="30" rx="2" fill="#10b981" />
             <path d="M190,205 L215,205 Q220,205 220,210 L225,215 L185,215 L190,210 Q190,205 190,205 Z" fill="#f8fafc" />
             <rect x="195" y="200" width="15" height="4" rx="1" fill="#3b82f6" />
@@ -386,7 +452,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
             <rect x="235" y="210" width="60" height="6" rx="3" fill="#64748b" />
             <rect x="350" y="192" width="70" height="26" rx="8" class="s2-btn" fill="#2563eb" style="transform-origin: 385px 205px;" />
             <rect x="365" y="202" width="40" height="6" rx="3" fill="#ffffff" />
-            <rect x="165" y="240" width="270" height="50" rx="10" fill="#1e293b" opacity="0.5" />
+            <rect x="165" y="240" width="270" height="50" rx="10" fill="#0f172a" opacity="0.5" />
             <rect x="175" y="250" width="4" height="30" rx="2" fill="#ef4444" />
             <rect x="235" y="255" width="40" height="8" rx="4" fill="#cbd5e1" />
             <g class="s2-check">
@@ -398,19 +464,23 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
             </g>
         </g>
 
-        <!-- SCENE 3: I DRIFT -->
+        <!-- SCENE 3: PÅ OPPDRAG -->
         <g class="scene scene-3">
-            <text x="300" y="50" class="text-title">Bil i bruk</text>
-            <text x="300" y="75" class="text-sub">Bilen er registrert opptatt</text>
+            <text x="300" y="50" class="text-title">På oppdrag</text>
+            <text x="300" y="75" class="text-sub">Bilen er din og klar til bruk</text>
+            
             <g class="s3-bg-pan">
                 <use href="#city-skyline" x="0" y="0" />
                 <use href="#city-skyline" x="600" y="0" />
             </g>
-            <rect x="0" y="285" width="600" height="115" fill="#0f172a" opacity="0.8" />
-            <g class="s3-road-pan">
-                <line x1="0" y1="330" x2="700" y2="330" stroke="#334155" stroke-width="4" stroke-dasharray="40 60" />
-                <line x1="0" y1="360" x2="700" y2="360" stroke="#1e293b" stroke-width="2" stroke-dasharray="20 40" />
+            
+            <g>
+                <polygon points="250,240 350,240 550,400 50,400" fill="#0b1121" />
+                <line x1="250" y1="240" x2="50" y2="400" stroke="#1e293b" stroke-width="3" />
+                <line x1="350" y1="240" x2="550" y2="400" stroke="#1e293b" stroke-width="3" />
+                <line x1="300" y1="240" x2="300" y2="400" stroke="#334155" stroke-width="4" stroke-dasharray="20 20" class="s3-forward-lines" />
             </g>
+            
             <g class="s3-car">
                 <use href="#car-front" transform="translate(0, 0)" />
                 <rect x="240" y="165" width="120" height="10" rx="3" fill="#1e293b" />
@@ -418,7 +488,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
                 <rect x="303" y="167" width="55" height="6" rx="2" fill="#ef4444" class="s3-strobe" style="animation-delay: 0.2s;" />
                 <rect x="215" y="232" width="30" height="12" rx="4" fill="#fef08a" class="s3-headlight" filter="url(#glow-strong)" />
                 <rect x="355" y="232" width="30" height="12" rx="4" fill="#fef08a" class="s3-headlight" filter="url(#glow-strong)" />
-                <polygon points="230,240 100,400 500,400 370,240" fill="#fef08a" opacity="0.1" />
+                <polygon points="230,240 50,400 550,400 370,240" fill="#fef08a" opacity="0.05" />
             </g>
         </g>
 
@@ -450,36 +520,20 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
     </svg>
  </div>
  
- <p class="text-slate-500 text-sm mb-6">Logg inn med din BID@politiet.no</p>
- <div id="f-email" class="w-full max-w-xs space-y-4">
-   <input type="email" id="l-email" placeholder="bid@politiet.no" class="w-full p-4 rounded-xl text-center text-lg font-bold">
-   <button onclick="sendOtp()" id="btn-send" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-lg text-white shadow-lg active:scale-95">SEND KODE</button>
+ <p class="text-slate-500 text-sm mb-6 z-10 relative pointer-events-auto">Logg inn med din BID@politiet.no</p>
+ <div id="f-email" class="w-full max-w-xs space-y-4 z-10 relative pointer-events-auto">
+   <input type="email" id="l-email" placeholder="bid@politiet.no" class="w-full p-4 rounded-xl text-center text-lg font-bold border border-slate-700 bg-slate-900/80 backdrop-blur-sm text-white focus:border-blue-500 outline-none">
+   <button onclick="sendOtp()" id="btn-send" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-lg text-white shadow-lg active:scale-95 transition-transform">SEND KODE</button>
  </div>
- <div id="f-otp" class="w-full max-w-xs space-y-4 hidden">
-   <input type="text" id="l-otp" placeholder="12345678" maxlength="8" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-widest">
-   <button onclick="verifyOtp()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold">LOGG INN</button>
-   <button onclick="resetAuth()" class="text-slate-500 text-sm underline mt-4">Angre</button>
+ <div id="f-otp" class="w-full max-w-xs space-y-4 hidden z-10 relative pointer-events-auto">
+   <input type="text" id="l-otp" placeholder="12345678" maxlength="8" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-widest border border-slate-700 bg-slate-900/80 backdrop-blur-sm text-white focus:border-blue-500 outline-none">
+   <button onclick="verifyOtp()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">LOGG INN</button>
+   <button onclick="resetAuth()" class="text-slate-400 text-sm underline mt-4 hover:text-white transition-colors">Angre</button>
  </div>
- <button onclick="window.open('https://bbmanual.pages.dev/')" class="text-blue-500 font-bold text-sm mt-6 flex items-center justify-center gap-2"><span class="material-icons-round">auto_stories</span> Brukermanual</button>
+ <button onclick="window.open('https://bbmanual.pages.dev/')" class="text-blue-500 font-bold text-sm mt-8 flex items-center justify-center gap-2 z-10 relative hover:text-blue-400 transition-colors pointer-events-auto"><span class="material-icons-round">auto_stories</span> Brukermanual</button>
 </div>
 
-<!-- HOVEDAPP -->
-<!-- Added padding-top safe area logic -->
-<div id="app" class="hidden h-full flex flex-col relative w-full" style="padding-top: env(safe-area-inset-top);">
- 
- <!-- VARSLING BANNER -->
- <div id="push-msg" class="hidden w-full bg-blue-600/90 backdrop-blur text-white p-3 z-[40] shadow-xl border-b border-blue-400/30">
-   <div class="flex justify-between items-start max-w-xl mx-auto gap-3">
-     <div class="flex-1">
-       <p class="font-bold text-xs mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">notifications_active</span> Ønsker du varsler?</p>
-       <p class="text-[10px] text-blue-100 leading-snug mb-2">Du kan aktivere varsler for dine reservasjoner. Hvis det ikke fungerer, prøv å reinstallere appen.</p>
-       <button onclick="enablePushFromBanner()" class="bg-white text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-black shadow-sm active:scale-95 transition-transform">AKTIVER VARSLER</button>
-     </div>
-     <button onclick="dismissPushMsg()" class="text-blue-200 hover:text-white p-1"><span class="material-icons-round text-lg">close</span></button>
-   </div>
- </div>
-
- <!-- TVUNGEN LOKASJONSVALG MODAL (NEW) -->
+<!-- TVUNGEN LOKASJONSVALG MODAL (NEW) -->
  <div id="m-loc-force" class="fixed inset-0 bg-[#0f172a] z-[100] hidden flex flex-col items-center justify-center p-6 text-center">
     <span class="material-icons-round text-blue-500 text-6xl mb-4">location_on</span>
     <h2 class="text-2xl font-black text-white uppercase mb-2">Velg Tjenestested</h2>
@@ -492,7 +546,8 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
     </div>
  </div>
 
-
+<!-- HOVEDAPP -->
+<div id="app" class="flex-1 flex flex-col w-full relative h-full hidden">
  <!-- DASHBOARD HEADER -->
  <header class="flex-none pt-2 pb-2 px-4 bg-[#0f172a] z-30 border-b border-slate-800 shadow-sm">
     <div class="flex justify-between items-end mb-4">
@@ -807,12 +862,12 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
   <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4">
       <div class="grid grid-cols-2 gap-4">
           <div>
-              <label class="text-[10px] font-bold text-slate-500">MERKE+BNR</label>
+              <label class="text-[10px] font-bold text-slate-500">NAVN/REGNR</label>
               <input type="text" id="adm-name" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm font-bold uppercase">
           </div>
           <div>
               <label class="text-[10px] font-bold text-slate-500">ANSVARLIG</label>
-              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. A2">
+              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Olsen">
           </div>
       </div>
       
@@ -826,9 +881,9 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
           </select>
       </div>
 
-      <div><label class="text-[10px] font-bold text-slate-500">STATUS</label><select id="adm-stat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm"><option value="Aktiv">Aktiv</option><option value="Verksted">Verksted</option><option value="Skade">Skade</option><option value="EU-kontroll">EU-kontroll</option><option value="Annet">Annet</option></select></div>
-      <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Synlig tekst til bilkort i oversikt..."></div>
-      <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Kjøretøynotater... (Triptrac?)"></textarea></div>
+      <div><label class="text-[10px] font-bold text-slate-500">STATUS</label><select id="adm-stat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm"><option value="Aktiv">Aktiv</option><option value="Verksted">Verksted</option><option value="Skade">Skade</option><option value="EU-kontroll">EU-kontroll</option><option value="Ute av drift">Ute av drift</option><option value="Annet">Annet</option><option value="Utilgjengelig">Utilgjengelig</option></select></div>
+      <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR (SYNLIG)</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Skriv beskjed..."></div>
+      <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater kun for admin..."></textarea></div>
   </div>
   <div class="flex gap-2 mt-4"><button id="btn-adm-del" onclick="delC(s.admId, $id('adm-name').value)" class="p-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900"><span class="material-icons-round">delete</span></button><button onclick="saveAdmCar()" class="flex-1 bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm">LAGRE ENDRINGER</button></div>
  </div>
@@ -908,6 +963,26 @@ async function installPwa() { if(s.deferredPrompt) { s.deferredPrompt.prompt(); 
 function closePwaToast() { $id('pwa-toast').classList.add('hidden'); }
 window.addEventListener('online', () => $id('offline-msg').classList.add('hidden'));
 window.addEventListener('offline', () => $id('offline-msg').classList.remove('hidden'));
+
+// --- SPLASH SCREEN LOGIKK ---
+let splashMinTimePassed = false;
+let authResolved = false;
+
+setTimeout(() => {
+    splashMinTimePassed = true;
+    checkAndHideSplash();
+}, 1800); // Tvinger splash screen til å vise i minst 1.8s for animasjonen
+
+function checkAndHideSplash() {
+    if (splashMinTimePassed && authResolved) {
+        const splash = $id('splash-screen');
+        if (splash && !splash.classList.contains('hidden')) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.classList.add('hidden'), 500);
+        }
+    }
+}
+
 _s.auth.onAuthStateChange((event, session) => { 
     if (session) { 
         s.u = session.user.email; 
@@ -936,6 +1011,9 @@ _s.auth.onAuthStateChange((event, session) => {
         s.bid = null; 
         s.kioskMode = false;
     }
+    
+    authResolved = true;
+    checkAndHideSplash();
 });
 
 function showToast(msg, type = 'info') { const c = $id('toast-container'); const t = document.createElement('div'); t.className = `toast toast-${type}`; let icon = type==='success'?'check_circle':(type==='error'?'error':'info'); t.innerHTML = `<span class="material-icons-round text-lg">${icon}</span> <span>${msg}</span>`; c.appendChild(t); setTimeout(()=>t.classList.add('show'),10); setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},3000); }
@@ -1055,7 +1133,9 @@ async function load() {
         }
         
         checkPushPrompt(); 
-        render();
+        // Kun kjør render() automatisk hvis vi er i en av hovedvisningene
+        // Dette hindrer at innstillinger/admin-vinduer lukkes hvert 10. sekund
+        if(['cars', 'res', 'mine'].includes(s.v)) render();
     } catch(e) { 
         console.error("Kritisk feil i load():", e); 
         showToast("Feil ved lasting av data", "error");
@@ -1149,6 +1229,28 @@ function getBadgesHtml(b, large=false, showResp=true, showType=true) {
     return html;
 }
 
+async function stat(id, status, car) {
+    const { error } = await _s.from('biler').update({ status }).eq('id', id);
+    if(error) showToast("Feil: " + error.message, "error");
+    else {
+        logMsg('Statusendring', `Satt til ${status}`, car);
+        showToast("Oppdatert!", "success");
+        load();
+    }
+}
+
+async function react() {
+    if(!s.co) return;
+    let confirmMsg = `Er ${s.co.bil} klar for drift?`;
+    if(s.co.status === 'Ute av drift' || s.co.status === 'Annet') {
+        confirmMsg = `ADVARSEL: ${s.co.bil} har status "${s.co.status}".\n\nEr du helt sikker på at denne skal settes som AKTIV i bilparken?`;
+    }
+    if(confirm(confirmMsg)) {
+        await stat(s.co.id, 'Aktiv', s.co.bil);
+        closeM('m-book');
+    }
+}
+
 function rCars(c) {
     const now = new Date();
     const twoHours = 2 * 60 * 60 * 1000;
@@ -1184,12 +1286,21 @@ function rCars(c) {
     const wrapper = document.createElement('div');
     wrapper.className = "flex flex-col rounded-xl overflow-hidden shadow-lg border border-slate-700/50 mb-6";
     const sortedCars = [...s.c].sort((a, b) => {
+        // 1. Prioriter "Min bil" (pågående tur) helt øverst
         const actA = s.r.some(r => r.bil === a.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
         const actB = s.r.some(r => r.bil === b.bil && new Date(r.start_tid) <= now && new Date(r.slutt_tid) >= now && r.bid === s.bid);
         if (actA && !actB) return -1; if (!actA && actB) return 1;
+
+        // 2. Prioriter "Aktiv" status over alle andre statuser (Verksted, Skade, etc.)
+        if (a.status === 'Aktiv' && b.status !== 'Aktiv') return -1;
+        if (a.status !== 'Aktiv' && b.status === 'Aktiv') return 1;
+
+        // 3. Sorter etter kategori (Uniformert -> Sivil -> Admin)
         const catOrder = { 'Uniformert': 1, 'Sivil': 2, 'Admin': 3 };
         const pA = catOrder[a.kategori] || 4; const pB = catOrder[b.kategori] || 4;
         if (pA !== pB) return pA - pB;
+
+        // 4. Alfabetisk sortering som fallback
         return a.bil.localeCompare(b.bil);
     });
 
@@ -1205,41 +1316,49 @@ function rCars(c) {
         let stripeClass="c-green", titleColor="text-white", subText="Ledig nå", subColor="text-emerald-500", rowBg="", rowOp="opacity-100";
         let actionBtn = `<button onclick="event.stopPropagation();book('${b.bil}')" class="btn-action btn-green">RESERVER</button>`;
 
-        if(b.status!=='Aktiv') { 
+        if(b.status!=='Aktiv') {
             // Default setup for unavailable cars (Gray)
-            stripeClass="c-gray"; 
-            titleColor="text-slate-500"; 
-            subColor="text-slate-500"; 
-            rowOp="opacity-75"; 
-            subText = b.kommentar ? b.kommentar : "Ute av drift";
+            stripeClass="c-gray";
+            titleColor="text-slate-500";
+            subColor="text-slate-500";
+            rowOp="opacity-75";
+            subText = b.kommentar ? b.kommentar : (b.status || "Ute av drift");
 
             // Specific overrides for color
-            if(b.status === 'Verksted') { 
-                stripeClass="c-purple"; 
-                titleColor="text-slate-400"; 
-                subColor="text-purple-400"; 
-                subText = "På verksted" + (b.kommentar ? ": " + b.kommentar : "");
-            } 
-            else if(b.status === 'EU-kontroll') { 
-                stripeClass="c-purple"; 
-                titleColor="text-slate-400"; 
-                subColor="text-purple-400"; 
-                subText = "EU-kontroll" + (b.kommentar ? ": " + b.kommentar : "");
+            if(b.status === 'Verksted' || b.status === 'EU-kontroll') {
+                stripeClass="c-purple";
+                titleColor="text-slate-400";
+                subColor="text-purple-400";
+                subText = (b.status === 'Verksted' ? "På verksted" : "EU-kontroll") + (b.kommentar ? ": " + b.kommentar : "");
             }
-            
-            actionBtn = `<button onclick="event.stopPropagation();stat(${b.id},'Aktiv','${b.bil}')" class="btn-action btn-green">KLAR</button>`;
-        }
-        else if(act) { 
+            else if(b.status === 'Skade') {
+                stripeClass="c-gray";
+                titleColor="text-slate-400";
+                subColor="text-slate-500";
+                subText = "Meldt feil" + (b.kommentar ? ": " + b.kommentar : "");
+            }
+            else if(b.status === 'Ute av drift' || b.status === 'Annet' || b.status === 'Utilgjengelig') {
+                stripeClass="c-gray";
+                titleColor="text-slate-600";
+                subColor="text-slate-600";
+                rowOp="opacity-50";
+                subText = (b.status === 'Ute av drift' ? "DEAKTIVERT" : (b.status === 'Utilgjengelig' ? "UTILGJENGELIG" : "ANNET")) + (b.kommentar ? ": " + b.kommentar : "");
+            }
+
+            // Confirmation logic to prevent accidental activation
+            let confirmMsg = `Er ${b.bil} klar for drift?`;
+            if(b.status === 'Ute av drift' || b.status === 'Annet' || b.status === 'Utilgjengelig') {
+                confirmMsg = `ADVARSEL: ${b.bil} har status "${b.status}".\n\nEr du helt sikker på at denne skal reaktiveres i bilparken?`;
+            }
+
+            actionBtn = `<button onclick="event.stopPropagation(); if(confirm('${confirmMsg}')) stat(${b.id},'Aktiv','${b.bil}')" class="btn-action btn-green">REAKTIVER BIL</button>`;
+        }        else if(act) { 
             stripeClass="c-red"; titleColor="text-slate-400"; subColor="text-slate-500"; rowOp="opacity-75";
             subText = `Opptatt av ${act.bid} til ${fmtT(act.slutt_tid)}`;
             if(act.formal && (act.formal.includes('Verksted') || act.formal.includes('Service'))) {
                  stripeClass="c-purple"; subText="På verksted"; subColor="text-purple-400"; rowOp="opacity-70";
-                 // Check if I am the one who booked it or if kiosk mode
-                 if (act.bid === s.bid || s.kioskMode) {
-                     actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
-                 } else {
-                     actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Opptatt</span></div>`;
-                 }
+                 // Anyone can return a workshop car
+                 actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
             } else {
                  actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Ledig</span><span class="block text-xs font-bold text-slate-300 font-mono">${fmtT(act.slutt_tid)}</span></div>`;
             }
@@ -1281,6 +1400,9 @@ function rRes(c, mineOnly) {
         // Buttons logic
         if(isVerksted) { 
             borderCol = "border-purple-500"; bgCol="bg-purple-900/10"; statusTxt = "VERKSTED"; icon="build"; 
+            if (active) {
+                 actionBtns = `<button onclick="event.stopPropagation();subRet(${r.id},'${r.bil}')" class="btn-action btn-primary py-2 px-4 rounded shadow-lg text-xs">LEVER NÅ</button>`;
+            }
         }
         
         if (!isVerksted) {
@@ -1479,21 +1601,56 @@ function handleFormChange(forceVerksted = false) {
 
 function setupModal(title, sub="Ny reservasjon") {
     const carObj = s.c.find(x => x.bil === title);
-    let html = `<span class="truncate">${title}</span>`; 
+    
+    // Automatisk ikon basert på status
+    let icon = "directions_car";
+    if (carObj) {
+        if (carObj.status === 'Verksted' || carObj.status === 'EU-kontroll') icon = "build";
+        else if (carObj.status === 'Skade') icon = "report_problem";
+        else if (carObj.status === 'Ute av drift' || carObj.status === 'Annet' || carObj.status === 'Utilgjengelig') icon = "pause_circle";
+    }
+
+    let html = `<span class="material-icons-round mr-2 text-2xl">${icon}</span> <span class="truncate">${title}</span>`; 
     if (carObj) { html += `<div class="flex items-center gap-1 ml-2 flex-shrink-0">` + getBadgesHtml(carObj) + `</div>`; }
     $id('b-title').innerHTML = html;
     const subEl = $id('b-sub'); if(subEl) subEl.innerText=sub;
-    const act=s.r.find(r=>r.bil===title && new Date(r.start_tid)<=new Date() && new Date(r.slutt_tid)>=new Date());
+    
     $id('b-alert').classList.add('hidden'); $id('b-info').classList.add('hidden'); $id('btn-react').classList.add('hidden');
     const btnOk = $id('btn-ok'); btnOk.disabled = false; btnOk.classList.remove('opacity-50', 'cursor-not-allowed'); btnOk.innerText = "BEKREFT";
-    const dateInputs = document.querySelector('#m-book .flex-col.gap-3.mb-4.bg-slate-800');
+    const dateInputs = $id('b-date-inputs');
     if(dateInputs) dateInputs.classList.remove('hidden');
 
+    const act=s.r.find(r=>r.bil===title && new Date(r.start_tid)<=new Date() && new Date(r.slutt_tid)>=new Date());
+    const isWorkshopBooking = act && act.formal && (act.formal.includes('Verksted') || act.formal.includes('Service'));
+
     if(s.co && s.co.kommentar && s.co.status==='Aktiv') { $id('b-info').innerText="INFO: "+s.co.kommentar; $id('b-info').classList.remove('hidden'); }
+    
     if(s.co && s.co.status!=='Aktiv') { 
-        $id('b-alert').classList.remove('hidden'); $id('b-reason').innerText="Årsak: "+(s.co.kommentar||s.co.status); $id('btn-react').classList.remove('hidden'); 
-        btnOk.disabled = true; btnOk.classList.add('opacity-50', 'cursor-not-allowed'); btnOk.innerText = "IKKE TILGJENGELIG";
+        $id('b-alert').classList.remove('hidden'); 
+        $id('b-reason').innerText="Årsak: "+(s.co.kommentar||s.co.status); 
+        $id('btn-react').classList.remove('hidden'); 
+        $id('btn-react').innerText = "REAKTIVER BIL";
+        
+        let btnText = "IKKE TILGJENGELIG";
+        if(s.co.status === 'Ute av drift' || s.co.status === 'Annet' || s.co.status === 'Utilgjengelig') btnText = "IKKE I DRIFT";
+
+        btnOk.disabled = true; btnOk.classList.add('opacity-50', 'cursor-not-allowed'); btnOk.innerText = btnText;
         if(dateInputs) dateInputs.classList.add('hidden');
+    } else if (isWorkshopBooking) {
+        $id('b-alert').classList.remove('hidden');
+        $id('al-t').innerHTML = '<span class="material-icons-round">build</span> PÅ VERKSTED';
+        $id('b-reason').innerHTML = `<strong>Detaljer:</strong> ${act.formal}<br><span class="text-xs text-slate-400">Satt på verksted av ${act.bid}</span>`;
+        $id('btn-react').classList.remove('hidden');
+        $id('btn-react').innerText = "BILEN ER HENTET (KLAR NÅ)";
+        // Override react function for this button to call ret() instead
+        $id('btn-react').onclick = () => { ret(act.id, title, 'verksted'); closeM('m-book'); };
+        
+        btnOk.disabled = true; btnOk.classList.add('opacity-50', 'cursor-not-allowed'); btnOk.innerText = "BILEN ER PÅ VERKSTED";
+        if(dateInputs) dateInputs.classList.add('hidden');
+    } else {
+        // Reset react button to default
+        $id('btn-react').onclick = () => react();
+        $id('al-t').innerHTML = '<span class="material-icons-round">error</span> UTILGJENGELIG';
     }
     
     // Warn if not my booking
@@ -1997,17 +2154,6 @@ function rSet(c) {
     const locOptions = locations.map(l => `<option value="${l}" ${s.loc === l ? 'selected' : ''}>${l}</option>`).join('');
 
     c.innerHTML = `
-    <!-- Card 0: Lokasjon (NEW) -->
-    <div class="settings-card border-blue-500/50 bg-blue-900/10">
-        <div class="settings-header"><span class="material-icons-round text-white">location_on</span> Tjenestested</div>
-        <div class="flex flex-col gap-2">
-             <label class="text-xs text-slate-400">Velg hvor du vil booke bil:</label>
-             <select onchange="changeLocation(this.value, this)" class="w-full bg-slate-900 p-3 rounded-xl border border-slate-600 text-white text-base font-bold">
-                ${locOptions}
-             </select>
-        </div>
-    </div>
-
     <!-- Card 1: Min Profil -->
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-blue-500">person</span> Min Profil</div>
@@ -2026,13 +2172,13 @@ function rSet(c) {
             <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
                 <div class="flex flex-col">
                     <span class="text-base text-slate-200 font-medium">Større tekst og knapper</span>
-                    <p class="text-xs text-slate-500 mt-1 leading-tight">Øker størrelsen på elementer for bedre lesbarhet.</p>
+                    <p class="text-xs text-slate-500 mt-1 leading-tight">Øker størrelsen på elementer for bedre lesbarhet på mobil.</p>
                 </div>
                 <input type="checkbox" onchange="togUiSize(this.checked)" ${s.uiLarge?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
             </div>
              <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
                 <div class="flex flex-col">
-                    <span class="text-base text-slate-200 font-medium">Vis biltyper</span>
+                    <span class="text-base text-slate-200 font-medium">Vis biltyper (Piller)</span>
                     <p class="text-xs text-slate-500 mt-1 leading-tight">Viser type bil (Uniformert/Sivil) som merker i oversikten.</p>
                 </div>
                 <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
@@ -2040,7 +2186,7 @@ function rSet(c) {
              <div class="flex items-center justify-between">
                 <div class="flex flex-col">
                     <span class="text-base text-slate-200 font-medium">Vis bilansvarlig</span>
-                    <p class="text-xs text-slate-500 mt-1 leading-tight">Viser hvem som er ansvarlig for hver bil i oversikten.</p>
+                    <p class="text-xs text-slate-500 mt-1 leading-tight">Viser hvem som er ansvarlig for hver bil i listen.</p>
                 </div>
                 <input type="checkbox" onchange="togVis('visResp', this.checked)" ${s.visResp?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
             </div>
@@ -2086,7 +2232,29 @@ function rSet(c) {
             </a>
         </div>
     </div>
-    
+
+    <!-- Card 5: Tjenestested (Tilgjengelig for alle) -->
+    <div class="settings-card border-slate-700">
+        <div class="settings-header"><span class="material-icons-round text-blue-400">location_on</span> Tjenestested</div>
+        <p class="text-[10px] text-slate-500 mb-3 uppercase font-bold tracking-wider">Aktivt sted: ${s.loc}</p>
+        <details>
+            <summary class="text-xs font-bold text-blue-400 cursor-pointer list-none flex justify-between items-center hover:bg-slate-800 p-2 rounded transition-colors uppercase tracking-wider">
+                Bytt tjenestested <span class="material-icons-round text-sm">expand_more</span>
+            </summary>
+            <div class="mt-4 p-4 bg-blue-900/10 rounded-xl border border-blue-900/30">
+                <div class="flex items-center gap-2 mb-3 bg-orange-900/20 border border-orange-500/40 p-3 rounded-lg text-orange-200">
+                    <span class="material-icons-round text-orange-500">warning</span>
+                    <p class="text-[10px] leading-tight font-bold">ADVARSEL: Bytte av tjenestested skal kun skje ved tjenestelige behov. Endringer her påvirker faktiske reservasjoner ved det valgte stedet.</p>
+                </div>
+                <label class="text-[10px] text-slate-500 uppercase font-black block mb-2">Velg nytt tjenestested:</label>
+                <select onchange="changeLocation(this.value, this)" class="w-full bg-slate-900 p-3 rounded-xl border border-slate-600 text-white text-base font-bold mb-2">
+                    ${locOptions}
+                </select>
+                <p class="text-[9px] text-slate-500 italic">Dette endrer hvilke biler og bookinger du ser i oversikten.</p>
+            </div>
+        </details>
+    </div>
+
     <!-- Admin Section -->
     <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800">
         <h2 class="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2"><span class="material-icons-round text-slate-500">admin_panel_settings</span> Administrasjon</h2>
@@ -2098,16 +2266,28 @@ function rSet(c) {
                 <button onclick="addAdminEmail()" class="bg-slate-700 border border-slate-600 px-4 rounded-xl text-white font-bold text-xs hover:bg-slate-600">LEGG TIL</button>
             </div>
         </div>
-        <details>
-            <summary class="text-xs font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors p-2 rounded hover:bg-slate-800">Avansert: Slett data <span class="material-icons-round text-sm">expand_more</span></summary>
-            <div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30">
-                <p class="text-xs text-red-400 mb-3">Dette sletter ALLE reservasjoner i databasen. Handlingen kan ikke angres.</p>
-                <button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-xl font-bold hover:bg-red-800 border border-red-700 shadow-lg text-xs">SLETT ALLE DATA</button>
-            </div>
-        </details>
+
+        <!-- Slett data kun synlig for bilansvarlig -->
+        <div id="admin-nuke-section" class="hidden">
+            <details>
+                <summary class="text-xs font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors p-2 rounded hover:bg-slate-800">Avansert: Slett data (${s.loc}) <span class="material-icons-round text-sm">expand_more</span></summary>
+                <div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30">
+                    <p class="text-xs text-red-400 mb-3">Dette sletter ALLE reservasjoner for biler tilknyttet <strong>${s.loc}</strong>. Handlingen kan ikke angres.</p>
+                    <button onclick="nuke()" class="w-full bg-red-900 text-white p-3 rounded-xl font-bold hover:bg-red-800 border border-red-700 shadow-lg text-xs">SLETT ALLE DATA FOR ${s.loc.toUpperCase()}</button>
+                </div>
+            </details>
+        </div>
     </div>
-    `;
+    `;    
     renderAdminEmails();
+
+    // Vis slett-seksjon kun for bilansvarlig
+    const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase());
+    if(isAdm) {
+        const nukeSec = document.getElementById('admin-nuke-section');
+        if(nukeSec) nukeSec.classList.remove('hidden');
+    }
+
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
 }
 
@@ -2305,7 +2485,24 @@ function urlBase64ToUint8Array(base64String) {
 // --------------------------
 
 async function updEm() { const e = $id('s-em').value.trim(); if(!e) return showToast("Skriv e-post", "error"); const { error } = await _s.from('brukere').upsert({ brukernavn: s.bid, epost: e, varsel: s.varsel }, { onConflict: 'brukernavn' }); if(error) showToast("Feil.", "error"); else { s.savedEmail = e; showToast("Lagret.", "success"); } }
-async function nuke() { if(prompt("Skriv NULLSTILL for å slette alle data")==="NULLSTILL") { await _s.from('bookinger').delete().gt('id', 0); load(); showToast("Nullstilt.", "info"); } }
+async function nuke() { 
+    if(!s.loc) return showToast("Lokasjon ikke satt", "error");
+    
+    if(prompt(`Skriv ${s.loc.toUpperCase()} for å slette alle data for dette tjenestestedet`) === s.loc.toUpperCase()) { 
+        // Finn biler for denne lokasjonen
+        const carsInLoc = s.c.filter(b => b.lokasjon === s.loc).map(b => b.bil);
+        
+        if (carsInLoc.length === 0) return showToast("Ingen biler funnet for " + s.loc, "error");
+
+        const { error } = await _s.from('bookinger').delete().in('bil', carsInLoc);
+        
+        if (error) showToast("Feil: " + error.message, "error");
+        else {
+            load(); 
+            showToast(`Alle data for ${s.loc} er slettet.`, "info"); 
+        }
+    } 
+}
 function fmtT(d) { return new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function fmtD(d) { return new Date(d).toLocaleDateString([],{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 function fmtDD(dStr) { 
