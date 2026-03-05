@@ -144,7 +144,7 @@ jobs:
                   hour:"2-digit", minute:"2-digit", timeZone: "Europe/Oslo"
                });
                
-               const formalText = b.formal ? `📝 ${b.formal}` : '';
+               const formalText = b.formal ? `📝 ${b.formal}` : "";
 
                await sendPush(
                    b.bid, 
@@ -168,7 +168,7 @@ jobs:
                   `;
                   try {
                       await transporter.sendMail({
-                        from: `"BookBil" <${process.env.GMAIL_USER}>`,
+                        from: `"BookBil" <${process.env.GMAIL_USER}>`, // Endret navn her
                         to: email,
                         subject: `Påminnelse: ${b.bil} kl. ${startTime}`,
                         html: getMailHeader("Varsel") + htmlContent + mailFooter
@@ -230,7 +230,7 @@ jobs:
 
                   try {
                       await transporter.sendMail({
-                        from: `"BookBil" <${process.env.GMAIL_USER}>`,
+                        from: `"BookBil" <${process.env.GMAIL_USER}>`, // Endret navn her
                         to: email,
                         subject: `Påminnelse: Levering av ${b.bil}`,
                         html: getMailHeader("Varsel") + htmlContent + mailFooter
@@ -251,7 +251,7 @@ jobs:
             // Hent alle biler for å finne lokasjon
             const { data: cars } = await supabase.from("biler").select("bil, lokasjon");
             const carLocMap = {};
-            if(cars) cars.forEach(c => carLocMap[c.bil] = c.lokasjon || 'Jæren');
+            if(cars) cars.forEach(c => carLocMap[c.bil] = c.lokasjon || "Jæren");
 
             // Hent all konfigurasjon (eposter)
             const { data: config } = await supabase.from("konfigurasjon").select("*");
@@ -262,7 +262,7 @@ jobs:
             const groupedMessages = {};
             
             messages.forEach(msg => {
-                const loc = carLocMap[msg.bil] || 'Jæren'; // Default til Jæren hvis ukjent
+                const loc = carLocMap[msg.bil] || "Jæren"; // Default til Jæren hvis ukjent
                 if(!groupedMessages[loc]) groupedMessages[loc] = [];
                 groupedMessages[loc].push(msg);
             });
@@ -271,7 +271,7 @@ jobs:
             for (const [location, msgs] of Object.entries(groupedMessages)) {
                 
                 // Finn riktig epost-mottaker for denne lokasjonen
-                const adminEmailsStr = configMap[`bilansvarlig_epost_${location}`] || configMap['bilansvarlig_epost']; // Fallback til gammel nøkkel
+                const adminEmailsStr = configMap[`bilansvarlig_epost_${location}`] || configMap["bilansvarlig_epost"]; // Fallback til gammel nøkkel
                 
                 if (!adminEmailsStr) {
                     console.log(`Ingen admin-epost funnet for ${location}, skipper sending.`);
@@ -312,7 +312,7 @@ jobs:
                 for (const email of adminEmails) {
                     try {
                         await transporter.sendMail({
-                          from: `"BookBil System" <${process.env.GMAIL_USER}>`,
+                          from: `"BookBil" <${process.env.GMAIL_USER}>`, // Endret navn her
                           to: email,
                           subject: `Billager ${location}: ${msgs.length} nye hendelser`,
                           html: getMailHeader(location) + digestHtml + mailFooter
