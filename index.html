@@ -56,6 +56,40 @@ body.ui-large { font-size: 17px; }
 .ui-large .big-fab { width: 68px; height: 68px; }
 .ui-large .big-fab .material-icons-round { font-size: 40px !important; }
 
+/* --- LIGHT MODE REFINED (MUTED) --- */
+body.light-mode { background-color: #cbd5e1; color: #1e293b; }
+.light-mode header { background-color: #e2e8f0; border-color: #94a3b8; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+.light-mode .bottom-nav { background-color: #e2e8f0; border-color: #94a3b8; }
+.light-mode #pg-t { color: #0f172a; }
+.light-mode .text-white, .light-mode .text-slate-300, .light-mode .text-slate-200, .light-mode .text-slate-100, .light-mode .text-blue-200, .light-mode .text-blue-100 { color: #1e293b !important; }
+.light-mode .text-slate-200 { color: #1e293b !important; }
+.light-mode .fleet-row { background-color: #f1f5f9; border-color: #cbd5e1; }
+.light-mode .fleet-row h2 { color: #0f172a !important; }
+.light-mode .fleet-row:active { background-color: #e2e8f0; }
+.light-mode .seg-tab { background-color: #e2e8f0; border-color: #94a3b8; color: #475569; }
+.light-mode .seg-tab.active { background-color: #3b82f6; color: white !important; border-color: #2563eb; }
+.light-mode .settings-card { background-color: #f1f5f9; border-color: #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.light-mode .settings-header { color: #64748b; }
+.light-mode input, .light-mode select, .light-mode textarea { background-color: #f8fafc !important; border-color: #94a3b8 !important; color: #0f172a !important; }
+.light-mode .modal-content-bottom { background-color: #e2e8f0; border-color: #94a3b8; }
+.light-mode #more-menu { background-color: #e2e8f0; }
+.light-mode #more-menu button { background-color: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
+.light-mode .text-slate-500, .light-mode .text-slate-400 { color: #475569 !important; }
+.light-mode .bg-slate-800, .light-mode .bg-slate-900\/50, .light-mode .bg-slate-900 { background-color: #e2e8f0 !important; border-color: #94a3b8 !important; color: #1e293b !important; }
+.light-mode .bg-blue-900\/40 { background-color: #bfdbfe !important; border-color: #60a5fa !important; color: #1e40af !important; }
+.light-mode .bg-blue-900\/40 * { color: #1e40af !important; }
+.light-mode .time-block { background-color: #f1f5f9; border-color: #cbd5e1; }
+.light-mode .time-block.past { background-color: #cbd5e1; border-color: transparent; opacity: 0.4; }
+.light-mode .time-label { color: #475569; }
+.light-mode .time-block.busy { background-color: #fca5a5; border-color: #f87171; opacity: 1; }
+.light-mode .time-block.range { background-color: #93c5fd; border-color: #3b82f6; }
+.light-mode .car-pill { border-color: transparent; opacity: 0.9; }
+.light-mode #auth { background-color: #cbd5e1; }
+.light-mode .scene rect[fill="#1e293b"] { fill: #94a3b8; }
+.light-mode .scene rect[fill="#0f172a"] { fill: #e2e8f0; }
+.light-mode .scene path[fill="#f8fafc"] { fill: #f1f5f9; }
+.light-mode .scene path[fill="#0f172a"] { fill: #1e293b; }
+
 /* Fleet Row (Liste-element) */
 .fleet-row {
     background-color: #1e293b; /* Slate 800 */
@@ -194,7 +228,8 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 .time-block.end::after { content: 'B'; color: white; font-weight: 900; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 
 /* Legend & Misc */
-.legend-box { display: flex; gap: 8px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 999px; font-size: 9px; color: #94a3b8; align-items: center; margin-right: auto; }
+.legend-box { display: flex; gap: 8px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 6px; font-size: 8px; color: #94a3b8; align-items: center; margin-right: auto; }
+.legend-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1; }
 .dot { width: 6px; height: 6px; border-radius: 50%; }
 .dot.free { background-color: #334155; border: 1px solid #475569; }
 .dot.busy { background-color: #7f1d1d; }
@@ -311,7 +346,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
 .s4-screen { animation: screen-success 16s infinite; }
 .s4-indicator { animation: indicator-success 16s infinite; }
 
-@keyframes drop-key { 0%, 80% { transform: translate(300px, -50px) rotate(-10deg); opacity: 0; } 82% { transform: translate(300px, 120px) rotate(5deg); opacity: 1; } 85% { transform: translate(300px, 180px) rotate(0deg); opacity: 1; } 87%, 100% { transform: translate(300px, 250px) rotate(0deg); opacity: 0; } }
+@keyframes drop-key { 0%, 80% { transform: translate(300px, -50px) rotate(-10deg); opacity: 0; } 82% { transform: translate(300px, 120px) rotate(5deg); opacity: 1; } 85%, 95% { transform: translate(300px, 205px) rotate(0deg); opacity: 1; } 98%, 100% { transform: translate(300px, 205px); opacity: 0; } }
 @keyframes screen-success { 0%, 86% { fill: #1e3a8a; } 87%, 100% { fill: #064e3b; } }
 @keyframes indicator-success { 0%, 86% { fill: #3b82f6; filter: none; } 87%, 100% { fill: #10b981; filter: drop-shadow(0 0 8px #10b981); } }
 
@@ -504,7 +539,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
                 <use href="#car-front" transform="translate(0, 0)" />
                 <rect x="240" y="165" width="120" height="10" rx="3" fill="#1e293b" />
                 <rect x="242" y="167" width="55" height="6" rx="2" fill="#3b82f6" class="s3-strobe" />
-                <rect x="303" y="167" width="55" height="6" rx="2" fill="#ef4444" class="s3-strobe" style="animation-delay: 0.2s;" />
+                <rect x="303" y="167" width="55" height="6" rx="2" fill="#3b82f6" class="s3-strobe" style="animation-delay: 0.2s;" />
                 <rect x="215" y="232" width="30" height="12" rx="4" fill="#fef08a" class="s3-headlight" filter="url(#glow-strong)" />
                 <rect x="355" y="232" width="30" height="12" rx="4" fill="#fef08a" class="s3-headlight" filter="url(#glow-strong)" />
                 <polygon points="230,240 50,400 550,400 370,240" fill="#fef08a" opacity="0.05" />
@@ -515,22 +550,30 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
         <g class="scene scene-4">
             <text x="300" y="50" class="text-title">Levering</text>
             <text x="300" y="75" class="text-sub">Returner nøkkelen for å avslutte turen</text>
-            <g transform="translate(200, 140)">
-                <rect x="0" y="0" width="200" height="180" rx="16" fill="#1e293b" stroke="#334155" stroke-width="4" />
-                <rect x="40" y="20" width="120" height="40" rx="6" fill="#0f172a" />
-                <rect x="45" y="25" width="110" height="30" rx="4" class="s4-screen" />
-                <circle cx="170" cy="40" r="4" class="s4-indicator" />
-                <rect x="40" y="75" width="20" height="15" rx="2" fill="#334155" />
-                <rect x="65" y="75" width="20" height="15" rx="2" fill="#334155" />
-                <rect x="90" y="75" width="20" height="15" rx="2" fill="#334155" />
-                <rect x="40" y="95" width="20" height="15" rx="2" fill="#334155" />
-                <rect x="65" y="95" width="20" height="15" rx="2" fill="#334155" />
-                <rect x="90" y="95" width="20" height="15" rx="2" fill="#334155" />
-                <rect x="40" y="115" width="20" height="15" rx="2" fill="#334155" />
-                <rect x="65" y="115" width="20" height="15" rx="2" fill="#334155" />
-                <rect x="90" y="115" width="20" height="15" rx="2" fill="#334155" />
-                <rect x="130" y="80" width="40" height="50" rx="4" fill="#0f172a" stroke="#475569" stroke-width="2" />
-                <rect x="145" y="85" width="10" height="40" rx="5" fill="#000" />
+            <g transform="translate(300, 230)">
+                <!-- NØKKELSKAP KROPP -->
+                <rect x="-80" y="-100" width="160" height="200" rx="12" fill="#1e293b" stroke="#334155" stroke-width="4" />
+                <rect x="-70" y="-90" width="140" height="180" rx="8" fill="#0f172a" />
+                
+                <!-- KROKER -->
+                <circle cx="-40" cy="-60" r="3" fill="#334155" />
+                <circle cx="0" cy="-60" r="3" fill="#334155" />
+                <circle cx="40" cy="-60" r="3" fill="#334155" />
+                
+                <circle cx="-40" cy="0" r="3" fill="#334155" />
+                <circle cx="0" cy="0" r="3" fill="#334155" />
+                <circle cx="40" cy="0" r="3" fill="#334155" />
+                
+                <circle cx="-40" cy="60" r="3" fill="#334155" />
+                <circle cx="0" cy="60" r="3" fill="#334155" />
+                <circle cx="40" cy="60" r="3" fill="#334155" />
+
+                <!-- STATISKE NØKLER I SKAPET -->
+                <use href="#car-fob" transform="translate(-40, -42) scale(0.4)" opacity="0.6" />
+                <use href="#car-fob" transform="translate(40, 18) scale(0.4)" opacity="0.6" />
+
+                <!-- STATUS INDIKATOR -->
+                <circle cx="60" cy="-85" r="4" class="s4-indicator" fill="#3b82f6" />
             </g>
             <g class="s4-key">
                 <use href="#car-fob" />
@@ -541,11 +584,11 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
  
  <p class="text-slate-500 text-sm mb-6 z-10 relative pointer-events-auto">Logg inn med din BID@politiet.no</p>
  <div id="f-email" class="w-full max-w-xs space-y-4 z-10 relative pointer-events-auto">
-   <input type="email" id="l-email" placeholder="bid@politiet.no" class="w-full p-4 rounded-xl text-center text-lg font-bold border border-slate-700 bg-slate-900/80 backdrop-blur-sm text-white focus:border-blue-500 outline-none">
+   <input type="email" id="l-email" placeholder="bid@politiet.no" onkeydown="if(event.key==='Enter')sendOtp()" class="w-full p-4 rounded-xl text-center text-lg font-bold border border-slate-700 bg-slate-900/80 backdrop-blur-sm text-white focus:border-blue-500 outline-none">
    <button onclick="sendOtp()" id="btn-send" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-lg text-white shadow-lg active:scale-95 transition-transform">SEND KODE</button>
  </div>
  <div id="f-otp" class="w-full max-w-xs space-y-4 hidden z-10 relative pointer-events-auto">
-   <input type="text" id="l-otp" placeholder="12345678" maxlength="8" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-widest border border-slate-700 bg-slate-900/80 backdrop-blur-sm text-white focus:border-blue-500 outline-none">
+   <input type="text" id="l-otp" placeholder="12345678" maxlength="8" onkeydown="if(event.key==='Enter')verifyOtp()" class="w-full p-4 rounded-xl text-center text-2xl font-black tracking-widest border border-slate-700 bg-slate-900/80 backdrop-blur-sm text-white focus:border-blue-500 outline-none">
    <button onclick="verifyOtp()" class="w-full bg-green-600 text-white p-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">LOGG INN</button>
    <button onclick="resetAuth()" class="text-slate-400 text-sm underline mt-4 hover:text-white transition-colors">Angre</button>
  </div>
@@ -724,9 +767,12 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
   <h2 class="text-white font-black text-xl uppercase mb-1">Bekreft Ekspress</h2>
   <p id="exp-conf-txt" class="text-slate-400 text-xs mb-6"></p>
   
-  <div class="mb-6">
-      <label class="text-[10px] font-bold text-slate-500 block mb-1">FORMÅL</label>
-      <input id="exp-conf-form" placeholder="F.eks. Møte" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white text-sm">
+  <div class="mb-6 bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl">
+      <label class="text-[10px] font-bold text-blue-400 block mb-1 uppercase tracking-widest">Automatisk formål</label>
+      <div class="text-white font-bold text-lg flex items-center gap-2">
+          <span class="material-icons-round text-blue-400">assignment</span>
+          OPPDRAG
+      </div>
   </div>
 
   <button onclick="confirmExpress()" class="w-full bg-blue-600 py-4 rounded-xl font-black text-white text-lg shadow-lg">BEKREFT</button>
@@ -823,10 +869,9 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
        <div class="flex-1">
          <label class="text-[10px] font-bold text-slate-500">TYPE OPPDRAG</label>
          <select id="b-form" onchange="handleFormChange()" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-600 text-white text-sm h-12">
-           <option value="" disabled selected>Velg...</option>
+           <option value="Oppdrag" selected>Oppdrag</option>
            <option value="Møte">Møte</option>
            <option value="IP">IP</option>
-           <option value="Oppdrag">Oppdrag</option>
            <option value="Annet">Annet</option>
            <option value="Verksted">Verksted</option>
          </select>
@@ -835,8 +880,12 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
     
     <!-- New Extra Info Field -->
     <div id="d-extra" class="hidden">
-        <label id="l-extra" class="text-[10px] font-bold text-slate-500">TILLEGGSINFO</label>
-        <input id="b-extra" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-600 text-white text-sm">
+        <div class="mb-1.5 flex items-center gap-2 text-[10px] font-bold text-orange-400 bg-orange-900/20 p-2.5 rounded-xl border border-orange-500/30">
+            <span class="material-icons-round text-sm">warning</span>
+            IKKE skriv personsensitiv info. Kun generell info.
+        </div>
+        <label id="l-extra" class="text-[10px] font-bold text-slate-500">BESKRIVELSE (VALGFRITT)</label>
+        <input id="b-extra" class="w-full bg-slate-800 p-3 rounded-xl border border-slate-600 text-white text-sm" placeholder="Hva gjelder det?">
     </div>
 
     <div class="hidden flex-col gap-2 bg-purple-900/20 p-3 rounded-xl border border-purple-500" id="b-form-verksted">
@@ -863,12 +912,17 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
  <div class="bg-[#0f172a] modal-content-bottom p-6 border-t border-slate-700 shadow-2xl" onclick="event.stopPropagation()">
   <div class="swipe w-full h-8 flex justify-center items-center" onpointerdown="swipe(event,'m-ret',1)"><div class="bar"></div></div>
   <h2 class="text-white font-black text-2xl uppercase mb-1">Levering</h2><p id="r-name" class="text-blue-400 font-bold uppercase mb-6 text-sm"></p>
-  <div class="bg-blue-900/20 border border-blue-800 p-4 rounded-xl mb-6">
-      <h3 class="text-blue-400 font-bold text-sm mb-1 flex items-center gap-2"><span class="material-icons-round text-sm">info</span> Informasjon</h3>
-      <p class="text-xs text-slate-300">Kommentar du skriver her blir synlig på bilkortet for neste bruker. I tillegg sendes det automatisk en e-post til bilansvarlig.</p>
-  </div>
+  
   <div class="bg-yellow-900/30 border border-yellow-600/50 p-4 rounded-xl mb-6 flex items-center gap-4"><div class="bg-yellow-600/20 p-3 rounded-full"><span class="material-icons-round text-yellow-500 text-3xl">vpn_key</span></div><div><h3 class="text-yellow-500 font-black text-sm">HUSK NØKLER!</h3><p class="text-yellow-200/80 text-xs">Legg tilbake i skapet.</p></div></div>
-  <input id="r-comm" placeholder="Kommentar (Sendes til bilansvarlig + notat på bil)" class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white mb-4 text-sm">
+  
+  <div class="mb-4">
+      <div class="mb-2 flex flex-col gap-1 text-[10px] font-bold text-orange-400 bg-orange-900/20 p-3 rounded-xl border border-orange-500/30">
+          <div class="flex items-center gap-2"><span class="material-icons-round text-sm">warning</span> IKKE skriv personsensitiv info.</div>
+          <div class="text-slate-400 font-medium ml-5 text-[9px]">Kommentar blir synlig på bilkortet og sendes til bilansvarlig.</div>
+      </div>
+      <input id="r-comm" placeholder="Skriv eventuell kommentar/avvik her..." class="w-full bg-slate-800 p-4 rounded-xl border border-slate-600 text-white text-sm">
+  </div>
+  
   <button onclick="subRet()" class="w-full bg-green-600 py-4 rounded-xl font-black text-white text-lg shadow-lg">BEKREFT</button><button onclick="closeM('m-ret')" class="w-full text-slate-500 font-bold py-4 mt-2">AVBRYT</button>
  </div>
 </div>
@@ -881,18 +935,18 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
   <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 space-y-4">
       <div class="grid grid-cols-2 gap-4">
           <div>
-              <label class="text-[10px] font-bold text-slate-500">NAVN/REGNR</label>
-              <input type="text" id="adm-name" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm font-bold uppercase">
+              <label class="text-[10px] font-bold text-slate-500">BRUKSNUMMER</label>
+              <input type="text" id="adm-name" oninput="this.value = this.value.toUpperCase()" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm font-bold" placeholder="F.eks. 4433">
           </div>
           <div>
               <label class="text-[10px] font-bold text-slate-500">ANSVARLIG</label>
-              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Olsen">
+              <input type="text" id="adm-resp" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="F.eks. Avsnitt 3">
           </div>
       </div>
       
       <!-- NYTT FELT: KATEGORI -->
       <div>
-          <label class="text-[10px] font-bold text-slate-500">KATEGORI (Bilsymbol)</label>
+          <label class="text-[10px] font-bold text-slate-500">BILKATEGORI (Bilsymbol)</label>
           <select id="adm-cat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm">
             <option value="Uniformert">Uniformert</option>
             <option value="Sivil">Sivil</option>
@@ -900,9 +954,9 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cu
           </select>
       </div>
 
-      <div><label class="text-[10px] font-bold text-slate-500">STATUS</label><select id="adm-stat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm"><option value="Aktiv">Aktiv</option><option value="Verksted">Verksted</option><option value="Skade">Skade</option><option value="EU-kontroll">EU-kontroll</option><option value="Ute av drift">Ute av drift</option><option value="Annet">Annet</option><option value="Utilgjengelig">Utilgjengelig</option></select></div>
-      <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR (SYNLIG)</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Skriv beskjed..."></div>
-      <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater kun for admin..."></textarea></div>
+      <div><label class="text-[10px] font-bold text-slate-500">BILSTATUS</label><select id="adm-stat" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm"><option value="Aktiv">Aktiv</option><option value="Verksted">Verksted</option><option value="Skade">Skade</option><option value="EU-kontroll">EU-kontroll</option><option value="Ute av drift">Ute av drift</option><option value="Annet">Annet</option><option value="Utilgjengelig">Utilgjengelig</option></select></div>
+      <div><label class="text-[10px] font-bold text-slate-500">KOMMENTAR</label><input type="text" id="adm-comm" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm" placeholder="Kommentar vil vises i biloversikten"></div>
+      <div><label class="text-[10px] font-bold text-slate-500">INTERN INFO</label><textarea id="adm-info" class="w-full p-3 rounded bg-slate-900 border border-slate-600 text-white text-sm h-24" placeholder="Notater for kjøretøyet..."></textarea></div>
   </div>
   <div class="flex gap-2 mt-4"><button id="btn-adm-del" onclick="delC(s.admId, $id('adm-name').value)" class="p-4 rounded-xl bg-red-900/30 text-red-400 border border-red-900"><span class="material-icons-round">delete</span></button><button onclick="saveAdmCar()" class="flex-1 bg-blue-600 py-4 rounded-xl font-bold text-white shadow-lg text-sm">LAGRE ENDRINGER</button></div>
  </div>
@@ -954,15 +1008,18 @@ let s = {
     visType: localStorage.getItem('visType') !== 'false', 
     visResp: localStorage.getItem('visResp') === 'true', 
     uiLarge: localStorage.getItem('uiLarge') === 'true', 
+    lightMode: localStorage.getItem('lightMode') === 'true',
     kioskMode: false,
-    loc: localStorage.getItem('bookbil_loc') || null // Default null to trigger DB fetch check
+    loc: localStorage.getItem('bookbil_loc') || null, // Default null to trigger DB fetch check
+    v: localStorage.getItem('lastTab') || 'cars'
 };
 
 let touchStartX = 0;
 let touchStartY = 0; 
 
-// Initialiser UI Size ved oppstart
+// Initialiser UI Size & Theme ved oppstart
 if(s.uiLarge) document.body.classList.add('ui-large');
+if(s.lightMode) document.body.classList.add('light-mode');
 
 // Service Worker Registration for PWA & PUSH
 if ('serviceWorker' in navigator) {
@@ -1002,6 +1059,15 @@ function checkAndHideSplash() {
     }
 }
 
+// Function to enable real-time updates
+function initRealtime() {
+    _s.channel('db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookinger' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'biler' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'konfigurasjon' }, () => load())
+      .subscribe();
+}
+
 _s.auth.onAuthStateChange((event, session) => { 
     if (session) { 
         s.u = session.user.email; 
@@ -1021,8 +1087,9 @@ _s.auth.onAuthStateChange((event, session) => {
 
         $id('auth').classList.add('hidden'); 
         $id('app').classList.remove('hidden'); 
-        tab('cars'); 
+        tab(s.v); 
         load(); 
+        initRealtime(); 
     } else { 
         $id('auth').classList.remove('hidden'); 
         $id('app').classList.add('hidden'); 
@@ -1042,6 +1109,7 @@ function closeM(id, back=true) { $id(id).classList.add('hidden'); s.activeModal 
 
 function tab(v) { 
     s.v=v; 
+    localStorage.setItem('lastTab', v);
     render(); 
     updNav(v); 
     // Force load on any main tab switch to ensure data is fresh
@@ -1143,21 +1211,25 @@ async function load() {
         
         if(conf.data) { s.bilansvarlig = conf.data.verdi; } else { s.bilansvarlig = ""; }
         
-        // Oppdatert header-visning
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
-        if (!s.kioskMode) {
-             $id('u-disp').innerHTML = `Bruker: ${s.bid} <span class="opacity-50 mx-1">•</span> <span class="material-icons-round text-xs align-middle opacity-50">refresh</span> <span class="font-normal opacity-75">${time}</span>`;
-        } else {
-             $id('u-disp').innerHTML = `KIOSK-MODUS <span class="opacity-50 mx-1">•</span> <span class="font-normal opacity-75">${time}</span>`;
-        }
-        
         checkPushPrompt(); 
         // Kun kjør render() automatisk hvis vi er i en av hovedvisningene
         // Dette hindrer at innstillinger/admin-vinduer lukkes hvert 10. sekund
-        if(['cars', 'res', 'mine'].includes(s.v)) render();
+        if(['cars', 'res', 'mine', 'admin', 'logg', 'set'].includes(s.v)) render();
     } catch(e) { 
         console.error("Kritisk feil i load():", e); 
         showToast("Feil ved lasting av data", "error");
+    }
+}
+
+// Function to update the clock on screen
+function updateTime() {
+    const el = $id('u-disp');
+    if(!el || !s.u) return;
+    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+    if (!s.kioskMode) {
+         el.innerHTML = `Bruker: ${s.bid} <span class="opacity-50 mx-1">•</span> <span class="font-normal opacity-75">${time}</span>`;
+    } else {
+         el.innerHTML = `KIOSK-MODUS <span class="opacity-50 mx-1">•</span> <span class="font-normal opacity-75">${time}</span>`;
     }
 }
 
@@ -1325,9 +1397,14 @@ function rCars(c) {
 
     const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1); tomorrow.setHours(0,0,0,0);
 
+    const myNextTripCar = myNextTrip ? myNextTrip.bil : null;
+
     sortedCars.forEach(b => {
         // FILTER: Skip cars not in current location (if location is set in DB)
         if(b.lokasjon && b.lokasjon !== s.loc && s.loc !== null) return;
+        
+        // NEW FILTER: Skip car if it's already shown in the top "My trip" card
+        if(b.bil === myNextTripCar) return;
 
         if(s.h.includes(b.bil)) return;
         const act = s.r.find(r => r.bil===b.bil && new Date(r.start_tid)<=now && new Date(r.slutt_tid)>=now);
@@ -1379,7 +1456,14 @@ function rCars(c) {
                  // Anyone can return a workshop car
                  actionBtn = `<button onclick="event.stopPropagation();ret(${act.id},'${b.bil}', 'verksted')" class="btn-action btn-green">HENTET</button>`;
             } else {
-                 actionBtn = `<div class="text-right pr-2"><span class="block text-[9px] text-slate-500 uppercase">Ledig</span><span class="block text-xs font-bold text-slate-300 font-mono">${fmtT(act.slutt_tid)}</span></div>`;
+                 actionBtn = `
+                 <div class="flex items-center gap-2">
+                    <div class="text-right hidden sm:block">
+                        <span class="block text-[9px] text-slate-500 uppercase">Ledig</span>
+                        <span class="block text-xs font-bold text-slate-400 font-mono">${fmtT(act.slutt_tid)}</span>
+                    </div>
+                    <button onclick="event.stopPropagation();book('${b.bil}')" class="btn-action btn-green opacity-60">RESERVER</button>
+                 </div>`;
             }
         }
         else if(nxt) { 
@@ -1465,7 +1549,7 @@ function rRes(c, mineOnly) {
     html += `</div>`; c.innerHTML = html;
 }
 
-function expressBook() { closeM('m-action', false); setExpDur(1); $id('exp-conf-form').value = ""; openM('m-express-list'); }
+function expressBook() { closeM('m-action', false); setExpDur(1); openM('m-express-list'); }
 function setExpDur(hours) { 
     s.expDur = hours; 
     $id('exp-slider').value = hours;
@@ -1526,8 +1610,7 @@ function initExpressConfirm(car, start, end) {
 }
 
 async function confirmExpress() {
-    const formal = $id('exp-conf-form').value;
-    if(!formal) return showToast("Skriv formål", "error");
+    const formal = "Oppdrag";
     s.bid = s.u.split('@')[0].toUpperCase();
     const d = { bid: s.bid, formal: formal, start_tid: s.expStart.toISOString(), slutt_tid: s.expEnd.toISOString(), bil: s.expCar };
     const { error } = await _s.from('bookinger').insert([d]);
@@ -1545,7 +1628,7 @@ function book(car, id=null, st=null, en=null) {
     
     // Clear fields
     $id('b-bid').value = s.kioskMode ? "" : s.bid;
-    $id('b-form').value = "";
+    $id('b-form').value = "Oppdrag"; // Default to 'Oppdrag'
     $id('b-extra').value = "";
     
     // Populate if editing
@@ -1587,7 +1670,6 @@ function book(car, id=null, st=null, en=null) {
     } else {
         // New booking
         handleFormChange(false);
-        $id('b-form').value = ""; 
         if(st && en) {
             const stD = new Date(st); setVal('b', 'st', stD); setVal('b', 'en', new Date(en)); s.tlClick = 2;
             const stDateOnly = new Date(stD); stDateOnly.setHours(0,0,0,0);
@@ -1611,18 +1693,9 @@ function handleFormChange(forceVerksted = false) {
         s.workshopMode = false;
         verk.classList.add('hidden'); verk.classList.remove('flex');
         
-        // Show Extra Input based on selection
-        if(bForm.value) {
+        // Show Extra Input ONLY if 'Annet' is selected
+        if(bForm.value === 'Annet') {
             extra.classList.remove('hidden');
-            const lbl = $id('l-extra');
-            const inp = $id('b-extra');
-            if(bForm.value === 'Annet') {
-                lbl.innerText = "BESKRIVELSE (PÅKREVD)";
-                inp.placeholder = "Hva gjelder det?";
-            } else {
-                lbl.innerText = "TILLEGGSINFO (VALGFRITT)";
-                inp.placeholder = "F.eks. Sted, sak nr...";
-            }
         } else {
             extra.classList.add('hidden');
         }
@@ -1644,7 +1717,17 @@ function setupModal(title, sub="Ny reservasjon") {
     }
 
     let html = `<span class="material-icons-round mr-2 text-2xl">${icon}</span> <span class="truncate">${title}</span>`; 
-    if (carObj) { html += `<div class="flex items-center gap-1 ml-2 flex-shrink-0">` + getBadgesHtml(carObj) + `</div>`; }
+    if (carObj) { 
+        html += `
+        <div class="flex items-center gap-3 ml-2">
+            <div class="flex items-center gap-1 flex-shrink-0">` + getBadgesHtml(carObj) + `</div>
+            <div class="legend-box">
+                <div class="legend-item"><div class="dot free"></div> LEDIG</div>
+                <div class="legend-item"><div class="dot selected"></div> VALGT</div>
+                <div class="legend-item"><div class="dot busy"></div> OPPTATT</div>
+            </div>
+        </div>`; 
+    }
     $id('b-title').innerHTML = html;
     const subEl = $id('b-sub'); if(subEl) subEl.innerText=sub;
     
@@ -1834,7 +1917,7 @@ function check(src) {
 function getVal(p, type) { const d = $id(`${p}-d-${type}`).value; const t = $id(`${p}-t-${type}`).value; if(!d || !t) return null; return new Date(d + 'T' + t); }
 function setVal(p, type, date) { if(!date) { $id(`${p}-d-${type}`).value = ""; $id(`${p}-t-${type}`).value = ""; return; } const iso = isoLocal(date); $id(`${p}-d-${type}`).value = iso.slice(0,10); $id(`${p}-t-${type}`).value = iso.slice(11,16); }
 function isoLocal(d) { const z = d.getTime() - (d.getTimezoneOffset() * 60000); return new Date(z).toISOString().slice(0,16); }
-async function logMsg(type, innhold, bil) { const { error } = await _s.from('meldinger').insert([{type: type, innhold: innhold, bil: bil, bruker: s.bid}]); if(error) console.error("Kunne ikke lagre melding", error); }
+async function logMsg(type, innhold, bil) { const { error } = await _s.from('meldinger').insert([{type: type, innhold: innhold, bil: bil, bruker: s.bid, lokasjon: s.loc}]); if(error) console.error("Kunne ikke lagre melding", error); }
 
 async function confB() {
     if(s.co && s.co.status !== 'Aktiv') return showToast("Bilen er utilgjengelig", "error");
@@ -1850,7 +1933,6 @@ async function confB() {
         const extra = $id('b-extra').value.trim();
         
         if(!cat) return showToast("Velg oppdragstype", "error");
-        if(cat === 'Annet' && !extra) return showToast("Skriv beskrivelse", "error");
         
         f = cat + (extra ? ": " + extra : "");
     }
@@ -1880,7 +1962,7 @@ async function delB(id) {
     const delId = id || s.editId;
     const r = s.r.find(x => x.id === delId);
     if(!r) return;
-    const txt = `Vil du slette reservasjon for ${r.bil}?\n\nTid: ${fmtDD(r.start_tid)} kl. ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}\nFormål: ${r.formal}`;
+    const txt = `Vil du slette reservasjon for ${r.bil}?\n\nBID: ${r.bid}\nTid: ${fmtDD(r.start_tid)} kl. ${fmtT(r.start_tid)} - ${fmtT(r.slutt_tid)}\nFormål: ${r.formal}`;
     if(confirm(txt)) { await _s.from('bookinger').delete().eq('id', delId); if(s.editId && s.activeModal === 'm-book') closeM('m-book'); load(); showToast("Slettet", "info"); } 
 }
 
@@ -2203,29 +2285,36 @@ function rSet(c) {
         
         <div class="space-y-4">
             <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
-                <div class="flex flex-col">
-                    <span class="text-base text-slate-200 font-medium">Større tekst og knapper</span>
-                    <p class="text-xs text-slate-500 mt-1 leading-tight">Øker størrelsen på elementer for bedre lesbarhet på mobil.</p>
-                </div>
-                <input type="checkbox" onchange="togUiSize(this.checked)" ${s.uiLarge?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
+               <div class="flex flex-col">
+                   <span class="text-base text-slate-200 font-medium">Større tekst og knapper</span>
+                   <p class="text-xs text-slate-500 mt-1 leading-tight">Øker størrelsen på elementer for bedre lesbarhet på mobil.</p>
+               </div>
+               <input type="checkbox" onchange="togUiSize(this.checked)" ${s.uiLarge?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
             </div>
-             <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
-                <div class="flex flex-col">
-                    <span class="text-base text-slate-200 font-medium">Vis biltyper (Piller)</span>
-                    <p class="text-xs text-slate-500 mt-1 leading-tight">Viser type bil (Uniformert/Sivil) som merker i oversikten.</p>
-                </div>
-                <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
+               <div class="flex flex-col">
+                   <span class="text-base text-slate-200 font-medium">Lys modus</span>
+                   <p class="text-xs text-slate-500 mt-1 leading-tight">Bytter til lyst fargetema.</p>
+               </div>
+               <input type="checkbox" onchange="togLightMode(this.checked)" ${s.lightMode?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
             </div>
-             <div class="flex items-center justify-between">
-                <div class="flex flex-col">
-                    <span class="text-base text-slate-200 font-medium">Vis bilansvarlig</span>
-                    <p class="text-xs text-slate-500 mt-1 leading-tight">Viser hvem som er ansvarlig for hver bil i listen.</p>
-                </div>
-                <input type="checkbox" onchange="togVis('visResp', this.checked)" ${s.visResp?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-3">
+               <div class="flex flex-col">
+                   <span class="text-base text-slate-200 font-medium">Vis biltyper</span>
+                   <p class="text-xs text-slate-500 mt-1 leading-tight">Viser type bil (Uniformert/Sivil) som merker i oversikten.</p>
+               </div>
+               <input type="checkbox" onchange="togVis('visType', this.checked)" ${s.visType?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
             </div>
-            
+            <div class="flex items-center justify-between">
+               <div class="flex flex-col">
+                   <span class="text-base text-slate-200 font-medium">Vis ansvarlig</span>
+                   <p class="text-xs text-slate-500 mt-1 leading-tight">Viser hvem eller hvilket avsnitt som har hovedansvar for bilen.</p>
+               </div>
+               <input type="checkbox" onchange="togVis('visResp', this.checked)" ${s.visResp?'checked':''} class="w-6 h-6 accent-blue-600 rounded cursor-pointer shrink-0">
+            </div>
+
             <div class="pt-2">
-                <p class="text-xs text-slate-500 font-bold uppercase mb-3">Velg biler som skal vises (${s.loc})</p>
+               <p class="text-xs text-slate-500 font-bold uppercase mb-3">Velg biler som skal vises i biloversikten for ${s.loc}</p>
                 <div class="flex flex-wrap gap-2">
                     ${p || "<span class='text-slate-500 text-xs italic'>Ingen biler funnet for dette stedet.</span>"}
                 </div>
@@ -2254,10 +2343,10 @@ function rSet(c) {
     <div class="settings-card">
         <div class="settings-header"><span class="material-icons-round text-emerald-500">info</span> Hjelp & Info</div>
         <div class="space-y-2">
-            <button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-slate-700/50 p-3 rounded-xl font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors">
+            <button onclick="window.open('https://bbmanual.pages.dev/')" class="w-full bg-slate-700/50 p-3 rounded-xl font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors text-sm">
                 <span class="material-icons-round text-sm">auto_stories</span> Åpne Brukermanual
             </button>
-            <button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-xl font-bold border border-blue-800 flex items-center justify-center gap-2">
+            <button id="pwa-settings-btn" onclick="installPwa()" class="hidden w-full bg-blue-900/30 text-blue-300 p-3 rounded-xl font-bold border border-blue-800 flex items-center justify-center gap-2 text-sm">
                 <span class="material-icons-round text-sm">download</span> Installer som App
             </button>
             <a href="mailto:glenn.andre.hansen@gmail.com" class="w-full bg-slate-700/50 p-3 rounded-xl font-bold border border-slate-600 text-white flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors text-sm no-underline">
@@ -2287,21 +2376,28 @@ function rSet(c) {
             </div>
         </details>
     </div>
+    `;
 
-    <!-- Admin Section -->
+    // Admin Section
+    const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase());
+    
+    c.innerHTML += `
     <div class="bg-slate-900/50 p-5 rounded-2xl border border-slate-800">
-        <h2 class="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2"><span class="material-icons-round text-slate-500">admin_panel_settings</span> Administrasjon</h2>
+        <h2 class="text-sm font-bold text-slate-400 mb-4 flex items-center gap-2 uppercase"><span class="material-icons-round text-slate-500">admin_panel_settings</span> ADMINISTRASJON</h2>
         <div class="mb-6">
-            <p class="text-xs text-slate-500 mb-2 font-bold uppercase">Bilansvarlige for ${s.loc}</p>
+            <p class="text-xs text-slate-500 mb-2 font-bold uppercase">Biladmin for ${s.loc}</p>
             <div id="admin-email-list" class="flex flex-wrap gap-2 mb-3"></div>
+            
+            ${isAdm ? `
             <div class="flex gap-2">
                 <input id="s-admin-new-em" placeholder="ny@admin.no" class="flex-grow p-3 rounded-xl text-sm bg-slate-900 border border-slate-700 text-white outline-none focus:border-blue-500">
                 <button onclick="addAdminEmail()" class="bg-slate-700 border border-slate-600 px-4 rounded-xl text-white font-bold text-xs hover:bg-slate-600">LEGG TIL</button>
             </div>
+            ` : `<p class="text-[10px] text-slate-600 italic">Kun biladmin kan endre denne listen.</p>`}
         </div>
 
-        <!-- Slett data kun synlig for bilansvarlig -->
-        <div id="admin-nuke-section" class="hidden">
+        <!-- Slett data kun synlig for biladmin -->
+        <div id="admin-nuke-section" class="${isAdm ? '' : 'hidden'}">
             <details>
                 <summary class="text-xs font-bold text-red-900/50 cursor-pointer list-none flex justify-between items-center hover:text-red-500 transition-colors p-2 rounded hover:bg-slate-800">Avansert: Slett data (${s.loc}) <span class="material-icons-round text-sm">expand_more</span></summary>
                 <div class="mt-4 p-4 bg-red-900/10 rounded-xl border border-red-900/30">
@@ -2313,13 +2409,6 @@ function rSet(c) {
     </div>
     `;    
     renderAdminEmails();
-
-    // Vis slett-seksjon kun for bilansvarlig
-    const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase());
-    if(isAdm) {
-        const nukeSec = document.getElementById('admin-nuke-section');
-        if(nukeSec) nukeSec.classList.remove('hidden');
-    }
 
     if(s.deferredPrompt) { const setBtn = $id('pwa-settings-btn'); if(setBtn) setBtn.classList.remove('hidden'); const icon = $id('install-icon'); if(icon) icon.classList.remove('hidden'); }
 }
@@ -2363,8 +2452,15 @@ async function applyLocationChange(newLoc) {
 function renderAdminEmails() {
     const list = $id('admin-email-list'); if(!list) return; list.innerHTML = "";
     const emails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : [];
+    const isAdm = s.bilansvarlig && s.bilansvarlig.toLowerCase().includes(s.u.toLowerCase());
+    
     if(emails.length === 0) { list.innerHTML = "<span class='text-xs text-slate-500 italic'>Ingen registrert.</span>"; return; }
-    emails.forEach(email => { const pill = document.createElement('div'); pill.className = 'email-pill'; pill.innerHTML = `<span>${email}</span><button onclick="removeAdminEmail('${email}')">×</button>`; list.appendChild(pill); });
+    emails.forEach(email => { 
+        const pill = document.createElement('div'); 
+        pill.className = 'email-pill'; 
+        pill.innerHTML = `<span>${email}</span>${isAdm ? `<button onclick="removeAdminEmail('${email}')">×</button>` : ''}`; 
+        list.appendChild(pill); 
+    });
 }
 async function addAdminEmail() { 
     const input = $id('s-admin-new-em'); 
@@ -2379,7 +2475,7 @@ async function addAdminEmail() {
     input.value = ""; 
 }
 async function removeAdminEmail(email) { 
-    if(!confirm(`Fjerne ${email} som bilansvarlig for ${s.loc}?`)) return; 
+    if(!confirm(`Fjerne ${email} som biladmin for ${s.loc}?`)) return; 
     let currentEmails = s.bilansvarlig ? s.bilansvarlig.split(',').map(e => e.trim()).filter(e => e) : []; 
     currentEmails = currentEmails.filter(e => e !== email); 
     await saveAdminConfig(currentEmails.join(',')); 
@@ -2401,6 +2497,7 @@ async function saveAdminConfig(val) {
 function tVis(c) { s.h.includes(c) ? s.h=s.h.filter(x=>x!==c) : s.h.push(c); localStorage.setItem('h',JSON.stringify(s.h)); render(); }
 function togVis(k, v) { s[k] = v; localStorage.setItem(k, v); render(); if(s.v === 'cars') load(); }
 function togUiSize(v) { s.uiLarge = v; localStorage.setItem('uiLarge', v); if(v) document.body.classList.add('ui-large'); else document.body.classList.remove('ui-large'); render(); }
+function togLightMode(v) { s.lightMode = v; localStorage.setItem('lightMode', v); if(v) document.body.classList.add('light-mode'); else document.body.classList.remove('light-mode'); render(); }
 async function togVar(v) { s.varsel = v; const p = { brukernavn: s.bid, varsel: v }; if(s.savedEmail) p.epost = s.savedEmail; await _s.from('brukere').upsert(p, { onConflict: 'brukernavn' }); showToast("Innstilling lagret", "success"); }
 
 // --- PUSH VARSEL LOGIKK ---
@@ -2584,7 +2681,11 @@ document.addEventListener('DOMContentLoaded', () => {
     enableDragScroll('ts-search');
 });
 
-setInterval(load,10000);
+// Safety refresh every 10 minutes
+setInterval(load, 600000);
+// Update clock every second
+setInterval(updateTime, 1000);
+updateTime();
 </script>
 </body>
 </html>
